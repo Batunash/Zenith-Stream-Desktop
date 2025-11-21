@@ -9,7 +9,9 @@ const validChannels = [
   "file:addEpisode",
   "file:addEpisode:progress", 
   "file:addEpisode:done",
-  "dialog:openFile",
+  "file:getSeriesDetail", 
+  "file:getEpisodes",     
+  "dialog:openVideoFiles",
   "dialog:openFileImage",
 ];
 

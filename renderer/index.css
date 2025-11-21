@@ -7,10 +7,10 @@
 html, body {
   width: 100%;
   height: 100%;
-  overflow: hidden; /* İŞTE BU KOMUT SAYFAYI ÇİVİLER */
-  background-color: #121212; /* Uygulama yüklenirken beyaz parlama olmasın */
+  overflow: hidden; 
+  background-color: #121212;
   font-family: 'Segoe UI', sans-serif;
-  -webkit-font-smoothing: antialiased; /* Yazıları pürüzsüzleştirir */
+  -webkit-font-smoothing: antialiased;
 }
 
 #root {

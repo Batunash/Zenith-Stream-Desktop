@@ -1,7 +1,7 @@
 const { ipcMain,dialog} = require("electron");
 
 module.exports = function registerDialogManager(){
-  ipcMain.handle("dialog:openFile", async () => {
+  ipcMain.handle("dialog:openVideoFiles", async () => {
     const result = await dialog.showOpenDialog({
       title: "Video seç",
       properties: ["openFile", "multiSelections"],

@@ -4,8 +4,8 @@ const fs = require("fs");
 const { MEDIA_DIR } = require('../../config/config');
 const episodeQueue = require("../utils/episodeQueue");
 const { downloadImage} =require("../utils/imageDownloader");
-const eq = new episodeQueue(MEDIA_DIR);
 
+const eq = new episodeQueue(MEDIA_DIR);
 
 module.exports = function registerFileControl(){
     ipcMain.handle("file:createSerie", async (event, { serieName, metadata }) => {
@@ -95,6 +95,54 @@ module.exports = function registerFileControl(){
             return seriesList;
         } catch (err) {
             console.error("Diziler okunurken hata:", err);
+            return [];
+        }
+    });
+    ipcMain.handle("file:getSeriesDetail", async (event, folderName) => {
+        const seriePath = path.join(MEDIA_DIR, folderName);
+        if (!fs.existsSync(seriePath)) return { error: "Dizi bulunamadı" };
+
+        try {
+            const metaPath = path.join(seriePath, 'metadata.json');
+            let metadata = {};
+            if (fs.existsSync(metaPath)) {
+                metadata = JSON.parse(fs.readFileSync(metaPath));
+                if (metadata.localPoster) {
+                    metadata.fullPosterPath = path.join(seriePath, metadata.localPoster);
+                }
+            }
+            const items = fs.readdirSync(seriePath);
+            const seasons = items
+                .filter(item => item.startsWith('Season') && fs.statSync(path.join(seriePath, item)).isDirectory())
+                .sort((a, b) => {
+                    const numA = parseInt(a.replace('Season ', '')) || 0;
+                    const numB = parseInt(b.replace('Season ', '')) || 0;
+                    return numA - numB;
+                });
+
+            return { ...metadata, seasons };
+        } catch (err) {
+            console.error("Detay hatası:", err);
+            return { error: err.message };
+        }
+    });
+    ipcMain.handle("file:getEpisodes", async (event, { folderName, season }) => {
+        const seasonPath = path.join(MEDIA_DIR, folderName, season);
+        if (!fs.existsSync(seasonPath)) return [];
+
+        try {
+            const files = fs.readdirSync(seasonPath);
+            const videoExtensions = ['.mp4', '.mkv', '.avi', '.mov', '.webm'];
+            const episodes = files
+                .filter(file => videoExtensions.includes(path.extname(file).toLowerCase()))
+                .map(file => ({
+                    name: file,
+                    path: path.join(seasonPath, file),
+                    size: fs.statSync(path.join(seasonPath, file)).size
+                }));
+            return episodes;
+        } catch (err) {
+            console.error("Bölüm okuma hatası:", err);
             return [];
         }
     });

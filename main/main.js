@@ -1,5 +1,6 @@
 const path = require("path");
 const { app, BrowserWindow, protocol, net } = require("electron"); 
+
 const isDev = !app.isPackaged;
 const registerServerControlIPC = require("./ipc/serverControl");
 const registerFileControl = require("./ipc/fileControl");

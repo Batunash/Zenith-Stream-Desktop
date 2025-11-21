@@ -3,7 +3,6 @@ const { spawn, exec } = require("child_process");
 let serverProcess = null;
 
 module.exports = function registerServerControlIPC() {
-  // start server
   ipcMain.handle("server:start", async () => {
     if (serverProcess) return { running: true, message: "Already running" };
 
@@ -15,8 +14,6 @@ module.exports = function registerServerControlIPC() {
 
     return { running: true, message: "Server started" };
   });
-
-  // Stop server
   ipcMain.handle("server:stop", async () => {
     if (!serverProcess) return { running: false, message: "Not running" };
 
@@ -25,8 +22,6 @@ module.exports = function registerServerControlIPC() {
 
     return { running: false, message: "Server stopped" };
   });
-
-  // Server status
   ipcMain.handle("server:status", async () => {
     return { running: serverProcess !== null };
   });

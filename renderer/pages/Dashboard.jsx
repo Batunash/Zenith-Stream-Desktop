@@ -63,6 +63,7 @@ export default function Dashboard() {
                 <SeriesCard 
                 key={serie.id} 
                 data={serie}
+                onClick={() => navigate(`/details/${encodeURIComponent(serie.folderName)}`)}
                 />
             ))}
             </div>

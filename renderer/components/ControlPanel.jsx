@@ -75,7 +75,7 @@ const getStyles = (isServerRunning) => ({
     width: '15px',
     height: '15px',
     borderRadius: '50%',
-    backgroundColor: isServerRunning ? '#4ade80' : '#ef4444', // Parametreden gelen değer
+    backgroundColor: isServerRunning ? '#4ade80' : '#ef4444', 
     display: 'inline-block',
     marginRight: '10px',
     boxShadow: isServerRunning ? '0 0 10px #4ade80' : 'none',
@@ -89,7 +89,7 @@ const getStyles = (isServerRunning) => ({
     border: 'none',
     fontWeight: 'bold',
     cursor: 'pointer',
-    backgroundColor: isServerRunning ? '#ef4444' : '#2563eb', // Parametreden gelen değer
+    backgroundColor: isServerRunning ? '#ef4444' : '#2563eb',
     color: 'white',
     fontSize: '1rem',
     transition: 'background-color 0.2s',

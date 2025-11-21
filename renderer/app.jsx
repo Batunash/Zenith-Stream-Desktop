@@ -2,6 +2,7 @@ import React from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import AddSerie from './pages/AddSerie';
+import SeriesDetail from './pages/SeriesDetail';
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/add-series" element={<AddSerie/>} />
+          <Route path="/details/:folderName" element={<SeriesDetail />} />
         
         </Routes>
       </div>
