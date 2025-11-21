@@ -2,11 +2,8 @@ const path = require('path');
 require('dotenv').config({ 
     path: path.resolve(__dirname, '.env') 
 }); 
-const config = {
-    PORT: process.env.PORT || 3000, 
-    JWT_SECRET: process.env.JWT_SECRET,
-    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
+const config={
     MEDIA_DIR: path.resolve(process.env.MEDIA_DIR)
-};
+}
 
 module.exports = config;

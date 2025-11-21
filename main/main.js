@@ -1,7 +1,10 @@
 const path = require("path");
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, protocol, net } = require("electron"); 
 const isDev = !app.isPackaged;
 const registerServerControlIPC = require("./ipc/serverControl");
+const registerFileControl = require("./ipc/fileControl");
+const registerDialogManager = require("./ipc/dialogManager");
+
 let mainWindow;
 
 function createWindow() {
@@ -26,15 +29,19 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, "../renderer/dist/index.html"));
   }
 }
-
-//IPC handlerlars
 function registerIpcHandlers() {
   registerServerControlIPC();
+  registerFileControl();
+  registerDialogManager();
 }
-
 app.whenReady().then(() => {
-  createWindow();
+  protocol.handle('media', (request) => {
+    const filePath = request.url.slice('media://'.length);
+    return net.fetch('file://' + decodeURIComponent(filePath));
+  });
+
   registerIpcHandlers();
+  createWindow();
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
