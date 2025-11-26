@@ -5,5 +5,6 @@ const { optionalAuth, authenticateToken } = require('../middleware/auth');
 
 router.get('/stream/:episodeId', optionalAuth, watchController.startWatch);
 router.put('/episode/:episodeId/progress', authenticateToken, watchController.updateProgress);
+router.get('/download/:episodeId', authenticateToken, watchController.downloadEpisode);
 
 module.exports = router;

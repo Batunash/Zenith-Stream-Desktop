@@ -3,9 +3,10 @@ const mediaService = require('../services/mediaService');
 async function listSeries(req, res) {
   try {
     const userId = req.user?.id; 
-    const series = mediaService.getSeries(userId);
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const series = mediaService.getSeries(userId, baseUrl);
     res.json({ series });
-  } catch (e) {s
+  } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'SERIES_LIST_FAILED' });
   }

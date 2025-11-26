@@ -1,13 +1,21 @@
 const path = require('path');
-const dotenv = require('dotenv');
-const envPath = path.resolve(__dirname, '../../.env');
-dotenv.config({ path: envPath });
+const fs = require('fs');
+const os = require('os');
+const userDataPath = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + '/.config');
+const configPath = path.join(userDataPath, 'Video Hub', 'settings.json');
+
+let userConfig = {};
+if (fs.existsSync(configPath)) {
+    try {
+        userConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    } catch (e) {}
+}
 
 const config = {
-    PORT: process.env.PORT || 3000, 
-    JWT_SECRET: process.env.JWT_SECRET,
-    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
-    MEDIA_DIR: process.env.MEDIA_DIR ? path.resolve(process.env.MEDIA_DIR) : path.join(require('os').homedir(), 'Desktop', 'Archive')
+    PORT: userConfig.PORT || 5000,
+    JWT_SECRET: userConfig.JWT_SECRET || "gizli_anahtar",
+    JWT_EXPIRES_IN: "7d",
+    MEDIA_DIR: userConfig.MEDIA_DIR || path.join(os.homedir(), 'Desktop', 'Archive')
 };
 
 module.exports = config;

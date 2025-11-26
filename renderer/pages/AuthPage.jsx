@@ -1,22 +1,21 @@
 import React, { useState, useEffect } from 'react';
 
 const AuthPage = ({ onLoginSuccess }) => {
-  const [isLogin, setIsLogin] = useState(true); 
+  const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ 
     username: '', 
     password: '' 
   });
-  
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     setFormData({ username: '', password: '' });
     setError(null);
+    setLoading(false);
   }, [isLogin]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -31,14 +30,18 @@ const AuthPage = ({ onLoginSuccess }) => {
     setLoading(true);
 
     try {
-        const channel = isLogin ? "auth:login" : "auth:register";
-        const res = await window.api.invoke(channel, formData);
+        const channel = isLogin ? "auth:login" : "auth:register";        
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error("Sunucu yanıt vermedi")), 5000)
+        );
+        const responsePromise = window.api.invoke(channel, formData);        
+        const res = await Promise.race([responsePromise, timeoutPromise]);
 
         if (res.success) {
             if (isLogin) {
                 onLoginSuccess(res.user);
             } else {
-                alert(res.message); 
+                alert(res.message);
                 setIsLogin(true); 
             }
         } else {
@@ -46,9 +49,9 @@ const AuthPage = ({ onLoginSuccess }) => {
         }
     } catch (err) {
         console.error(err);
-        setError("Beklenmedik bir hata oluştu.");
+        setError(err.message || "Beklenmedik bir hata oluştu.");
     } finally {
-        setLoading(false);
+        setLoading(false); 
     }
   };
 
@@ -67,8 +70,7 @@ const AuthPage = ({ onLoginSuccess }) => {
                     value={formData.username}
                     onChange={handleChange}
                     style={styles.input}
-                    autoComplete="off" 
-                    disabled={loading} 
+                    autoComplete="off"
                 />
             </div>
             
@@ -81,7 +83,6 @@ const AuthPage = ({ onLoginSuccess }) => {
                     onChange={handleChange}
                     style={styles.input}
                     autoComplete="off"
-                    disabled={loading}
                 />
             </div>
             
@@ -89,8 +90,8 @@ const AuthPage = ({ onLoginSuccess }) => {
 
             <button 
                 type="submit" 
-                style={{...styles.button, opacity: loading ? 0.7 : 1}} 
-                disabled={loading}
+                style={{...styles.button, opacity: loading ? 0.7 : 1, cursor: loading ? 'wait' : 'pointer'}} 
+                disabled={loading} 
             >
                 {loading ? 'İşleniyor...' : (isLogin ? 'Giriş Yap' : 'Kayıt Ol')}
             </button>
@@ -100,7 +101,7 @@ const AuthPage = ({ onLoginSuccess }) => {
             {isLogin ? "Hesabın yok mu? " : "Zaten hesabın var mı? "}
             <span 
                 style={styles.link} 
-                onClick={() => !loading && setIsLogin(!isLogin)} 
+                onClick={() => setIsLogin(!isLogin)}
             >
                 {isLogin ? "Kayıt Ol" : "Giriş Yap"}
             </span>
@@ -116,7 +117,7 @@ const styles = {
   title: { fontSize: '2rem', marginBottom: '10px', fontWeight: 'bold' },
   subtitle: { color: '#888', marginBottom: '30px' },
   input: { width: '100%', padding: '12px', backgroundColor: '#222', border: '1px solid #444', borderRadius: '8px', color: 'white', fontSize: '1rem', outline: 'none' },
-  button: { width: '100%', padding: '12px', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px', transition: 'opacity 0.2s' },
+  button: { width: '100%', padding: '12px', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: 'bold', marginTop: '10px' },
   error: { color: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', padding: '10px', borderRadius: '6px', marginBottom: '15px', fontSize: '0.9rem' },
   footer: { marginTop: '20px', color: '#888', fontSize: '0.9rem' },
   link: { color: '#2563eb', cursor: 'pointer', fontWeight: 'bold', marginLeft: '5px' }

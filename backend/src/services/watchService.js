@@ -5,8 +5,8 @@ const { db } = require('./mediaService');
 
 
 function watch (req){
-    const {series, file}=req.params;
-    const episode = db.getEpisodeBySeriesAndFile(series, file);
+    const {episodeId}=req.params;
+    const episode = db.getEpisodeById(episodeId);
     const filePath = episode.FILE_PATH;
     if (!episode) {
     throw new Error('Episode not found in database');

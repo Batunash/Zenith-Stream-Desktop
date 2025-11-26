@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FormInput from '../components/FormInput';
 import { fetchSeriesByImdb } from '../services/tmdbService'; 
@@ -20,7 +20,10 @@ const AddSeriesPage = () => {
   });
   useEffect(() => {
     window.api.invoke('settings:get').then(cfg => {
-        const hasKey = cfg.VITE_TMDB_API_KEY && cfg.VITE_TMDB_API_KEY.length > 10;
+      const apiKey = cfg.TMDB_API_KEY || cfg.VITE_TMDB_API_KEY;
+      const hasKey = apiKey && apiKey.length > 10;
+        setHasApiKey(hasKey);
+        if (!hasKey) setActiveTab('manual');
         setHasApiKey(hasKey);
         if (!hasKey) setActiveTab('manual');
     });
