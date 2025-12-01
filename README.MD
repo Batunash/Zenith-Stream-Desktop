@@ -60,10 +60,7 @@ Use this method if you do not have an API key or prefer to input details manuall
 3. **Upload Files:**  
    - Click **"☁️ Upload File"** and choose video files from your computer.  
    - Files will be moved/copied into the correct location under your Media Directory.
-4. **Playback:**  
-   - Click the ▶ icon next to an episode to start streaming it within the app.  
-   - Progress is saved, allowing you to resume later.
-5. **Deleting Content:**  
+4. **Deleting Content:**  
    - Use the 🗑️ icon on the series card or next to an episode/season to permanently delete the content  
      **and its physical files** from your hard drive.
 
