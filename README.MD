@@ -1,6 +1,6 @@
-# 🎬 Zenith Stream - User Guide
+# 🎬 Zenith Stream 
 
-**Zenith Stream** is a **local media server and player** designed to manage your personal movie and TV show library with a modern, clean interface.
+**Zenith Stream** is a **local media server** designed to manage your personal movie and TV show library with a modern, clean interface.
 
 ---
 
@@ -49,7 +49,7 @@ Use this method if you do not have an API key or prefer to input details manuall
 
 ---
 
-## 📂 3. Library Management and Playback
+## 📂 3. Library Management 
 
 ### Managing Episodes and Files
 
