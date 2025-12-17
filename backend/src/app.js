@@ -14,5 +14,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api', mediaRoutes);
 app.use('/api', watchRoutes);
 app.use('/images', express.static(MEDIA_DIR));
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
 
 module.exports = app;
