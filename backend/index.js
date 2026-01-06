@@ -12,7 +12,7 @@ const serverManager = {
                 return;
             }
             server = app.listen(PORT, '0.0.0.0', () => {
-                console.log(`🚀 Mobil Sunucu Başlatıldı: http://0.0.0.0:${PORT}`);
+                console.log(`Server Started: http://0.0.0.0:${PORT}`);
                 resolve(true);
             });
             
@@ -33,7 +33,7 @@ const serverManager = {
                     reject(err);
                     return;
                 }
-                console.log('🛑 Sunucu Durduruldu.');
+                console.log('Server Stopped.');
                 server = null;
                 resolve(false);
             });
