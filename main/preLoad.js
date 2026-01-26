@@ -27,7 +27,10 @@ const validChannels = [
   "app:restart",
   "window:minimize",
   "window:maximize",
-  "window:close"
+  "window:close",
+  "media:analyze",
+  "media:decide",
+  "media:process"
 ];
 
 contextBridge.exposeInMainWorld("api", {

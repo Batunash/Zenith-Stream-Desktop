@@ -7,6 +7,9 @@ const { downloadImage } = require("../utils/imageDownloader");
 const db = require("../../backend/src/config/database");
 const axios = require('axios');
 const { VIDEO_EXTS } = require("../../backend/src/constants");
+const { analyzeFile } = require('../utils/mediaAnalyzer');
+const { decideProcessingStrategy } = require('../utils/decisionEngine');
+const { processVideo } = require('../utils/videoBuilder');
 const isSafePath = (rootPath, targetPath) => {
     if (!rootPath || !targetPath) return false;
     const resolvedRoot = path.resolve(rootPath);
@@ -306,6 +309,47 @@ module.exports = function registerFileControl() {
         } catch (error) {
             console.error("TMDB Fetch Error:", error.message);
             return { success: false, message: "TMDB bağlantı hatası." };
+        }
+    });
+    ipcMain.handle("media:analyze", async (event, filePath) => {
+        try {
+
+            const report = await analyzeFile(filePath);
+            console.log(JSON.stringify(report, null, 2));
+            return { success: true, data: report };
+        } catch (error) {
+            console.error(error);
+            return { success: false, error: error.message };
+        }
+    });
+    ipcMain.handle("media:decide", async (event, { filePath, userPreferences }) => {
+        try {
+            const analysis = await analyzeFile(filePath);
+            const decision = decideProcessingStrategy(analysis, userPreferences);
+            return { 
+                success: true, 
+                analysis: analysis,
+                decision: decision 
+            };
+        } catch (error) {
+            console.error(error);
+            return { success: false, error: error.message };
+        }
+    });
+    ipcMain.handle("media:process", async (event, { filePath, userPreferences }) => {
+        try {
+            const analysis = await analyzeFile(filePath);
+            const strategy = decideProcessingStrategy(analysis, userPreferences);
+            const onProgress = (percent) => {
+                event.sender.send('media:progress', { filePath, percent });
+            };
+            const result = await processVideo(filePath, strategy, onProgress);
+
+            return { success: true, newPath: result.path };
+
+        } catch (error) {
+            console.error(error);
+            return { success: false, error: error.message };
         }
     });
 };
