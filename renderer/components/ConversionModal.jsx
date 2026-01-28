@@ -10,9 +10,9 @@ const ConversionModal = ({ filePath, onClose, onStart }) => {
         let isMounted = true;
         const analyzeFile = async () => {
             try {
-                const result = await window.ipcRenderer.invoke('media:analyze', filePath);
-                if (isMounted) {
-                    setAnalysis(result);
+               const response = await window.api.invoke('media:analyze', filePath);
+               if (isMounted && response.success) { 
+                    const result = response.data; 
                     const defaults = result.subtitles
                         .filter(s => ['tur', 'eng', 'und'].includes(s.language))
                         .map(s => s.index);

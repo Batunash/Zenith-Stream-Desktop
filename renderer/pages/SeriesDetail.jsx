@@ -16,6 +16,36 @@ const SeriesDetail = () => {
   const [episodes, setEpisodes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [transfers, setTransfers] = useState({});
+  const [showConvertModal, setShowConvertModal] = useState(false);
+  const [selectedFileForConvert, setSelectedFileForConvert] = useState(null);
+  const [conversionState, setConversionState] = useState({});
+  const handleConvertClick = (episode) => {
+      setSelectedFileForConvert(episode.path);
+      setShowConvertModal(true);
+  };
+  const handleStartConversion = async (userPreferences) => {
+      const filePath = selectedFileForConvert;
+      setShowConvertModal(false);
+      setConversionState(prev => ({
+          ...prev,
+          [filePath]: { status: 'processing', progress: 0 }
+      }));
+
+      try {
+          await window.api.invoke('media:process', {
+              filePath,
+              userPreferences
+          });
+          setConversionState(prev => {
+              const newState = { ...prev };
+              delete newState[filePath];
+              return newState;
+          });
+          
+      } catch (error) {
+          console.error(error);
+      }
+  };
 
   const fetchDetails = async () => {
     try {
@@ -54,11 +84,19 @@ const SeriesDetail = () => {
       }));
       if (!data.error) fetchEpisodes();
     });
+    const removeListener = window.api.receive('media:progress', ({ filePath, percent }) => {
+        setConversionState(prev => ({
+            ...prev,
+            [filePath]: { status: 'processing', progress: percent }
+        }));
+    });
     return () => {
         window.api.remove("file:addEpisode:progress");
         window.api.remove("file:addEpisode:done");
+        window.api.remove('media:progress');
     };
   }, [activeSeason]);
+  
 
   const handleAddSeason = async () => {
     const seasonNumbers = seasons.map(seasonName => {
@@ -145,9 +183,19 @@ const SeriesDetail = () => {
             onUpload={handleUploadEpisode}
             onDelete={handleDeleteEpisode}
             uploadDisabled={metadata?.type === 'movie' && episodes.length >= 1}
+            onConvert={handleConvertClick}
+            conversionState={conversionState}
         />
       </div>
+      {showConvertModal && selectedFileForConvert && (
+            <ConversionModal 
+                filePath={selectedFileForConvert}
+                onClose={() => setShowConvertModal(false)}
+                onStart={handleStartConversion}
+            />
+        )}
     </div>
+    
   );
 };
 

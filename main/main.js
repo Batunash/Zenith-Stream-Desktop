@@ -1,6 +1,6 @@
 const path = require("path");
 const { app, BrowserWindow, protocol, net } = require("electron"); 
-
+app.disableHardwareAcceleration();
 const isDev = !app.isPackaged;
 const registerServerControlIPC = require("./ipc/serverControl");
 const registerFileControl = require("./ipc/fileControl");
@@ -9,6 +9,7 @@ const registerAuthControl = require("./ipc/authControl");
 const registerSettingsControl = require("./ipc/settingsControl")
 const registerWindowControl = require("./ipc/windowControl");
 let mainWindow;
+
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -41,6 +42,7 @@ function registerIpcHandlers() {
   registerSettingsControl();
   registerWindowControl();
 }
+
 app.whenReady().then(() => {
   
  protocol.registerFileProtocol("media", (request, callback) => {

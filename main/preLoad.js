@@ -30,7 +30,8 @@ const validChannels = [
   "window:close",
   "media:analyze",
   "media:decide",
-  "media:process"
+  "media:process",
+  "media:progress"
 ];
 
 contextBridge.exposeInMainWorld("api", {
