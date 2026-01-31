@@ -14,13 +14,20 @@ const processVideo = (inputPath, strategy, onProgress) => {
         const name = path.parse(inputPath).name;
         const finalPath = path.join(dir, `${name}.mp4`);
         const tempPath = path.join(dir, `temp_${name}_${Date.now()}.mp4`);        
-        let command = ffmpeg(inputPath)
-            .output(tempPath)
+        let command = ffmpeg(inputPath);
+        
+        if (strategy.externalSubtitle) {
+            command.input(strategy.externalSubtitle);
+        }
+
+        command.output(tempPath)
             .videoCodec(strategy.video.codec)
             .audioCodec(strategy.audio.codec);
+            
         if (strategy.video.action === 'encode') {
             command.outputOptions('-preset', strategy.video.preset || 'fast');
         }
+        
         const burnSub = strategy.subtitles.find(s => s.action === 'burn');
         
         if (burnSub) {
@@ -32,20 +39,33 @@ const processVideo = (inputPath, strategy, onProgress) => {
             let outputIndex = 0;
             strategy.subtitles.forEach((sub) => {
                 if (sub.action === 'soft_convert') {
-                    command.outputOptions(`-map 0:${sub.index}`);
-                    command.outputOptions(`-c:s:${outputIndex} mov_text`);
-                    command.outputOptions(`-metadata:s:s:${outputIndex} language=${sub.language}`);
-                    if(sub.title) command.outputOptions(`-metadata:s:s:${outputIndex} title="${sub.title}"`);
+                    // DÜZELTME: -map ve değerini ayrı argümanlar olarak veriyoruz
+                    command.outputOptions('-map', `0:${sub.index}`);
+                    command.outputOptions(`-c:s:${outputIndex}`, 'mov_text');
+                    command.outputOptions(`-metadata:s:s:${outputIndex}`, `language=${sub.language}`);
+                    
+                    if(sub.title) {
+                        // DÜZELTME: Boşluk içeren başlıklar için argümanları ayırıyoruz
+                        command.outputOptions(`-metadata:s:s:${outputIndex}`, `title=${sub.title}`);
+                    }
                     outputIndex++;
                 }
             });
+            if (strategy.externalSubtitle) {
+                command.outputOptions('-map', '1:0');
+                command.outputOptions(`-c:s:${outputIndex}`, 'mov_text');
+                command.outputOptions(`-metadata:s:s:${outputIndex}`, 'language=tur');
+                command.outputOptions(`-metadata:s:s:${outputIndex}`, 'title=External');
+                outputIndex++;
+            }
         }
         if (!burnSub) {
-            command.outputOptions('-map 0:v');
-            command.outputOptions('-map 0:a');
+            // DÜZELTME: -map komutlarını güvenli hale getirdik
+            command.outputOptions('-map', '0:v');
+            command.outputOptions('-map', '0:a');
         }
 
-        command.outputOptions('-movflags +faststart');
+        command.outputOptions('-movflags', '+faststart');
         command
             .on('progress', (progress) => {
                 if (progress.percent && onProgress) {
@@ -56,7 +76,6 @@ const processVideo = (inputPath, strategy, onProgress) => {
                 try {
                     console.log('✅ Dönüştürme bitti, dosya değişimi yapılıyor...');
 
-                    // ADIM 1: Orijinal dosyayı sil
                     if (fs.existsSync(inputPath)) {
                         fs.unlinkSync(inputPath);
                     }

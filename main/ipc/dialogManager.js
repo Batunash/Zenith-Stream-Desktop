@@ -37,4 +37,14 @@ module.exports = function registerDialogManager(){
         });
         return canceled ? null : filePaths[0];
     });
+    ipcMain.handle("dialog:openSubtitleFile", async () => {
+        const { canceled, filePaths } = await dialog.showOpenDialog({
+            title: 'Altyazı Dosyası Seç',
+            properties: ['openFile'],
+            filters: [
+                { name: 'Altyazı Dosyaları', extensions: ['srt', 'ass', 'vtt'] }
+            ]
+        });
+        return canceled ? null : filePaths[0];
+    });
 };

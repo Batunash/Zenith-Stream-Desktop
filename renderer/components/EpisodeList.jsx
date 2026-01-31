@@ -1,9 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FaCog, FaSpinner } from 'react-icons/fa'; 
+import { FaCog, FaSpinner, FaEdit } from 'react-icons/fa'; 
+
 const EpisodeList = ({ episodes, activeSeason, onUpload, onDelete, onConvert, conversionState = {}, uploadDisabled }) => {
   const { t } = useTranslation();
   const isCompatible = (filename) => filename.toLowerCase().endsWith('.mp4');
+
   return (
     <div style={styles.episodeSection}>
         <div style={styles.header}>
@@ -45,13 +47,14 @@ const EpisodeList = ({ episodes, activeSeason, onUpload, onDelete, onConvert, co
                                 )}
                             </div>
                             <div style={styles.actions}>
-                                {needsConversion && !isProcessing && (
+                                {!isProcessing && (
                                     <button 
-                                        style={styles.convertBtn}
+                                        style={needsConversion ? styles.convertBtn : styles.editBtn}
                                         onClick={() => onConvert(ep)}
-                                        title="Format change"
+                                        title={needsConversion ? "Convert Format" : "Edit / Add Subtitle"}
                                     >
-                                        <FaCog /> change format
+                                        {needsConversion ? <FaCog /> : <FaEdit />} 
+                                        {needsConversion ? ' Convert' : ' Edit'}
                                     </button>
                                 )}
                                 
@@ -77,7 +80,6 @@ const EpisodeList = ({ episodes, activeSeason, onUpload, onDelete, onConvert, co
 };
 
 const styles = {
-  // ... senin mevcut stillerin ...
   episodeSection: { animation: 'fadeIn 0.5s' },
   header: { display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: 20 },
   uploadBtn: { backgroundColor: '#2563eb', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' },
@@ -90,7 +92,8 @@ const styles = {
   emptyState: { padding: '40px', textAlign: 'center', color: '#555', border: '2px dashed #333', borderRadius: '12px' },
   tag: { backgroundColor: '#eab308', color: 'black', padding: '1px 5px', borderRadius: '3px', fontSize: '0.7rem', fontWeight: 'bold' },
   actions: { display: 'flex', alignItems: 'center', gap: '10px' },
-  convertBtn: { backgroundColor: '#e50914',color: 'white',border: 'none',padding: '6px 12px',borderRadius: '4px',cursor: 'pointer', fontSize: '0.8rem', display: 'flex',alignItems: 'center',gap: '5px'},
+  convertBtn: { backgroundColor: '#e50914', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px'},
+  editBtn: { backgroundColor: '#334155', color: 'white', border: '1px solid #475569', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px'},
   progressContainer: { width: '100%', height: '4px', backgroundColor: '#333', borderRadius: '2px', marginTop: '8px', position: 'relative' },
   progressBar: { height: '100%', backgroundColor: '#22c55e', borderRadius: '2px', transition: 'width 0.2s' },
   progressText: { position: 'absolute', right: 0, top: '-15px', fontSize: '0.7rem', color: '#22c55e' }

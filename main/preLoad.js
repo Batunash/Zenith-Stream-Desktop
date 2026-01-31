@@ -22,6 +22,7 @@ const validChannels = [
   "dialog:openVideoFiles",
   "dialog:openFileImage",
   "dialog:openDirectory",
+  "dialog:openSubtitleFile",
   "settings:get",
   "settings:save",
   "app:restart",

@@ -42,7 +42,7 @@ const SeriesDetail = () => {
               delete newState[filePath];
               return newState;
           });
-          
+          fetchEpisodes();
       } catch (error) {
           console.error(error);
       }

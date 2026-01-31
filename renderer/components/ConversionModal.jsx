@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FaSpinner, FaExclamationTriangle, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaSpinner, FaExclamationTriangle, FaCheck, FaTimes, FaFolderOpen } from 'react-icons/fa';
 
 const ConversionModal = ({ filePath, onClose, onStart }) => {
     const [loading, setLoading] = useState(true);
     const [analysis, setAnalysis] = useState(null);
     const [selectedIndices, setSelectedIndices] = useState([]);
     const [burnWarning, setBurnWarning] = useState(null);
+    const [externalSub, setExternalSub] = useState(null);
 
     useEffect(() => {
         let isMounted = true;
@@ -57,10 +58,18 @@ const ConversionModal = ({ filePath, onClose, onStart }) => {
         }
     };
 
+    const handleBrowseSub = async () => {
+        const path = await window.api.invoke('dialog:openSubtitleFile');
+        if (path) {
+            setExternalSub(path);
+        }
+    };
+
     const handleStart = () => {
         onStart({
             selectedIndices,
-            burnIndex: null 
+            burnIndex: null,
+            externalSubtitle: externalSub
         });
     };
 
@@ -85,7 +94,28 @@ const ConversionModal = ({ filePath, onClose, onStart }) => {
                         File: <span style={{ color: '#aaa' }}>{analysis?.filename?.split(/[\\/]/).pop()}</span>
                     </p>
                     
-                    <div style={styles.sectionTitle}>Select subtitile</div>
+                    <div style={styles.sectionTitle}>Harici Altyazı (Opsiyonel)</div>
+                    <div style={{ marginBottom: 20 }}>
+                        {externalSub ? (
+                            <div style={styles.externalSubBox}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
+                                    <FaCheck color="#4ade80" />
+                                    <span style={{ fontSize: '0.9rem', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                                        {externalSub.split(/[\\/]/).pop()}
+                                    </span>
+                                </div>
+                                <button onClick={() => setExternalSub(null)} style={styles.closeBtn}>
+                                    <FaTimes />
+                                </button>
+                            </div>
+                        ) : (
+                            <button onClick={handleBrowseSub} style={styles.btnSecondary}>
+                                <FaFolderOpen style={{ marginRight: 8 }} /> Dosya Seç (.srt, .vtt)
+                            </button>
+                        )}
+                    </div>
+
+                    <div style={styles.sectionTitle}>Select subtitle</div>
                     
                     <div style={styles.subtitleList}>
                         {(!analysis?.subtitles || analysis.subtitles.length === 0) && (
@@ -297,6 +327,30 @@ const styles = {
         cursor: 'pointer',
         fontWeight: 'bold',
         transition: 'background 0.2s',
+    },
+    btnSecondary: {
+        backgroundColor: '#333',
+        color: '#fff',
+        border: '1px solid #555',
+        padding: '8px 15px',
+        borderRadius: '6px',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        fontSize: '0.85rem',
+        width: '100%',
+        justifyContent: 'center',
+        transition: 'background 0.2s',
+    },
+    externalSubBox: {
+        backgroundColor: '#2a3a4a',
+        border: '1px solid #4ade80',
+        borderRadius: '6px',
+        padding: '8px 12px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        color: '#fff'
     }
 };
 

@@ -8,6 +8,10 @@ const decideProcessingStrategy = (analysisReport, userOptions = null) => {
         requiresReEncode: false
     };
 
+    if (userOptions && userOptions.externalSubtitle) {
+        strategy.externalSubtitle = userOptions.externalSubtitle;
+    }
+
     let targetSubs = [];
     
     if (userOptions && userOptions.selectedIndices && userOptions.selectedIndices.length > 0) {
@@ -27,7 +31,6 @@ const decideProcessingStrategy = (analysisReport, userOptions = null) => {
     const burnIndex = userOptions?.burnIndex;
 
     targetSubs.forEach(sub => {
-        // A) BURN-IN (Gömme) Durumu
         if (sub.index === burnIndex || sub.type === 'pgs' || sub.type === 'vobsub') {
             strategy.subtitles.push({
                 index: sub.index,
