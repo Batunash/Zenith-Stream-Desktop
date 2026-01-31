@@ -38,15 +38,16 @@
     "win": {
       "target": "nsis",
       "icon": "assets/icon.png",
-      "artifactName": "${productName}-Setup-${version}.${ext}"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "shortcutName": "Zenith Stream",
-      "runAfterFinish": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "extraResources": [
+        {
+          "from": "resources/bin/win",
+          "to": "bin/win",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
     },
     "linux": {
       "target": [
@@ -56,23 +57,32 @@
       "icon": "assets/icon.png",
       "artifactName": "${name}-${version}-Linux-${arch}.${ext}",
       "executableName": "zenith-stream-desktop",
-      "synopsis": "Premium Video Streaming App"
+      "synopsis": "Premium Video Streaming App",
+      "extraResources": [
+        {
+          "from": "resources/bin/linux",
+          "to": "bin/linux",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
     },
     "mac": {
       "target": "dmg",
       "icon": "assets/icon.png",
       "category": "public.app-category.entertainment",
-      "artifactName": "${productName}-${version}-Mac.${ext}"
-    },
-    "extraResources": [
-      {
-        "from": "resources/bin",
-        "to": "bin",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ]
+      "artifactName": "${productName}-${version}-Mac.${ext}",
+      "extraResources": [
+        {
+          "from": "resources/bin/mac",
+          "to": "bin/mac",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
+    }
   },
   "dependencies": {
     "axios": "^1.13.2",
@@ -85,20 +95,17 @@
     "i18next": "^25.6.3",
     "i18next-browser-languagedetector": "^8.2.0",
     "jsonwebtoken": "^9.0.2",
-    "morgan": "^1.10.1",
-    "qrcode.react": "^4.2.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-dropzone": "^14.3.8",
-    "react-i18next": "^16.3.5",
-    "react-icons": "^5.5.0",
-    "react-router-dom": "^7.9.6",
-    "sql.js": "^1.13.0"
+    "morgan": "^1.10.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-i18next": "^15.4.0",
+    "react-router-dom": "^7.1.3",
+    "sql.js": "^1.12.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^5.1.1",
-    "electron": "39.2.1",
-    "electron-builder": "^26.4.0",
-    "vite": "^7.2.2"
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8",
+    "vite": "^6.0.7"
   }
 }
