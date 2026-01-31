@@ -1,5 +1,10 @@
 const path = require("path");
 const { app, BrowserWindow, protocol, net } = require("electron"); 
+app.commandLine.appendSwitch("disable-gpu");
+app.commandLine.appendSwitch("disable-gpu-compositing");
+app.commandLine.appendSwitch("disable-software-rasterizer");
+app.commandLine.appendSwitch("disable-features", "VaapiVideoDecoder,UseOzonePlatform");
+app.commandLine.appendSwitch("ozone-platform", "x11");
 app.disableHardwareAcceleration();
 const isDev = !app.isPackaged;
 const registerServerControlIPC = require("./ipc/serverControl");

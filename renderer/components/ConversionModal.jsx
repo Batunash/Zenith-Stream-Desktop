@@ -6,28 +6,33 @@ const ConversionModal = ({ filePath, onClose, onStart }) => {
     const [analysis, setAnalysis] = useState(null);
     const [selectedIndices, setSelectedIndices] = useState([]);
     const [burnWarning, setBurnWarning] = useState(null);
+
     useEffect(() => {
         let isMounted = true;
         const analyzeFile = async () => {
             try {
                const response = await window.api.invoke('media:analyze', filePath);
-               if (isMounted && response.success) { 
-                    const result = response.data; 
-                    const defaults = result.subtitles
-                        .filter(s => ['tur', 'eng', 'und'].includes(s.language))
-                        .map(s => s.index);
-                    setSelectedIndices(defaults);
-                    checkBurnWarning(defaults, result.subtitles);
+               if (isMounted) {
+                    if (response.success) { 
+                        const result = response.data; 
+                        setAnalysis(result);
+                        const defaults = result.subtitles
+                            .filter(s => ['tur', 'eng', 'und'].includes(s.language))
+                            .map(s => s.index);
+                        setSelectedIndices(defaults);
+                        checkBurnWarning(defaults, result.subtitles);
+                    }
                     setLoading(false);
                 }
             } catch (error) {
-                console.error("Analiz hatası:", error);
+                console.error(error);
                 if (isMounted) setLoading(false);
             }
         };
         analyzeFile();
         return () => { isMounted = false; };
     }, [filePath]);
+
     const toggleSubtitle = (sub) => {
         const isSelected = selectedIndices.includes(sub.index);
         let newIndices;
@@ -40,6 +45,7 @@ const ConversionModal = ({ filePath, onClose, onStart }) => {
         setSelectedIndices(newIndices);
         checkBurnWarning(newIndices, analysis.subtitles);
     };
+
     const checkBurnWarning = (indices, allSubs) => {
         const selectedSubs = allSubs.filter(s => indices.includes(s.index));
         const hasPGS = selectedSubs.find(s => s.type === 'pgs' || s.type === 'vobsub');
@@ -57,6 +63,7 @@ const ConversionModal = ({ filePath, onClose, onStart }) => {
             burnIndex: null 
         });
     };
+
     if (loading) return (
         <div style={styles.overlay}>
             <div style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -75,19 +82,19 @@ const ConversionModal = ({ filePath, onClose, onStart }) => {
                 </div>
                 <div style={styles.modalBody}>
                     <p style={styles.fileInfo}>
-                        File: <span style={{ color: '#aaa' }}>{analysis?.filename.split(/[\\/]/).pop()}</span>
+                        File: <span style={{ color: '#aaa' }}>{analysis?.filename?.split(/[\\/]/).pop()}</span>
                     </p>
                     
                     <div style={styles.sectionTitle}>Select subtitile</div>
                     
                     <div style={styles.subtitleList}>
-                        {analysis?.subtitles.length === 0 && (
+                        {(!analysis?.subtitles || analysis.subtitles.length === 0) && (
                             <p style={{ color: '#666', textAlign: 'center', padding: '20px' }}>
                                No subtitle found.
                             </p>
                         )}
                         
-                        {analysis?.subtitles.map(sub => {
+                        {analysis?.subtitles?.map(sub => {
                             const isSelected = selectedIndices.includes(sub.index);
                             return (
                                 <div 
@@ -97,6 +104,11 @@ const ConversionModal = ({ filePath, onClose, onStart }) => {
                                         backgroundColor: isSelected ? '#2a3a4a' : 'transparent'
                                     }}
                                     onClick={() => toggleSubtitle(sub)}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') toggleSubtitle(sub);
+                                    }}
                                 >
                                     <div style={{
                                         ...styles.checkbox,
@@ -140,6 +152,7 @@ const ConversionModal = ({ filePath, onClose, onStart }) => {
         </div>
     );
 };
+
 const styles = {
     overlay: {
         position: 'fixed',

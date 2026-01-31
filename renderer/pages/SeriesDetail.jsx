@@ -4,6 +4,7 @@ import SeriesBanner from '../components/SeriesBanner';
 import SeasonList from '../components/SeasonList';
 import EpisodeList from '../components/EpisodeList';
 import TransferList from '../components/TransferList';
+import ConversionModal from "../components/ConversionModal";
 import { useTranslation } from 'react-i18next';
 
 const SeriesDetail = () => {
