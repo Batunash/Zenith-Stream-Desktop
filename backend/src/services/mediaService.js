@@ -4,8 +4,12 @@ const db = require('../config/database');
 
 function initializeDatabase() {
   try {
-    db.syncFilesystemToDatabase(MEDIA_DIR, VIDEO_EXTS);
-    console.log('Database sync OK');
+    const db = require('../config/database');
+    const config = require('../config/config');
+    const { VIDEO_EXTS } = require('../constants');
+
+    db.syncFilesystemToDatabase(config.MEDIA_DIR, VIDEO_EXTS);
+    console.log('Database sync OK. Media Dir:', config.MEDIA_DIR);
   } catch (error) {
     console.error('Sync Error:', error);
   }

@@ -6,6 +6,8 @@ let serverProcess = null
 module.exports = function registerServerControlIPC() {
   ipcMain.handle("server:start", async () => {
     try {
+      const mediaService = require("../../backend/src/services/mediaService");
+      mediaService.initializeDatabase();
       await serverManager.start(); 
       return { running: true, message: "Server started" };
     } catch (err) {
