@@ -1,10 +1,12 @@
-name: Electron CI
+name: Build & Publish
+
+permissions:
+  contents: write
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -15,16 +17,13 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install
+      - run: npm install
       - name: Download FFmpeg (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -48,10 +47,13 @@ jobs:
           curl -L https://ffbinaries.com/api/v1/download/osx-64/ffprobe -o resources/bin/mac/ffprobe
           chmod +x resources/bin/mac/ffmpeg
           chmod +x resources/bin/mac/ffprobe
+
       - name: Build Electron
         run: npm run dist
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: build-${{ matrix.os }}
-          path: release/
+          files: release/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
