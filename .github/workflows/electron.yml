@@ -7,6 +7,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -24,6 +25,7 @@ jobs:
           node-version: 20
 
       - run: npm install
+
       - name: Download FFmpeg (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -32,6 +34,7 @@ jobs:
           curl -L https://ffbinaries.com/api/v1/download/linux-64/ffprobe -o resources/bin/linux/ffprobe
           chmod +x resources/bin/linux/ffmpeg
           chmod +x resources/bin/linux/ffprobe
+
       - name: Download FFmpeg (Windows)
         if: runner.os == 'Windows'
         shell: bash
@@ -39,6 +42,7 @@ jobs:
           mkdir -p resources/bin/win
           curl -L https://ffbinaries.com/api/v1/download/windows-64/ffmpeg.exe -o resources/bin/win/ffmpeg.exe
           curl -L https://ffbinaries.com/api/v1/download/windows-64/ffprobe.exe -o resources/bin/win/ffprobe.exe
+
       - name: Download FFmpeg (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -48,11 +52,9 @@ jobs:
           chmod +x resources/bin/mac/ffmpeg
           chmod +x resources/bin/mac/ffprobe
 
-      - name: Build Electron
-        run: npm run dist
+      - run: npm run dist
 
-      - name: Publish Release
-        uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2
         with:
           files: release/**
         env:
