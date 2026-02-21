@@ -12,7 +12,7 @@ const serverManager = {
                 return;
             }
             server = app.listen(PORT, '0.0.0.0', () => {
-                console.log(`Server Started: http://0.0.0.0:${PORT}`);
+                console.log('server running');
                 resolve(true);
             });
             
