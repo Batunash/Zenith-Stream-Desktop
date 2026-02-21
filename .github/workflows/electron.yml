@@ -1,13 +1,18 @@
-name: Electron CI
+name: Build & Publish
+
+permissions:
+  contents: write
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -20,9 +25,39 @@ jobs:
           node-version: 20
 
       - run: npm install
-      - run: npm run dist
 
-      - uses: actions/upload-artifact@v4
+      - name: Download FFmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p resources/bin/linux
+          curl -L https://ffbinaries.com/api/v1/download/linux-64/ffmpeg -o resources/bin/linux/ffmpeg
+          curl -L https://ffbinaries.com/api/v1/download/linux-64/ffprobe -o resources/bin/linux/ffprobe
+          chmod +x resources/bin/linux/ffmpeg
+          chmod +x resources/bin/linux/ffprobe
+
+      - name: Download FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          mkdir -p resources/bin/win
+          curl -L https://ffbinaries.com/api/v1/download/windows-64/ffmpeg.exe -o resources/bin/win/ffmpeg.exe
+          curl -L https://ffbinaries.com/api/v1/download/windows-64/ffprobe.exe -o resources/bin/win/ffprobe.exe
+
+      - name: Download FFmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p resources/bin/mac
+          curl -L https://ffbinaries.com/api/v1/download/osx-64/ffmpeg -o resources/bin/mac/ffmpeg
+          curl -L https://ffbinaries.com/api/v1/download/osx-64/ffprobe -o resources/bin/mac/ffprobe
+          chmod +x resources/bin/mac/ffmpeg
+          chmod +x resources/bin/mac/ffprobe
+
+      - run: npm run dist
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - uses: softprops/action-gh-release@v2
         with:
-          name: build-${{ matrix.os }}
-          path: release/
+          files: release/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
