@@ -3,6 +3,34 @@ const fs = require('fs');
 const path = require('path');
 const { app } = require('electron');
 
+function findFirstVideoFile(dir, exts) {
+  let entries;
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch (e) {
+    console.warn('[findFirstVideoFile] cannot read dir', dir, e && e.message);
+    return null;
+  }
+  for (const e of entries) {
+    if (e.isFile() && exts.includes(path.extname(e.name).toLowerCase())) {
+      return path.join(dir, e.name);
+    }
+  }
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    if (e.name.startsWith('.')) continue;
+    const subDir = path.join(dir, e.name);
+    try {
+      const subFile = fs.readdirSync(subDir)
+        .find(f => exts.includes(path.extname(f).toLowerCase()));
+      if (subFile) return path.join(subDir, subFile);
+    } catch (err) {
+      console.warn('[findFirstVideoFile] cannot read subdir', subDir, err && err.message);
+    }
+  }
+  return null;
+}
+
 class DatabaseManager {
   constructor() {
     this.db = null;
@@ -215,10 +243,8 @@ syncFilesystemToDatabase(mediaDir, videoExts) {
           } else {
             this.prepare('UPDATE SEASONS SET FOLDER_PATH = ? WHERE ID = ?').run(contentPath, season.ID);
           }
-          const files = fs.readdirSync(contentPath).filter(f => videoExts.includes(path.extname(f).toLowerCase()));
-          if (files.length > 0) {
-            const file = files[0];
-            const filePath = path.join(contentPath, file);
+          const filePath = findFirstVideoFile(contentPath, videoExts);
+          if (filePath) {
             const stats = fs.statSync(filePath);
             const exists = this.prepare('SELECT ID FROM EPISODES WHERE SEASON_ID = ?').get(season.ID);
             if (!exists) {
