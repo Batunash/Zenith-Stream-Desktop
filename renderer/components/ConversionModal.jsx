@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaSpinner, FaExclamationTriangle, FaCheck, FaTimes, FaFolderOpen } from 'react-icons/fa';
+import { FaSpinner, FaExclamationTriangle, FaCheck, FaTimes, FaFolderOpen, FaFileAlt } from 'react-icons/fa';
 
 const ConversionModal = ({ filePath, onClose, onStart }) => {
     const [loading, setLoading] = useState(true);
@@ -7,6 +7,7 @@ const ConversionModal = ({ filePath, onClose, onStart }) => {
     const [selectedIndices, setSelectedIndices] = useState([]);
     const [burnWarning, setBurnWarning] = useState(null);
     const [externalSub, setExternalSub] = useState(null);
+    const [detectedSubs, setDetectedSubs] = useState([]);
 
     useEffect(() => {
         let isMounted = true;
@@ -31,6 +32,7 @@ const ConversionModal = ({ filePath, onClose, onStart }) => {
             }
         };
         analyzeFile();
+        detectMatchingSubs(filePath);
         return () => { isMounted = false; };
     }, [filePath]);
 
@@ -50,11 +52,34 @@ const ConversionModal = ({ filePath, onClose, onStart }) => {
     const checkBurnWarning = (indices, allSubs) => {
         const selectedSubs = allSubs.filter(s => indices.includes(s.index));
         const hasPGS = selectedSubs.find(s => s.type === 'pgs' || s.type === 'vobsub');
-        
+
         if (hasPGS) {
             setBurnWarning(`Dikkat: "${hasPGS.language.toUpperCase()}" altyazısı resim tabanlıdır (PGS). Bu altyazıyı seçerseniz videoya gömülecektir (Burn-in) ve işlem uzun sürecektir.`);
         } else {
             setBurnWarning(null);
+        }
+    };
+
+    const detectMatchingSubs = async (videoPath) => {
+        try {
+            const dir = videoPath.substring(0, videoPath.lastIndexOf('\\') + 1);
+            const baseName = videoPath.substring(videoPath.lastIndexOf('\\') + 1, videoPath.lastIndexOf('.'));
+            const files = await window.api.invoke('dialog:listDirectory', dir);
+            if (!files || !files.length) return;
+
+            const matching = files.filter(f => {
+                if (!f.name.toLowerCase().endsWith('.srt')) return false;
+                const fileBase = f.name.substring(0, f.name.lastIndexOf('.'));
+                return fileBase.toLowerCase().startsWith(baseName.toLowerCase());
+            });
+
+            setDetectedSubs(matching.map(f => ({
+                path: f.path,
+                name: f.name,
+                lang: f.name.substring(f.name.lastIndexOf('.') - 3, f.name.lastIndexOf('.'))
+            })));
+        } catch (err) {
+            console.error('[ConversionModal] detect subs error:', err);
         }
     };
 
@@ -109,9 +134,28 @@ const ConversionModal = ({ filePath, onClose, onStart }) => {
                                 </button>
                             </div>
                         ) : (
-                            <button onClick={handleBrowseSub} style={styles.btnSecondary}>
-                                <FaFolderOpen style={{ marginRight: 8 }} /> Dosya Seç (.srt, .vtt)
-                            </button>
+                            <div>
+                                <button onClick={handleBrowseSub} style={styles.btnSecondary}>
+                                    <FaFolderOpen style={{ marginRight: 8 }} /> Dosya Seç (.srt, .vtt)
+                                </button>
+                                {detectedSubs.length > 0 && (
+                                    <div style={styles.detectedSection}>
+                                        <div style={styles.detectedTitle}>
+                                            <FaFileAlt style={{ marginRight: 6 }} />
+                                            {t('convert.detected_subs')}
+                                        </div>
+                                        {detectedSubs.map((sub, idx) => (
+                                            <button
+                                                key={idx}
+                                                style={styles.detectedItem}
+                                                onClick={() => setExternalSub(sub.path)}
+                                            >
+                                                {sub.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         )}
                     </div>
 
@@ -351,6 +395,34 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'space-between',
         color: '#fff'
+    },
+    detectedSection: {
+        marginTop: 12,
+        padding: 12,
+        backgroundColor: '#111',
+        border: '1px solid #333',
+        borderRadius: 6
+    },
+    detectedTitle: {
+        fontSize: '0.75rem',
+        color: '#888',
+        marginBottom: 8,
+        display: 'flex',
+        alignItems: 'center'
+    },
+    detectedItem: {
+        display: 'block',
+        width: '100%',
+        padding: '6px 10px',
+        backgroundColor: '#222',
+        border: '1px solid #444',
+        borderRadius: 4,
+        color: '#ccc',
+        fontSize: '0.8rem',
+        cursor: 'pointer',
+        marginBottom: 6,
+        textAlign: 'left',
+        transition: 'background 0.2s'
     }
 };
 

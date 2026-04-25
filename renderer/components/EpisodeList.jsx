@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FaCog, FaSpinner, FaEdit } from 'react-icons/fa'; 
+import { FaCog, FaSpinner, FaEdit, FaLanguage } from 'react-icons/fa';
 
-const EpisodeList = ({ episodes, activeSeason, onUpload, onDelete, onConvert, conversionState = {}, uploadDisabled }) => {
+const EpisodeList = ({ episodes, activeSeason, onUpload, onDelete, onConvert, onTranslate, conversionState = {}, uploadDisabled }) => {
   const { t } = useTranslation();
   const isCompatible = (filename) => filename.toLowerCase().endsWith('.mp4');
 
@@ -48,17 +48,27 @@ const EpisodeList = ({ episodes, activeSeason, onUpload, onDelete, onConvert, co
                             </div>
                             <div style={styles.actions}>
                                 {!isProcessing && (
-                                    <button 
+                                    <button
                                         style={needsConversion ? styles.convertBtn : styles.editBtn}
                                         onClick={() => onConvert(ep)}
                                         title={needsConversion ? "Convert Format" : "Edit / Add Subtitle"}
                                     >
-                                        {needsConversion ? <FaCog /> : <FaEdit />} 
+                                        {needsConversion ? <FaCog /> : <FaEdit />}
                                         {needsConversion ? ' Convert' : ' Edit'}
                                     </button>
                                 )}
-                                
-                                <button 
+
+                                {!isProcessing && onTranslate && (
+                                    <button
+                                        style={styles.translateBtn}
+                                        onClick={() => onTranslate(ep)}
+                                        title={t('translate.tooltip')}
+                                    >
+                                        <FaLanguage />
+                                    </button>
+                                )}
+
+                                <button
                                     style={styles.deleteEpBtn}
                                     onClick={() => onDelete(ep.path)}
                                     title={t('common.delete')}
@@ -94,6 +104,7 @@ const styles = {
   actions: { display: 'flex', alignItems: 'center', gap: '10px' },
   convertBtn: { backgroundColor: '#e50914', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px'},
   editBtn: { backgroundColor: '#334155', color: 'white', border: '1px solid #475569', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px'},
+  translateBtn: { backgroundColor: 'transparent', color: '#60a5fa', border: '1px solid #1e3a8a', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center' },
   progressContainer: { width: '100%', height: '4px', backgroundColor: '#333', borderRadius: '2px', marginTop: '8px', position: 'relative' },
   progressBar: { height: '100%', backgroundColor: '#22c55e', borderRadius: '2px', transition: 'width 0.2s' },
   progressText: { position: 'absolute', right: 0, top: '-15px', fontSize: '0.7rem', color: '#22c55e' }

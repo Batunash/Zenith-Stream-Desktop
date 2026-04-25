@@ -10,7 +10,10 @@ const SettingsPage = ({ isSetupRequired, onConfigUpdate }) => {
     PORT: '3000',
     MEDIA_DIR: '',
     JWT_SECRET: '',
-    TMDB_API_KEY: '' 
+    TMDB_API_KEY: '',
+    AI_PROVIDER: 'nvidia',
+    GEMINI_API_KEY: '',
+    NVIDIA_API_KEY: ''
   });
   
   const [loading, setLoading] = useState(false);
@@ -145,6 +148,51 @@ const SettingsPage = ({ isSetupRequired, onConfigUpdate }) => {
                     {t('settings.api_key_help')}
                 </span>
             </div>
+        </div>
+
+        <div style={styles.section}>
+            <h3 style={styles.sectionTitle}>{t('settings.section_ai')}</h3>
+            <div style={styles.inputGroup}>
+                <label style={styles.label}>{t('settings.ai_provider')}</label>
+                <select
+                    style={styles.input}
+                    value={config.AI_PROVIDER || 'nvidia'}
+                    onChange={(e) => handleChange('AI_PROVIDER', e.target.value)}
+                >
+                    <option value="nvidia">{t('settings.provider_nvidia')}</option>
+                    <option value="gemini">{t('settings.provider_gemini')}</option>
+                </select>
+            </div>
+            {(config.AI_PROVIDER || 'nvidia') === 'nvidia' && (
+                <div style={styles.inputGroup}>
+                    <label style={styles.label}>{t('settings.nvidia_api_key')} ({t('common.optional')})</label>
+                    <input
+                        type="password"
+                        style={styles.input}
+                        value={config.NVIDIA_API_KEY || ''}
+                        onChange={(e) => handleChange('NVIDIA_API_KEY', e.target.value)}
+                        placeholder="nvapi-..."
+                    />
+                    <span style={styles.hint}>
+                        {t('settings.nvidia_api_key_help')}
+                    </span>
+                </div>
+            )}
+            {config.AI_PROVIDER === 'gemini' && (
+                <div style={styles.inputGroup}>
+                    <label style={styles.label}>{t('settings.gemini_api_key')} ({t('common.optional')})</label>
+                    <input
+                        type="password"
+                        style={styles.input}
+                        value={config.GEMINI_API_KEY || ''}
+                        onChange={(e) => handleChange('GEMINI_API_KEY', e.target.value)}
+                        placeholder="AIza..."
+                    />
+                    <span style={styles.hint}>
+                        {t('settings.gemini_api_key_help')}
+                    </span>
+                </div>
+            )}
         </div>
 
         <div style={styles.section}>

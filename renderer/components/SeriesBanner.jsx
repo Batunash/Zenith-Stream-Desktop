@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { FaLanguage } from 'react-icons/fa';
 
-const SeriesBanner = ({ metadata, seasonCount, onBack }) => {
+const SeriesBanner = ({ metadata, seasonCount, onBack, onAutoTranslate }) => {
   const { t } = useTranslation();
   const backdropUrl = metadata?.backdrop 
     ? (metadata.backdrop.startsWith('http') ? metadata.backdrop : `media://${metadata.fullPosterPath}`) 
@@ -18,6 +19,12 @@ const SeriesBanner = ({ metadata, seasonCount, onBack }) => {
           <div style={styles.metaBadges}>
               <span style={styles.badge}>IMDB: {metadata?.rating}</span>
               <span style={styles.badge}>{seasonCount} {t('detail.seasons')}</span>
+              {onAutoTranslate && (
+                  <button style={styles.autoTranslateBtn} onClick={onAutoTranslate}>
+                      <FaLanguage />
+                      <span style={{ marginLeft: 6 }}>{t('auto_translate.button')}</span>
+                  </button>
+              )}
           </div>
           <p style={styles.overview}>{metadata?.overview}</p>
       </div>
@@ -34,6 +41,18 @@ const styles = {
   title: { fontSize: '3rem', margin: '0 0 10px 0', textShadow: '0 2px 10px rgba(0,0,0,0.8)' },
   metaBadges: { display: 'flex', gap: '10px', marginBottom: '15px' },
   badge: { backgroundColor: 'rgba(255,255,255,0.2)', padding: '4px 10px', borderRadius: '4px', fontSize: '0.9rem', backdropFilter: 'blur(5px)' },
+  autoTranslateBtn: {
+    backgroundColor: 'rgba(234, 179, 8, 0.3)',
+    border: '1px solid rgba(234, 179, 8, 0.5)',
+    color: '#eab308',
+    padding: '4px 12px',
+    borderRadius: '4px',
+    fontSize: '0.85rem',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    backdropFilter: 'blur(5px)'
+  },
   overview: { maxWidth: '800px', lineHeight: '1.6', color: '#ddd', fontSize: '1rem', textShadow: '0 1px 5px rgba(0,0,0,0.8)' },
 };
 

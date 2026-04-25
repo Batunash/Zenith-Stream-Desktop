@@ -5,6 +5,8 @@ import SeasonList from '../components/SeasonList';
 import EpisodeList from '../components/EpisodeList';
 import TransferList from '../components/TransferList';
 import ConversionModal from "../components/ConversionModal";
+import TranslateSubtitleModal from "../components/TranslateSubtitleModal";
+import AutoTranslateModal from "../components/AutoTranslateModal";
 import { useTranslation } from 'react-i18next';
 
 const SeriesDetail = () => {
@@ -20,6 +22,8 @@ const SeriesDetail = () => {
   const [showConvertModal, setShowConvertModal] = useState(false);
   const [selectedFileForConvert, setSelectedFileForConvert] = useState(null);
   const [conversionState, setConversionState] = useState({});
+  const [translateTarget, setTranslateTarget] = useState(null);
+  const [showAutoTranslate, setShowAutoTranslate] = useState(false);
   const handleConvertClick = (episode) => {
       setSelectedFileForConvert(episode.path);
       setShowConvertModal(true);
@@ -159,14 +163,19 @@ const SeriesDetail = () => {
     if (res.success) setEpisodes(prev => prev.filter(ep => ep.path !== path));
   };
 
+  const handleAutoTranslate = () => {
+    setShowAutoTranslate(true);
+  };
+
   if (loading && !metadata) return <div style={{color:'white', padding: 40}}>{t('common.loading')}</div>;
 
   return (
     <div style={{ height: '100%', overflowY: 'auto', backgroundColor: '#121212', color: 'white' }}>
-      <SeriesBanner 
-        metadata={metadata} 
-        seasonCount={seasons.length} 
-        onBack={() => navigate('/')} 
+      <SeriesBanner
+        metadata={metadata}
+        seasonCount={seasons.length}
+        onBack={() => navigate('/')}
+        onAutoTranslate={handleAutoTranslate}
       />
       <div style={{ padding: '0 40px 50px 40px' ,marginTop:'30px'}}>
         <SeasonList 
@@ -178,21 +187,35 @@ const SeriesDetail = () => {
             isMovie={metadata?.type === 'movie'}
         />
         <TransferList transfers={transfers} />
-        <EpisodeList 
-            episodes={episodes} 
-            activeSeason={activeSeason} 
+        <EpisodeList
+            episodes={episodes}
+            activeSeason={activeSeason}
             onUpload={handleUploadEpisode}
             onDelete={handleDeleteEpisode}
             uploadDisabled={metadata?.type === 'movie' && episodes.length >= 1}
             onConvert={handleConvertClick}
+            onTranslate={(ep) => setTranslateTarget(ep.path)}
             conversionState={conversionState}
         />
       </div>
       {showConvertModal && selectedFileForConvert && (
-            <ConversionModal 
+            <ConversionModal
                 filePath={selectedFileForConvert}
                 onClose={() => setShowConvertModal(false)}
                 onStart={handleStartConversion}
+            />
+        )}
+      {translateTarget && (
+            <TranslateSubtitleModal
+                videoPath={translateTarget}
+                onClose={() => setTranslateTarget(null)}
+            />
+        )}
+      {showAutoTranslate && (
+            <AutoTranslateModal
+                seriesName={metadata?.title || folderName}
+                episodes={episodes}
+                onClose={() => setShowAutoTranslate(false)}
             />
         )}
     </div>

@@ -1,4 +1,6 @@
-const { ipcMain,dialog} = require("electron");
+const { ipcMain, dialog } = require("electron");
+const fs = require("fs");
+const path = require("path");
 
 module.exports = function registerDialogManager(){
     ipcMain.handle('dialog:openVideoFiles', async (event, args) => {
@@ -46,5 +48,21 @@ module.exports = function registerDialogManager(){
             ]
         });
         return canceled ? null : filePaths[0];
+    });
+    ipcMain.handle("dialog:listDirectory", async (event, dirPath) => {
+        if (!dirPath || !fs.existsSync(dirPath)) return [];
+        try {
+            const files = fs.readdirSync(dirPath, { withFileTypes: true });
+            return files
+                .filter(f => f.isFile())
+                .map(f => ({
+                    name: f.name,
+                    path: path.join(dirPath, f.name),
+                    size: f.size
+                }));
+        } catch (err) {
+            console.error('[Dialog] listDirectory error:', err);
+            return [];
+        }
     });
 };

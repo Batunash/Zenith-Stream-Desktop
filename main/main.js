@@ -13,6 +13,8 @@ const registerDialogManager = require("./ipc/dialogManager");
 const registerAuthControl = require("./ipc/authControl");
 const registerSettingsControl = require("./ipc/settingsControl")
 const registerWindowControl = require("./ipc/windowControl");
+const registerTranslateControl = require("./ipc/translateControl");
+const registerBurnControl = require("./ipc/burnControl");
 let mainWindow;
 
 
@@ -46,6 +48,8 @@ function registerIpcHandlers() {
   registerAuthControl();
   registerSettingsControl();
   registerWindowControl();
+  registerTranslateControl();
+  registerBurnControl();
 }
 
 app.whenReady().then(() => {

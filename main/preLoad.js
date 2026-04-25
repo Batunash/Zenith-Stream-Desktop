@@ -23,6 +23,7 @@ const validChannels = [
   "dialog:openFileImage",
   "dialog:openDirectory",
   "dialog:openSubtitleFile",
+  "dialog:listDirectory",
   "settings:get",
   "settings:save",
   "app:restart",
@@ -32,7 +33,11 @@ const validChannels = [
   "media:analyze",
   "media:decide",
   "media:process",
-  "media:progress"
+  "media:progress",
+  "media:translateSubtitle",
+  "media:translateSubtitle:progress",
+  "media:burnExternalSubtitle",
+  "media:burnExternalSubtitle:progress"
 ];
 
 contextBridge.exposeInMainWorld("api", {

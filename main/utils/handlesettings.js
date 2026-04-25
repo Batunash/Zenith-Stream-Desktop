@@ -8,7 +8,10 @@ const DEFAULT_CONFIG = {
     PORT: '5000',
     MEDIA_DIR: path.join(app.getPath('home'), 'Desktop', 'Archive'),
     JWT_SECRET: crypto.randomBytes(32).toString('hex'),
-    TMDB_API_KEY: ''
+    TMDB_API_KEY: '',
+    AI_PROVIDER: 'nvidia',
+    GEMINI_API_KEY: '',
+    NVIDIA_API_KEY: ''
 };
 
 const getSettings = () => {
