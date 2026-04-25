@@ -97,7 +97,7 @@ const AutoTranslateModal = ({ seriesName, episodes, onClose }) => {
             const ep = selectedList[i];
             const cfg = episodeConfigs[ep.path];
             setCurrentEpisode(ep.name);
-            setStage(cfg.sourceType === 'translate' ? 'translating' : 'burning');
+            setStage(cfg.sourceType === 'translate' ? 'translating' : 'converting');
             setProgress(Math.round((i / selectedList.length) * 100));
 
             let srtPath = null;
@@ -131,13 +131,16 @@ const AutoTranslateModal = ({ seriesName, episodes, onClose }) => {
                     srtPath = cfg.existingPath;
                 }
 
-                setStage('burning');
-                const burnRes = await window.api.invoke('media:burnExternalSubtitle', {
-                    videoPath: ep.path,
-                    srtPath
+                setStage('converting');
+                const processRes = await window.api.invoke('media:process', {
+                    filePath: ep.path,
+                    userPreferences: {
+                        selectedIndices: [],
+                        externalSubtitle: srtPath
+                    }
                 });
 
-                if (!burnRes.success) throw new Error(burnRes.error || 'Burn failed');
+                if (!processRes.success) throw new Error(processRes.error || 'Conversion failed');
 
                 done.push({ path: ep.path, name: ep.name, success: true });
             } catch (err) {
@@ -284,7 +287,7 @@ const AutoTranslateModal = ({ seriesName, episodes, onClose }) => {
                             <span style={{ flex: 1 }}>
                                 {stage === 'analyzing' && t('auto_translate.analyzing')}
                                 {stage === 'translating' && t('auto_translate.progress_translating', { episode: currentEpisode })}
-                                {stage === 'burning' && t('auto_translate.progress_burning', { episode: currentEpisode })}
+                                {stage === 'converting' && t('auto_translate.progress_converting', { episode: currentEpisode })}
                                 {stage === 'done' && t('auto_translate.done')}
                             </span>
                             <div style={styles.bar}>

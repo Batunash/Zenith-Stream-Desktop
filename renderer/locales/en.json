@@ -153,7 +153,7 @@
     "start_batch": "Start Batch",
     "analyzing": "Analyzing videos...",
     "progress_translating": "Translating {{episode}}...",
-    "progress_burning": "Burning {{episode}}...",
+    "progress_converting": "Converting {{episode}}...",
     "done": "Batch complete",
     "summary": "{{success}}/{{total}} episodes completed successfully."
   }

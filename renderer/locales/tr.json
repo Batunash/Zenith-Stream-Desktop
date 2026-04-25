@@ -153,7 +153,7 @@
     "start_batch": "Toplu İşlemi Başlat",
     "analyzing": "Videolar analiz ediliyor...",
     "progress_translating": "{{episode}} çevriliyor...",
-    "progress_burning": "{{episode}} gömülüyor...",
+    "progress_converting": "{{episode}} dönüştürülüyor...",
     "done": "Toplu işlem tamamlandı",
     "summary": "{{total}} bölümden {{success}} tanesi tamamlandı."
   }
