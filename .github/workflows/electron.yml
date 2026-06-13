@@ -21,7 +21,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - run: npm install
 
@@ -29,8 +29,8 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           mkdir -p resources/bin/linux
-          curl -L "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffmpeg-6.1-linux-64.zip" -o ffmpeg.zip
-          curl -L "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffprobe-6.1-linux-64.zip" -o ffprobe.zip
+          curl -L "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffmpeg-4.4.1-linux-64.zip" -o ffmpeg.zip
+          curl -L "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffprobe-4.4.1-linux-64.zip" -o ffprobe.zip
           unzip ffmpeg.zip -d resources/bin/linux/
           unzip ffprobe.zip -d resources/bin/linux/
           chmod +x resources/bin/linux/ffmpeg
@@ -41,8 +41,8 @@ jobs:
         shell: bash
         run: |
           mkdir -p resources/bin/win
-          curl -L "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffmpeg-6.1-win-64.zip" -o ffmpeg.zip
-          curl -L "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffprobe-6.1-win-64.zip" -o ffprobe.zip
+          curl -L "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffmpeg-4.4.1-win-64.zip" -o ffmpeg.zip
+          curl -L "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffprobe-4.4.1-win-64.zip" -o ffprobe.zip
           unzip ffmpeg.zip -d resources/bin/win/
           unzip ffprobe.zip -d resources/bin/win/
 
@@ -50,8 +50,8 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           mkdir -p resources/bin/mac
-          curl -L "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffmpeg-6.1-macos-64.zip" -o ffmpeg.zip
-          curl -L "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffprobe-6.1-macos-64.zip" -o ffprobe.zip
+          curl -L "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffmpeg-4.4.1-osx-64.zip" -o ffmpeg.zip
+          curl -L "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v4.4.1/ffprobe-4.4.1-osx-64.zip" -o ffprobe.zip
           unzip ffmpeg.zip -d resources/bin/mac/
           unzip ffprobe.zip -d resources/bin/mac/
           chmod +x resources/bin/mac/ffmpeg
