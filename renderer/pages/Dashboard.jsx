@@ -91,11 +91,10 @@ export default function Dashboard() {
         )}
       </div>
 
-      <ControlPanel 
+      <ControlPanel
         isServerRunning={isServerRunning}
         toggleServer={handleServerToggle}
-        onAddSerie={handleAddSerie} 
-        onOpenSettings={navigateToSettings} 
+        onOpenSettings={navigateToSettings}
       />
     </div>
   );

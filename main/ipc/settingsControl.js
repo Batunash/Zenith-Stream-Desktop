@@ -1,4 +1,4 @@
-const { ipcMain, app } = require("electron");
+const { ipcMain, app } = require('electron');
 const { getSettings, saveSettings, moveArchiveContents } = require("./../utils/handlesettings");
 const db = require("../../backend/src/config/database");
 const { VIDEO_EXTS } = require("../../backend/src/constants");

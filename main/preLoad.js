@@ -37,7 +37,26 @@ const validChannels = [
   "media:translateSubtitle",
   "media:translateSubtitle:progress",
   "media:burnExternalSubtitle",
-  "media:burnExternalSubtitle:progress"
+  "media:burnExternalSubtitle:progress",
+  "browser:navigate",
+  "browser:goBack",
+  "browser:goForward",
+  "browser:reload",
+  "browser:getStreams",
+  "browser:clearStreams",
+  "browser:downloadStream",
+  "browser:resize",
+  "browser:show",
+  "browser:hide",
+  "browser:progress",
+  "browser:complete",
+  "browser:error",
+  "browser:titleChanged",
+  "browser:urlChanged",
+  "browser:streamDetected",
+  "browser:downloads",
+  "browser:clearCompleted",
+  "browser:cancelDownload"
 ];
 
 contextBridge.exposeInMainWorld("api", {

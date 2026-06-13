@@ -156,5 +156,59 @@
     "progress_converting": "{{episode}} dönüştürülüyor...",
     "done": "Toplu işlem tamamlandı",
     "summary": "{{total}} bölümden {{success}} tanesi tamamlandı."
+  },
+  "downloadManager": {
+    "title": "İndirme Yöneticisi",
+    "urlPlaceholder": "Video URL girin (hdfilmcehennemi.nl, fullhdfilmizlesene.life, vb.)",
+    "testButton": "URL Test Et",
+    "downloadButton": "İndir",
+    "supportedSites": "Desteklenen siteler:",
+    "supportedSitesList": "hdfilmcehennemi.nl, fullhdfilmizlesene.life, webteizle3.xyz, kultfilmler.net, diziwatch.ac, anizm.net, tranimeizle.io",
+    "downloadQueue": "İndirme Kuyruğu",
+    "clearCompleted": "Tamamlananları Temizle",
+    "noDownloads": "Kuyrukta indirme yok",
+    "status": {
+      "starting": "Başlatılıyor",
+      "downloading": "İndiriliyor",
+      "completed": "Tamamlandı",
+      "failed": "Başarısız",
+      "cancelled": "İptal Edildi"
+    }
+  },
+  "control_panel": {
+    "server_status": "Sunucu Durumu",
+    "running": "ÇALIŞIYOR",
+    "stopped": "DURDURULDU",
+    "start_server": "Sunucuyu Başlat",
+    "stop_server": "Sunucuyu Durdur",
+    "add_serie": "Dizi ekle",
+    "download_manager": "İndirme Yöneticisi",
+    "stream_capture": "Akım Yakalama Tarayıcısı",
+    "settings": "Ayarlar"
+  },
+  "streamCapture": {
+    "title": "Akım Yakalama Tarayıcısı",
+    "urlPlaceholder": "Yayıncı site URL'sini girin (örn: hdfilmcehennemi.nl/dizi/...)",
+    "navigate": "Git",
+    "openBrowser": "Tarayıcıyı Aç",
+    "detectedStreams": "Tespit Edilen Akımlar",
+    "clear": "Temizle",
+    "noStreams": "Henüz akım tespit edilmedi.",
+    "hint": "Yayıncı bir siteye gidin ve bir videoyu oynatın. Tespit edilen akımlar burada görünecek.",
+    "download": "İndir",
+    "openExternal": "Tarayıcıda Aç",
+    "downloads": "İndirmeler",
+    "status": {
+      "downloading": "İndiriliyor",
+      "completed": "Tamamlandı",
+      "failed": "Başarısız"
+    },
+    "instructions": {
+      "title": "Nasıl kullanılır",
+      "step1": "\"Tarayıcıyı Aç\" butonuna tıklayın veya URL girip \"Git\" butonuna tıklayın",
+      "step2": "İndirmek istediğiniz videoya giderek gezinin",
+      "step3": "Videoyu oynatın - akımlar otomatik olarak tespit edilecek",
+      "step4": "Tespit edilen akımların yanındaki indirme simgesine tıklayın"
+    }
   }
 }

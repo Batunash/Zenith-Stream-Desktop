@@ -85,6 +85,24 @@ Source code and installation instructions:
 
 ---
 
+## 🌐 5. Built-in Web Downloader (Advanced Video Sniffer)
+
+Zenith Stream comes with a powerful, built-in "1DM-style" web browser that automatically detects and downloads streaming videos from websites.
+
+### Key Features:
+- **Universal Sniffer:** Automatically catches `m3u8` (HLS) and `.mp4` video streams playing in the browser.
+- **Smart Subtitle Integration:** Detects separate subtitle files (SRT, VTT) and automatically embeds them into a single `.mkv` file, complete with correct language tags (e.g., Türkçe, English, Forced).
+- **Background Downloads:** Leverages FFmpeg to silently compile streams in the background while you navigate to other pages or manage your library.
+- **Bypass Restrictions:** Spoofs User-Agent, Origin, and Referer headers exactly as your browser sends them to seamlessly bypass 403 Forbidden errors and Hotlink protections.
+
+### How to use:
+1. Click **"Web Downloader (1DM)"** from the Dashboard control panel.
+2. Enter any URL or Google search term in the address bar.
+3. Play a video on a webpage. The built-in sniffer will instantly catch the video streams and subtitles.
+4. Click **Download** on the green panel. The file will be compiled and can be moved to your Media Directory.
+
+---
+
 ## ⚠️ Important Disclaimer
 
 **Zenith Stream is a Video Library Management and Organization Tool.**

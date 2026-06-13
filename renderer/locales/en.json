@@ -156,5 +156,59 @@
     "progress_converting": "Converting {{episode}}...",
     "done": "Batch complete",
     "summary": "{{success}}/{{total}} episodes completed successfully."
+  },
+  "downloadManager": {
+    "title": "Download Manager",
+    "urlPlaceholder": "Enter video URL (hdfilmcehennemi.nl, fullhdfilmizlesene.life, etc.)",
+    "testButton": "Test URL",
+    "downloadButton": "Download",
+    "supportedSites": "Supported sites:",
+    "supportedSitesList": "hdfilmcehennemi.nl, fullhdfilmizlesene.life, webteizle3.xyz, kultfilmler.net, diziwatch.ac, anizm.net, tranimeizle.io",
+    "downloadQueue": "Download Queue",
+    "clearCompleted": "Clear Completed",
+    "noDownloads": "No downloads in queue",
+    "status": {
+      "starting": "Starting",
+      "downloading": "Downloading",
+      "completed": "Completed",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "control_panel": {
+    "server_status": "Server Status",
+    "running": "RUNNING",
+    "stopped": "STOPPED",
+    "start_server": "Start Server",
+    "stop_server": "Stop Server",
+    "add_serie": "Add Series",
+    "download_manager": "Download Manager",
+    "stream_capture": "Stream Capture Browser",
+    "settings": "Settings"
+  },
+  "streamCapture": {
+    "title": "Stream Capture Browser",
+    "urlPlaceholder": "Enter streaming site URL (e.g., hdfilmcehennemi.nl/dizi/...)",
+    "navigate": "Navigate",
+    "openBrowser": "Open Browser",
+    "detectedStreams": "Detected Streams",
+    "clear": "Clear",
+    "noStreams": "No streams detected yet.",
+    "hint": "Navigate to a streaming site and play a video. Detected streams will appear here.",
+    "download": "Download",
+    "openExternal": "Open in Browser",
+    "downloads": "Downloads",
+    "status": {
+      "downloading": "Downloading",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
+    "instructions": {
+      "title": "How to use",
+      "step1": "Click \"Open Browser\" or enter URL and click \"Navigate\"",
+      "step2": "Browse to the video you want to download",
+      "step3": "Play the video - streams will be detected automatically",
+      "step4": "Click the download icon next to detected streams"
+    }
   }
 }

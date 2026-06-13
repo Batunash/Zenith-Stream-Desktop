@@ -1,8 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
-const ControlPanel = ({ isServerRunning, toggleServer, onOpenSettings ,onAddSerie}) => {
+const ControlPanel = ({ isServerRunning, toggleServer, onOpenSettings }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const styles = getStyles(isServerRunning);
 
   return (
@@ -27,9 +29,9 @@ const ControlPanel = ({ isServerRunning, toggleServer, onOpenSettings ,onAddSeri
         </button>
       </div>
       <div>
-        <button 
-          style={styles.settingsBtn} 
-          onClick={onAddSerie}
+        <button
+          style={styles.settingsBtn}
+          onClick={() => navigate('/add-series')}
           onMouseEnter={(e) => e.target.style.backgroundColor = '#444'}
           onMouseLeave={(e) => e.target.style.backgroundColor = '#333'}
         >
@@ -39,7 +41,20 @@ const ControlPanel = ({ isServerRunning, toggleServer, onOpenSettings ,onAddSeri
           </svg>
           {t('control_panel.add_serie')}
         </button>
-        <button 
+        <button
+          style={styles.settingsBtn}
+          onClick={() => navigate('/download')}
+          onMouseEnter={(e) => e.target.style.backgroundColor = '#444'}
+          onMouseLeave={(e) => e.target.style.backgroundColor = '#333'}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '8px'}}>
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7,10 12,15 17,10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          {t('control_panel.download_manager', 'Web Downloader (1DM)')}
+        </button>
+        <button
           style={styles.settingsBtn} 
           onClick={onOpenSettings}
           onMouseEnter={(e) => e.target.style.backgroundColor = '#444'}

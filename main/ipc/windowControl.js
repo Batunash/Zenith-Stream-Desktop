@@ -1,4 +1,4 @@
-const { ipcMain, BrowserWindow } = require("electron");
+const { ipcMain, BrowserWindow } = require('electron');
 
 module.exports = function registerWindowControl() {
     ipcMain.on("window:minimize", (event) => {

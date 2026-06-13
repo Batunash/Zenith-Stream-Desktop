@@ -15,6 +15,7 @@ const registerSettingsControl = require("./ipc/settingsControl")
 const registerWindowControl = require("./ipc/windowControl");
 const registerTranslateControl = require("./ipc/translateControl");
 const registerBurnControl = require("./ipc/burnControl");
+const registerBrowserDownloaderControl = require("./ipc/browserDownloaderControl");
 let mainWindow;
 
 
@@ -50,6 +51,7 @@ function registerIpcHandlers() {
   registerWindowControl();
   registerTranslateControl();
   registerBurnControl();
+  registerBrowserDownloaderControl();
 }
 
 app.whenReady().then(() => {

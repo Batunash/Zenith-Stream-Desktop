@@ -5,6 +5,7 @@ import AddSerie from './pages/AddSerie';
 import SeriesDetail from './pages/SeriesDetail';
 import AuthPage from './pages/AuthPage'; 
 import SettingsPage from './pages/SettingsPage';
+import DownloadManager from './pages/DownloadManager';
 function App() {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
@@ -56,6 +57,7 @@ function App() {
                   
                   <Route path="/add-series" element={<ProtectedRoute><AddSerie /></ProtectedRoute>} />
                   <Route path="/details/:folderName" element={<ProtectedRoute><SeriesDetail /></ProtectedRoute>} />
+                  <Route path="/download" element={<ProtectedRoute><DownloadManager /></ProtectedRoute>} />
                 </Routes>
             </div>
         )}
