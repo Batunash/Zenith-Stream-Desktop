@@ -21,9 +21,13 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
 
       - run: npm install
+
+      - name: Install libfuse2 for AppImage (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libfuse2
 
       - name: Download FFmpeg (Linux)
         if: runner.os == 'Linux'
