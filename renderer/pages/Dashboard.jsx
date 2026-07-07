@@ -4,7 +4,7 @@ import SeriesCard from '../components/SeriesCard';
 import ControlPanel from '../components/ControlPanel';
 import { useTranslation } from 'react-i18next';
 import { FixedSizeGrid as Grid } from 'react-window';
-import AutoSizer from 'react-virtualized-auto-sizer';
+import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 export default function Dashboard() {
   const { t } = useTranslation();

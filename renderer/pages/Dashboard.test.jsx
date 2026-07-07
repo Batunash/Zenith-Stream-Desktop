@@ -9,7 +9,7 @@ import { MemoryRouter } from 'react-router-dom';
 import Dashboard from './Dashboard';
 
 vi.mock('react-virtualized-auto-sizer', () => ({
-  default: ({ children }) => children({ width: 1000, height: 1000 }),
+  AutoSizer: ({ children }) => children({ width: 1000, height: 1000 }),
 }));
 
 vi.mock('react-window', () => ({

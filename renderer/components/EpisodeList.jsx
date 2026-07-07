@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FaCog, FaSpinner, FaEdit, FaLanguage } from 'react-icons/fa';
 import { List } from 'react-window';
-import AutoSizer from 'react-virtualized-auto-sizer';
+import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 const EpisodeList = ({
   episodes,
