@@ -19,19 +19,19 @@ describe('Constants', () => {
     });
 
     it('should only contain string values', () => {
-      VIDEO_EXTS.forEach(ext => {
+      VIDEO_EXTS.forEach((ext) => {
         expect(typeof ext).toBe('string');
       });
     });
 
     it('should all start with a dot', () => {
-      VIDEO_EXTS.forEach(ext => {
+      VIDEO_EXTS.forEach((ext) => {
         expect(ext.startsWith('.')).toBe(true);
       });
     });
 
     it('should be case lowercase', () => {
-      VIDEO_EXTS.forEach(ext => {
+      VIDEO_EXTS.forEach((ext) => {
         expect(ext).toBe(ext.toLowerCase());
       });
     });

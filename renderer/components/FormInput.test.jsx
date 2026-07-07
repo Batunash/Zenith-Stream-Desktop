@@ -92,12 +92,16 @@ describe('FormInput', () => {
 
   describe('Different Input Types', () => {
     it('renders a password input', () => {
-      const { container } = render(<FormInput label="Password" type="password" onChange={mockOnChange} />);
+      const { container } = render(
+        <FormInput label="Password" type="password" onChange={mockOnChange} />
+      );
       expect(container.querySelector('input[type="password"]')).toBeInTheDocument();
     });
 
     it('renders an email input', () => {
-      const { container } = render(<FormInput label="Email" type="email" onChange={mockOnChange} />);
+      const { container } = render(
+        <FormInput label="Email" type="email" onChange={mockOnChange} />
+      );
       expect(container.querySelector('input[type="email"]')).toBeInTheDocument();
     });
 

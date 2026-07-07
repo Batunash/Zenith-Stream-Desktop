@@ -1,84 +1,84 @@
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer } = require('electron');
 const validChannels = [
-  "auth:login",   
-  "auth:register", 
-  "server:start",
-  "server:stop",
-  "server:getNetworkInfo",
-  "server:status",
-  "file:createSerie",
-  "file:getSeries",
-  "file:createSeason",
-  "file:addEpisode",
-  "file:addEpisode:progress", 
-  "file:addEpisode:done",
-  "file:getSeriesDetail", 
-  "file:getEpisodes",   
-  "file:deleteSerie",
-  "file:deleteSeason",
-  "file:deleteEpisode",  
-  "file:syncDatabase",
-  "file:fetchMetadata",
-  "dialog:openVideoFiles",
-  "dialog:openFileImage",
-  "dialog:openDirectory",
-  "dialog:openSubtitleFile",
-  "dialog:listDirectory",
-  "settings:get",
-  "settings:save",
-  "app:restart",
-  "window:minimize",
-  "window:maximize",
-  "window:close",
-  "media:analyze",
-  "media:decide",
-  "media:process",
-  "media:progress",
-  "media:translateSubtitle",
-  "media:translateSubtitle:progress",
-  "media:burnExternalSubtitle",
-  "media:burnExternalSubtitle:progress",
-  "browser:navigate",
-  "browser:goBack",
-  "browser:goForward",
-  "browser:reload",
-  "browser:getStreams",
-  "browser:clearStreams",
-  "browser:downloadStream",
-  "browser:resize",
-  "browser:show",
-  "browser:hide",
-  "browser:progress",
-  "browser:complete",
-  "browser:error",
-  "browser:titleChanged",
-  "browser:urlChanged",
-  "browser:streamDetected",
-  "browser:downloads",
-  "browser:clearCompleted",
-  "browser:cancelDownload"
+  'auth:login',
+  'auth:register',
+  'server:start',
+  'server:stop',
+  'server:getNetworkInfo',
+  'server:status',
+  'file:createSerie',
+  'file:getSeries',
+  'file:createSeason',
+  'file:addEpisode',
+  'file:addEpisode:progress',
+  'file:addEpisode:done',
+  'file:getSeriesDetail',
+  'file:getEpisodes',
+  'file:deleteSerie',
+  'file:deleteSeason',
+  'file:deleteEpisode',
+  'file:syncDatabase',
+  'file:fetchMetadata',
+  'dialog:openVideoFiles',
+  'dialog:openFileImage',
+  'dialog:openDirectory',
+  'dialog:openSubtitleFile',
+  'dialog:listDirectory',
+  'settings:get',
+  'settings:save',
+  'app:restart',
+  'window:minimize',
+  'window:maximize',
+  'window:close',
+  'media:analyze',
+  'media:decide',
+  'media:process',
+  'media:progress',
+  'media:translateSubtitle',
+  'media:translateSubtitle:progress',
+  'media:burnExternalSubtitle',
+  'media:burnExternalSubtitle:progress',
+  'browser:navigate',
+  'browser:goBack',
+  'browser:goForward',
+  'browser:reload',
+  'browser:getStreams',
+  'browser:clearStreams',
+  'browser:downloadStream',
+  'browser:resize',
+  'browser:show',
+  'browser:hide',
+  'browser:progress',
+  'browser:complete',
+  'browser:error',
+  'browser:titleChanged',
+  'browser:urlChanged',
+  'browser:streamDetected',
+  'browser:downloads',
+  'browser:clearCompleted',
+  'browser:cancelDownload',
 ];
 
-contextBridge.exposeInMainWorld("api", {
+contextBridge.exposeInMainWorld('api', {
   send: (channel, data) => {
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data);
     } else {
-      console.warn("Blocked IPC channel:", channel);
+      console.warn('Blocked IPC channel:', channel);
     }
   },
   receive: (channel, func) => {
     if (validChannels.includes(channel)) {
       ipcRenderer.on(channel, (event, ...args) => func(...args));
     } else {
-      console.warn("Blocked IPC channel:", channel);
+      console.warn('Blocked IPC channel:', channel);
     }
   },
   invoke: (channel, args) => {
     if (validChannels.includes(channel)) {
       return ipcRenderer.invoke(channel, args);
     } else {
-      console.warn("Blocked IPC channel:", channel);
+      console.warn('Blocked IPC channel:', channel);
     }
   },
   remove: (channel) => {

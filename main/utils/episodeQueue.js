@@ -1,5 +1,5 @@
-const fs = require("fs");
-const path=require("path");
+const fs = require('fs');
+const path = require('path');
 
 class episodeQueue {
   constructor(mediaDir, maxParallel = 2) {
@@ -22,23 +22,23 @@ class episodeQueue {
       const read = fs.createReadStream(src);
       const write = fs.createWriteStream(dest);
 
-      read.on("data", chunk => {
+      read.on('data', (chunk) => {
         transferred += chunk.length;
         onProgress(Math.round((transferred / total) * 100));
       });
 
-      write.on("finish", () => {
+      write.on('finish', () => {
         fs.unlink(src, (err) => {
-            if (err) {
-                console.warn("Dosya kopyalandı ama silinemedi:", src);
-                resolve(dest); 
-            } else {
-                console.log("Dosya taşındı (orijinal silindi):", src);
-                resolve(dest);
-            }
+          if (err) {
+            console.warn('Dosya kopyalandı ama silinemedi:', src);
+            resolve(dest);
+          } else {
+            console.log('Dosya taşındı (orijinal silindi):', src);
+            resolve(dest);
+          }
         });
       });
-      write.on("error", reject);
+      write.on('error', reject);
 
       read.pipe(write);
     });
@@ -53,14 +53,17 @@ class episodeQueue {
     while (this.activeCount < this.maxParallel && this.queue.length > 0) {
       const item = this.queue.shift();
       this.activeCount++;
-      this.moveVideo(item.filePath, item.destFolder, percent => {
-        item.event.sender.send("file:addEpisode:progress", { file: item.filePath, percent });
+      this.moveVideo(item.filePath, item.destFolder, (percent) => {
+        item.event.sender.send('file:addEpisode:progress', { file: item.filePath, percent });
       })
-        .then(dest => {
-          item.event.sender.send("file:addEpisode:done", { file: item.filePath, path: dest });
+        .then((dest) => {
+          item.event.sender.send('file:addEpisode:done', { file: item.filePath, path: dest });
         })
-        .catch(err => {
-          item.event.sender.send("file:addEpisode:done", { file: item.filePath, error: err.message });
+        .catch((err) => {
+          item.event.sender.send('file:addEpisode:done', {
+            file: item.filePath,
+            error: err.message,
+          });
         })
         .finally(() => {
           this.activeCount--;

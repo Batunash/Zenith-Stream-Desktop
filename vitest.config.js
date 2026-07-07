@@ -11,10 +11,10 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.js'],
     server: {
       deps: {
-        inline: ['electron']
-      }
+        inline: ['electron'],
+      },
     },
-    exclude: ['e2e/**', 'node_modules/**', 'dist/**']
+    exclude: ['e2e/**', 'node_modules/**', 'dist/**'],
   },
   alias: {
     '@': path.resolve(__dirname, './renderer/src'),

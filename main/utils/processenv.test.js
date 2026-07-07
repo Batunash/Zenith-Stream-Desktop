@@ -83,7 +83,7 @@ describe('processenv Module', () => {
       saveEnv({ PORT: '3000' });
       expect(global.__fsMock.writeFileSync).toHaveBeenCalledWith(
         expect.stringContaining('.env'),
-        expect.stringContaining('PORT=3000'),
+        expect.stringContaining('PORT=3000')
       );
     });
 

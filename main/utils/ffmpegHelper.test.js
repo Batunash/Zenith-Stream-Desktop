@@ -10,7 +10,7 @@ describe('ffmpegHelper', () => {
     vi.clearAllMocks();
     originalPlatform = os.platform;
     mockFfmpegObj = global.__ffmpegMockObj;
-    
+
     // Clear the mock calls on the global mock object
     if (mockFfmpegObj) {
       if (mockFfmpegObj.setFfmpegPath) mockFfmpegObj.setFfmpegPath.mockClear();
@@ -32,7 +32,7 @@ describe('ffmpegHelper', () => {
     os.platform = () => 'win32';
     electron.app.isPackaged = false;
     const ffmpeg = loadFfmpegHelper();
-    
+
     expect(ffmpeg.setFfmpegPath).toHaveBeenCalled();
     const arg = ffmpeg.setFfmpegPath.mock.calls[0][0];
     expect(arg.includes('win')).toBe(true);
@@ -43,7 +43,7 @@ describe('ffmpegHelper', () => {
     os.platform = () => 'linux';
     electron.app.isPackaged = false;
     const ffmpeg = loadFfmpegHelper();
-    
+
     expect(ffmpeg.setFfmpegPath).toHaveBeenCalled();
     const arg = ffmpeg.setFfmpegPath.mock.calls[0][0];
     expect(arg.includes('linux')).toBe(true);
@@ -54,7 +54,7 @@ describe('ffmpegHelper', () => {
     os.platform = () => 'darwin';
     electron.app.isPackaged = false;
     const ffmpeg = loadFfmpegHelper();
-    
+
     expect(ffmpeg.setFfmpegPath).toHaveBeenCalled();
     const arg = ffmpeg.setFfmpegPath.mock.calls[0][0];
     expect(arg.includes('mac')).toBe(true);
@@ -66,7 +66,7 @@ describe('ffmpegHelper', () => {
     os.platform = () => 'unknown';
     electron.app.isPackaged = false;
     const ffmpeg = loadFfmpegHelper();
-    
+
     expect(consoleSpy).toHaveBeenCalledWith('Unsuported ', 'unknown');
     consoleSpy.mockRestore();
   });
@@ -76,7 +76,7 @@ describe('ffmpegHelper', () => {
     os.platform = () => 'win32';
     electron.app.isPackaged = true;
     const ffmpeg = loadFfmpegHelper();
-    
+
     expect(ffmpeg.setFfmpegPath).toHaveBeenCalled();
     const arg = ffmpeg.setFfmpegPath.mock.calls[0][0];
     expect(arg).toContain('mock');

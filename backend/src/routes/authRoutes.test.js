@@ -3,13 +3,16 @@ const request = require('supertest');
 const path = require('path');
 
 const ctrl = vi.hoisted(() => ({
-  register:   vi.fn((req, res) => res.status(201).json({ registered: true, body: req.body })),
-  login:      vi.fn((req, res) => res.status(200).json({ token: 'jwt-stub', body: req.body })),
-  getProfile: vi.fn((req, res) => res.status(200).json({ profile: true, user: req.user }))
+  register: vi.fn((req, res) => res.status(201).json({ registered: true, body: req.body })),
+  login: vi.fn((req, res) => res.status(200).json({ token: 'jwt-stub', body: req.body })),
+  getProfile: vi.fn((req, res) => res.status(200).json({ profile: true, user: req.user })),
 }));
 
 const mw = vi.hoisted(() => ({
-  authenticateToken: vi.fn((req, res, next) => { req.user = { id: 7 }; next(); })
+  authenticateToken: vi.fn((req, res, next) => {
+    req.user = { id: 7 };
+    next();
+  }),
 }));
 
 vi.mock('../controllers/authController', () => ctrl);
@@ -18,13 +21,23 @@ vi.mock('../middleware/auth', () => mw);
 const cwd = process.cwd();
 const ctrlP = path.resolve(cwd, 'backend/src/controllers/authController.js');
 const mwP = path.resolve(cwd, 'backend/src/middleware/auth.js');
-require.cache[ctrlP] = { id: ctrlP, filename: ctrlP, loaded: true, exports: ctrl, children: [], paths: [] };
+require.cache[ctrlP] = {
+  id: ctrlP,
+  filename: ctrlP,
+  loaded: true,
+  exports: ctrl,
+  children: [],
+  paths: [],
+};
 require.cache[mwP] = { id: mwP, filename: mwP, loaded: true, exports: mw, children: [], paths: [] };
 
 let app;
 beforeEach(() => {
   vi.clearAllMocks();
-  mw.authenticateToken.mockImplementation((req, res, next) => { req.user = { id: 7 }; next(); });
+  mw.authenticateToken.mockImplementation((req, res, next) => {
+    req.user = { id: 7 };
+    next();
+  });
   const express = require('express');
   const router = require('./authRoutes');
   app = express();
@@ -66,7 +79,9 @@ describe('Auth Routes', () => {
     });
 
     it('short-circuits to 401 when authenticateToken rejects', async () => {
-      mw.authenticateToken.mockImplementation((req, res) => res.status(401).json({ error: 'unauthorized' }));
+      mw.authenticateToken.mockImplementation((req, res) =>
+        res.status(401).json({ error: 'unauthorized' })
+      );
       const res = await request(app).get('/api/auth/profile');
       expect(res.status).toBe(401);
       expect(ctrl.getProfile).not.toHaveBeenCalled();

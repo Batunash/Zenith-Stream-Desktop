@@ -6,9 +6,9 @@ const Module = require('module');
 // temporarily patch Module.prototype.require to hand preLoad a tailored mock.
 const contextBridge = { exposeInMainWorld: vi.fn() };
 const ipcRenderer = {
-  send:              vi.fn(),
-  on:                vi.fn(),
-  invoke:            vi.fn().mockResolvedValue('invoked-result'),
+  send: vi.fn(),
+  on: vi.fn(),
+  invoke: vi.fn().mockResolvedValue('invoked-result'),
   removeAllListeners: vi.fn(),
 };
 const electronMock = { contextBridge, ipcRenderer };
@@ -106,8 +106,15 @@ describe('Preload Script', () => {
   describe('channel whitelist', () => {
     it('accepts the known valid channels', () => {
       // exercise a representative subset
-      ['auth:login', 'server:start', 'file:createSerie', 'settings:save', 'window:close',
-       'media:analyze', 'browser:downloadStream'].forEach((ch) => {
+      [
+        'auth:login',
+        'server:start',
+        'file:createSerie',
+        'settings:save',
+        'window:close',
+        'media:analyze',
+        'browser:downloadStream',
+      ].forEach((ch) => {
         exposedApi.send(ch, null);
       });
       expect(ipcRenderer.send).toHaveBeenCalledTimes(7);

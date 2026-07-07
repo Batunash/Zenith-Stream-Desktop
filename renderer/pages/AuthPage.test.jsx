@@ -24,11 +24,11 @@ vi.mock('react-i18next', () => ({
         'auth.has_account': 'Already have an account?',
         'auth.unexpected_error': 'Unexpected error',
         'auth.server_timeout': 'Timeout',
-        'common.processing': 'Processing...'
+        'common.processing': 'Processing...',
       };
       return keys[key] || key;
-    }
-  })
+    },
+  }),
 }));
 
 const mockInvoke = vi.fn();
@@ -54,7 +54,7 @@ describe('AuthPage', () => {
   it('toggles to register form when link is clicked', () => {
     renderComponent();
     fireEvent.click(screen.getByText('Register', { selector: 'span' }));
-    
+
     expect(screen.getByText('Create Account')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Register' })).toBeInTheDocument();
   });
@@ -62,7 +62,7 @@ describe('AuthPage', () => {
   it('shows error if fields are empty on submit', () => {
     renderComponent();
     fireEvent.click(screen.getByRole('button', { name: 'Login' }));
-    
+
     expect(screen.getByText('Please fill all fields')).toBeInTheDocument();
     expect(mockInvoke).not.toHaveBeenCalled();
   });
@@ -78,7 +78,10 @@ describe('AuthPage', () => {
     expect(screen.getByText('Processing...')).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockInvoke).toHaveBeenCalledWith('auth:login', { username: 'testuser', password: 'password123' });
+      expect(mockInvoke).toHaveBeenCalledWith('auth:login', {
+        username: 'testuser',
+        password: 'password123',
+      });
       expect(mockOnLoginSuccess).toHaveBeenCalledWith({ ID: 1, USERNAME: 'testuser' });
     });
   });
@@ -97,38 +100,41 @@ describe('AuthPage', () => {
     });
   });
 
-    it('calls auth:register, shows alert, and switches to login on successful registration', async () => {
-        mockInvoke.mockResolvedValueOnce({ success: true, message: 'User created' });
-        renderComponent();
+  it('calls auth:register, shows alert, and switches to login on successful registration', async () => {
+    mockInvoke.mockResolvedValueOnce({ success: true, message: 'User created' });
+    renderComponent();
 
-        // Switch to register mode
-        fireEvent.click(screen.getByText('Register', { selector: 'span' }));
-        
-        fireEvent.change(screen.getByPlaceholderText('Username'), { target: { value: 'newuser' } });
-        fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'newpass' } });
-        fireEvent.click(screen.getByRole('button', { name: 'Register' }));
+    // Switch to register mode
+    fireEvent.click(screen.getByText('Register', { selector: 'span' }));
 
-        await waitFor(() => {
-        expect(mockInvoke).toHaveBeenCalledWith('auth:register', { username: 'newuser', password: 'newpass' });
-        expect(window.alert).toHaveBeenCalledWith('User created');
-        // Should switch back to login mode (Wait, 'Welcome' is the login title)
-        expect(screen.getByText('Welcome')).toBeInTheDocument();
-        });
+    fireEvent.change(screen.getByPlaceholderText('Username'), { target: { value: 'newuser' } });
+    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'newpass' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Register' }));
+
+    await waitFor(() => {
+      expect(mockInvoke).toHaveBeenCalledWith('auth:register', {
+        username: 'newuser',
+        password: 'newpass',
+      });
+      expect(window.alert).toHaveBeenCalledWith('User created');
+      // Should switch back to login mode (Wait, 'Welcome' is the login title)
+      expect(screen.getByText('Welcome')).toBeInTheDocument();
+    });
+  });
+
+  it('handles unexpected errors gracefully', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockInvoke.mockRejectedValueOnce(new Error('Network error'));
+    renderComponent();
+
+    fireEvent.change(screen.getByPlaceholderText('Username'), { target: { value: 'testuser' } });
+    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Login' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Network error')).toBeInTheDocument();
     });
 
-    it('handles unexpected errors gracefully', async () => {
-        vi.spyOn(console, 'error').mockImplementation(() => {});
-        mockInvoke.mockRejectedValueOnce(new Error('Network error'));
-        renderComponent();
-
-        fireEvent.change(screen.getByPlaceholderText('Username'), { target: { value: 'testuser' } });
-        fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'password123' } });
-        fireEvent.click(screen.getByRole('button', { name: 'Login' }));
-
-        await waitFor(() => {
-            expect(screen.getByText('Network error')).toBeInTheDocument();
-        });
-
-        expect(console.error).toHaveBeenCalledWith(expect.any(Error));
-    });
+    expect(console.error).toHaveBeenCalledWith(expect.any(Error));
+  });
 });

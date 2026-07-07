@@ -3,13 +3,15 @@ const request = require('supertest');
 const path = require('path');
 
 const ctrl = vi.hoisted(() => ({
-  listSeries:         vi.fn((req, res) => res.status(200).json([{ id: 1, title: 'S1' }])),
-  getSeriesEpisodes:  vi.fn((req, res) => res.status(200).json({ seriesId: req.params.seriesId, episodes: [] }))
+  listSeries: vi.fn((req, res) => res.status(200).json([{ id: 1, title: 'S1' }])),
+  getSeriesEpisodes: vi.fn((req, res) =>
+    res.status(200).json({ seriesId: req.params.seriesId, episodes: [] })
+  ),
 }));
 
 const mw = vi.hoisted(() => ({
-  optionalAuth:       vi.fn((req, res, next) => next()),
-  authenticateToken:  vi.fn((req, res, next) => next())
+  optionalAuth: vi.fn((req, res, next) => next()),
+  authenticateToken: vi.fn((req, res, next) => next()),
 }));
 
 vi.mock('../controllers/mediaController', () => ctrl);
@@ -18,7 +20,14 @@ vi.mock('../middleware/auth', () => mw);
 const cwd = process.cwd();
 const ctrlP = path.resolve(cwd, 'backend/src/controllers/mediaController.js');
 const mwP = path.resolve(cwd, 'backend/src/middleware/auth.js');
-require.cache[ctrlP] = { id: ctrlP, filename: ctrlP, loaded: true, exports: ctrl, children: [], paths: [] };
+require.cache[ctrlP] = {
+  id: ctrlP,
+  filename: ctrlP,
+  loaded: true,
+  exports: ctrl,
+  children: [],
+  paths: [],
+};
 require.cache[mwP] = { id: mwP, filename: mwP, loaded: true, exports: mw, children: [], paths: [] };
 
 let app;

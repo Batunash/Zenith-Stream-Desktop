@@ -51,11 +51,13 @@ describe('Image Downloader', () => {
 
     await downloadImage(mockUrl, mockDestPath);
 
-    expect(axiosMock).toHaveBeenCalledWith(expect.objectContaining({
-      url: mockUrl,
-      method: 'GET',
-      responseType: 'stream',
-    }));
+    expect(axiosMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: mockUrl,
+        method: 'GET',
+        responseType: 'stream',
+      })
+    );
     expect(global.__fsMock.createWriteStream).toHaveBeenCalledWith(mockDestPath);
   });
 
@@ -68,7 +70,10 @@ describe('Image Downloader', () => {
   });
 
   it('handles a 404 response', async () => {
-    axiosMock.mockRejectedValue({ message: 'Request failed with status code 404', response: { status: 404 } });
+    axiosMock.mockRejectedValue({
+      message: 'Request failed with status code 404',
+      response: { status: 404 },
+    });
 
     const result = await downloadImage(mockUrl, mockDestPath);
     expect(result).toBeUndefined();
@@ -81,10 +86,12 @@ describe('Image Downloader', () => {
 
     await downloadImage(mockUrl, mockDestPath);
 
-    expect(axiosMock).toHaveBeenCalledWith(expect.objectContaining({
-      method: 'GET',
-      responseType: 'stream',
-    }));
+    expect(axiosMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        responseType: 'stream',
+      })
+    );
   });
 
   it('handles a timeout error', async () => {

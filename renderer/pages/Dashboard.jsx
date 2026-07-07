@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import SeriesCard from '../components/SeriesCard';
 import ControlPanel from '../components/ControlPanel';
 import { useTranslation } from 'react-i18next';
+import { FixedSizeGrid as Grid } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
 
 export default function Dashboard() {
   const { t } = useTranslation();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [isServerRunning, setIsServerRunning] = useState(false);
-  const [series, setSeries] = useState([]); 
+  const [series, setSeries] = useState([]);
 
   const loadSeries = async () => {
     try {
@@ -22,48 +24,46 @@ export default function Dashboard() {
 
   const refreshStatus = async () => {
     try {
-      const res = await window.api.invoke("server:status");
+      const res = await window.api.invoke('server:status');
       setIsServerRunning(res.running);
     } catch (error) {
-      console.error("IPC Hatası (Status):", error);
+      console.error('IPC Hatası (Status):', error);
     }
   };
 
   useEffect(() => {
-    loadSeries();   
+    loadSeries();
     refreshStatus();
   }, []);
 
   const handleServerToggle = async () => {
     try {
       if (isServerRunning) {
-        await window.api.invoke("server:stop");
+        await window.api.invoke('server:stop');
       } else {
-        await window.api.invoke("server:start");
+        await window.api.invoke('server:start');
       }
       await refreshStatus();
     } catch (error) {
-      console.error("IPC Hatası (Start/Stop):", error);
+      console.error('IPC Hatası (Start/Stop):', error);
     }
   };
 
-
-
   const navigateToSettings = () => {
-      navigate('/settings');
+    navigate('/settings');
   };
 
   const handleDeleteSerie = async (serie) => {
     if (!confirm(t('dashboard.delete_confirm', { title: serie.title }))) return;
     try {
-        const res = await window.api.invoke('file:deleteSerie', serie.folderName);
-        if (res.success) {
-            setSeries(prev => prev.filter(s => s.folderName !== serie.folderName));
-        } else {
-            alert(t('common.error') + ": " + res.error);
-        }
+      const res = await window.api.invoke('file:deleteSerie', serie.folderName);
+      if (res.success) {
+        setSeries((prev) => prev.filter((s) => s.folderName !== serie.folderName));
+      } else {
+        alert(t('common.error') + ': ' + res.error);
+      }
     } catch (err) {
-        console.error(err);
+      console.error(err);
     }
   };
 
@@ -72,21 +72,49 @@ export default function Dashboard() {
       <div style={styles.mainContent}>
         <h1 style={styles.header}>{t('dashboard.title')}</h1>
         {series.length > 0 ? (
-            <div style={styles.grid}>
-            {series.map((serie) => (
-                <SeriesCard 
-                key={serie.id} 
-                data={serie}
-                onClick={() => navigate(`/details/${encodeURIComponent(serie.folderName)}`)}
-                onDelete={handleDeleteSerie}
-                />
-            ))}
-            </div>
+          <div style={{ flex: 1, minHeight: '400px' }}>
+            <AutoSizer>
+              {({ height, width }) => {
+                const CARD_WIDTH = 200;
+                const CARD_HEIGHT = 280;
+                const columnCount = Math.max(1, Math.floor(width / CARD_WIDTH));
+                const rowCount = Math.ceil(series.length / columnCount);
+
+                const Cell = ({ columnIndex, rowIndex, style }) => {
+                  const index = rowIndex * columnCount + columnIndex;
+                  if (index >= series.length) return null;
+                  const serie = series[index];
+                  return (
+                    <div style={{ ...style, padding: '10px', boxSizing: 'border-box' }}>
+                      <SeriesCard
+                        data={serie}
+                        onClick={() => navigate(`/details/${encodeURIComponent(serie.folderName)}`)}
+                        onDelete={handleDeleteSerie}
+                      />
+                    </div>
+                  );
+                };
+
+                return (
+                  <Grid
+                    columnCount={columnCount}
+                    columnWidth={CARD_WIDTH}
+                    height={height}
+                    rowCount={rowCount}
+                    rowHeight={CARD_HEIGHT}
+                    width={width}
+                  >
+                    {Cell}
+                  </Grid>
+                );
+              }}
+            </AutoSizer>
+          </div>
         ) : (
-            <div style={{color: '#666', textAlign: 'center', marginTop: '50px'}}>
-                <h2>{t('dashboard.no_series_title')}</h2>
-                <p>{t('dashboard.no_series_desc')}</p>
-            </div>
+          <div style={{ color: '#666', textAlign: 'center', marginTop: '50px' }}>
+            <h2>{t('dashboard.no_series_title')}</h2>
+            <p>{t('dashboard.no_series_desc')}</p>
+          </div>
         )}
       </div>
 
@@ -100,30 +128,30 @@ export default function Dashboard() {
 }
 
 const styles = {
-    page: {
-      display: 'flex',       
-      width: '100%',          
-      height: '100%',         
-      overflow: 'hidden',     
-    },
-    mainContent: {
-      flex: 1,                
-      padding: '40px',
-      overflowY: 'auto',      
-      height: '100%',         
-    },
-    header: {
-      color: 'white',
-      marginBottom: '30px',
-      fontSize: '2rem',
-      fontWeight: 'bold',
-      borderBottom: '1px solid #333',
-      paddingBottom: '15px',
-    },
-    grid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', 
-      gap: '25px',
-      paddingBottom: '50px'
-    }
+  page: {
+    display: 'flex',
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+  },
+  mainContent: {
+    flex: 1,
+    padding: '40px',
+    overflowY: 'auto',
+    height: '100%',
+  },
+  header: {
+    color: 'white',
+    marginBottom: '30px',
+    fontSize: '2rem',
+    fontWeight: 'bold',
+    borderBottom: '1px solid #333',
+    paddingBottom: '15px',
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+    gap: '25px',
+    paddingBottom: '50px',
+  },
 };

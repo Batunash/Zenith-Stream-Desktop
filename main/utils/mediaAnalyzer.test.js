@@ -9,12 +9,12 @@ describe('mediaAnalyzer', () => {
   beforeEach(async () => {
     vi.resetModules();
     vi.clearAllMocks();
-    
+
     // We import ffmpegHelper to mock its properties
     const ffmpegHelper = require('./ffmpegHelper');
     ffprobeMock = vi.fn();
     ffmpegHelper.ffprobe = ffprobeMock;
-    
+
     mediaAnalyzer = require('./mediaAnalyzer');
   });
 
@@ -22,7 +22,7 @@ describe('mediaAnalyzer', () => {
     const mockMetadata = {
       format: {
         format_name: 'matroska,webm',
-        duration: 120.5
+        duration: 120.5,
       },
       streams: [
         {
@@ -32,23 +32,23 @@ describe('mediaAnalyzer', () => {
           width: 1920,
           height: 1080,
           avg_frame_rate: '24000/1001',
-          duration: 120.5
+          duration: 120.5,
         },
         {
           index: 1,
           codec_type: 'audio',
           codec_name: 'aac',
           channels: 2,
-          tags: { language: 'jpn', title: 'Stereo' }
+          tags: { language: 'jpn', title: 'Stereo' },
         },
         {
           index: 2,
           codec_type: 'subtitle',
           codec_name: 'subrip',
           tags: { language: 'eng' },
-          disposition: { forced: 0 }
-        }
-      ]
+          disposition: { forced: 0 },
+        },
+      ],
     };
 
     ffprobeMock.mockImplementation((path, callback) => {
@@ -56,17 +56,17 @@ describe('mediaAnalyzer', () => {
     });
 
     const result = await mediaAnalyzer.analyzeFile('dummy.mkv');
-    
+
     expect(result.container).toBe('matroska,webm');
     expect(result.duration).toBe(120.5);
-    
+
     expect(result.video).toBeDefined();
     expect(result.video.codec).toBe('hevc');
     expect(result.video.resolution).toBe('1920x1080');
-    
+
     expect(result.audio).toHaveLength(1);
     expect(result.audio[0].language).toBe('jpn');
-    
+
     expect(result.subtitles).toHaveLength(1);
     expect(result.subtitles[0].type).toBe('srt');
     expect(result.subtitles[0].language).toBe('eng');

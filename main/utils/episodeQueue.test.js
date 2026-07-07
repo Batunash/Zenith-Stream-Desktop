@@ -44,7 +44,7 @@ describe('EpisodeQueue', () => {
     readStream.emit('data', { length: 50 });
     expect(mockEvent.sender.send).toHaveBeenCalledWith('file:addEpisode:progress', {
       file: '/mock/src1.mkv',
-      percent: 50
+      percent: 50,
     });
 
     // Simulate copy finish
@@ -53,7 +53,7 @@ describe('EpisodeQueue', () => {
 
     expect(mockEvent.sender.send).toHaveBeenCalledWith('file:addEpisode:done', {
       file: '/mock/src1.mkv',
-      path: path.join('/mock/dest1', 'src1.mkv')
+      path: path.join('/mock/dest1', 'src1.mkv'),
     });
     expect(fs.unlink).toHaveBeenCalledWith('/mock/src1.mkv', expect.any(Function));
   });
@@ -68,9 +68,7 @@ describe('EpisodeQueue', () => {
     fs.createWriteStream.mockReturnValue(writeStream);
     fs.unlink.mockImplementation((_src, cb) => cb(new Error('Unlink error')));
 
-    queue.addVideos([
-      { filePath: '/mock/src1.mkv', destFolder: '/mock/dest1', event: mockEvent }
-    ]);
+    queue.addVideos([{ filePath: '/mock/src1.mkv', destFolder: '/mock/dest1', event: mockEvent }]);
 
     writeStream.emit('finish');
     await new Promise(process.nextTick);
@@ -78,7 +76,7 @@ describe('EpisodeQueue', () => {
     // Still sends done even if unlink failed (file was copied)
     expect(mockEvent.sender.send).toHaveBeenCalledWith('file:addEpisode:done', {
       file: '/mock/src1.mkv',
-      path: path.join('/mock/dest1', 'src1.mkv')
+      path: path.join('/mock/dest1', 'src1.mkv'),
     });
   });
 
@@ -91,9 +89,7 @@ describe('EpisodeQueue', () => {
     fs.createReadStream.mockReturnValue(readStream);
     fs.createWriteStream.mockReturnValue(writeStream);
 
-    queue.addVideos([
-      { filePath: '/mock/src1.mkv', destFolder: '/mock/dest1', event: mockEvent }
-    ]);
+    queue.addVideos([{ filePath: '/mock/src1.mkv', destFolder: '/mock/dest1', event: mockEvent }]);
 
     expect(fs.mkdirSync).toHaveBeenCalledWith('/mock/dest1', { recursive: true });
   });
@@ -101,17 +97,17 @@ describe('EpisodeQueue', () => {
   it('handles mkdirSync permission error gracefully without crashing', async () => {
     const mockEvent = { sender: { send: vi.fn() } };
     fs.existsSync.mockReturnValue(false);
-    fs.mkdirSync.mockImplementation(() => { throw new Error('EACCES: permission denied'); });
+    fs.mkdirSync.mockImplementation(() => {
+      throw new Error('EACCES: permission denied');
+    });
 
-    queue.addVideos([
-      { filePath: '/mock/src1.mkv', destFolder: '/mock/dest1', event: mockEvent }
-    ]);
+    queue.addVideos([{ filePath: '/mock/src1.mkv', destFolder: '/mock/dest1', event: mockEvent }]);
 
     await new Promise(process.nextTick);
 
     expect(mockEvent.sender.send).toHaveBeenCalledWith('file:addEpisode:done', {
       file: '/mock/src1.mkv',
-      error: 'EACCES: permission denied'
+      error: 'EACCES: permission denied',
     });
   });
 
@@ -124,9 +120,7 @@ describe('EpisodeQueue', () => {
     fs.createReadStream.mockReturnValue(readStream);
     fs.createWriteStream.mockReturnValue(writeStream);
 
-    queue.addVideos([
-      { filePath: '/mock/src1.mkv', destFolder: '/mock/dest1', event: mockEvent }
-    ]);
+    queue.addVideos([{ filePath: '/mock/src1.mkv', destFolder: '/mock/dest1', event: mockEvent }]);
 
     // Simulate disk full — caught by write.on('error', reject)
     writeStream.emit('error', new Error('ENOSPC: no space left on device'));
@@ -135,7 +129,7 @@ describe('EpisodeQueue', () => {
 
     expect(mockEvent.sender.send).toHaveBeenCalledWith('file:addEpisode:done', {
       file: '/mock/src1.mkv',
-      error: 'ENOSPC: no space left on device'
+      error: 'ENOSPC: no space left on device',
     });
     expect(queue.activeCount).toBeLessThan(2);
   });

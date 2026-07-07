@@ -7,7 +7,7 @@ const cfg = vi.hoisted(() => ({
   JWT_SECRET: 'test-secret-key',
   JWT_EXPIRES_IN: '7d',
   PORT: 5000,
-  MEDIA_DIR: '/tmp/media'
+  MEDIA_DIR: '/tmp/media',
 }));
 
 vi.mock('./config', () => ({ ...cfg }));
@@ -15,8 +15,12 @@ vi.mock('./config', () => ({ ...cfg }));
 const _path = require('path');
 const _cfgResolved = _path.resolve(process.cwd(), 'backend/src/config/config.js');
 require.cache[_cfgResolved] = {
-  id: _cfgResolved, filename: _cfgResolved, loaded: true,
-  exports: cfg, children: [], paths: []
+  id: _cfgResolved,
+  filename: _cfgResolved,
+  loaded: true,
+  exports: cfg,
+  children: [],
+  paths: [],
 };
 
 describe('Auth Module', () => {

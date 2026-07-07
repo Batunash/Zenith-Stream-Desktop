@@ -1,6 +1,14 @@
 import React from 'react';
 
-const FormInput = ({ label, value, onChange, placeholder, type = "text", required = false, isTextArea = false }) => {
+const FormInput = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = 'text',
+  required = false,
+  isTextArea = false,
+}) => {
   const styles = {
     wrapper: { marginBottom: '20px' },
     label: { display: 'block', color: '#ccc', marginBottom: '8px', fontSize: '0.9rem' },
@@ -14,9 +22,9 @@ const FormInput = ({ label, value, onChange, placeholder, type = "text", require
       fontSize: '1rem',
       outline: 'none',
       transition: 'border-color 0.2s',
-      fontFamily: 'inherit'
+      fontFamily: 'inherit',
     },
-    required: { color: '#e50914', marginLeft: '4px' }
+    required: { color: '#e50914', marginLeft: '4px' },
   };
 
   return (
@@ -25,14 +33,14 @@ const FormInput = ({ label, value, onChange, placeholder, type = "text", require
         {label}
         {required && <span style={styles.required}>*</span>}
       </label>
-      
+
       {isTextArea ? (
         <textarea
           value={value}
           onChange={onChange}
           placeholder={placeholder}
           rows={4}
-          style={{...styles.input, resize: 'vertical'}}
+          style={{ ...styles.input, resize: 'vertical' }}
         />
       ) : (
         <input

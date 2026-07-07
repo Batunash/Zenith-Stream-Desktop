@@ -21,7 +21,10 @@ const routers = vi.hoisted(() => {
 });
 
 const cfgMock = vi.hoisted(() => ({
-  MEDIA_DIR: require('os').tmpdir(), PORT: 5000, JWT_SECRET: 's', JWT_EXPIRES_IN: '7d'
+  MEDIA_DIR: require('os').tmpdir(),
+  PORT: 5000,
+  JWT_SECRET: 's',
+  JWT_EXPIRES_IN: '7d',
 }));
 
 vi.mock('./config/config', () => ({ ...cfgMock }));
@@ -32,7 +35,14 @@ vi.mock('./routes/watchRoutes', () => routers.watch);
 const cwd = process.cwd();
 const injectCache = (rel, exports) => {
   const resolved = path.resolve(cwd, rel);
-  require.cache[resolved] = { id: resolved, filename: resolved, loaded: true, exports, children: [], paths: [] };
+  require.cache[resolved] = {
+    id: resolved,
+    filename: resolved,
+    loaded: true,
+    exports,
+    children: [],
+    paths: [],
+  };
 };
 injectCache('backend/src/config/config.js', cfgMock);
 injectCache('backend/src/routes/mediaRoutes.js', routers.media);
@@ -117,7 +127,8 @@ describe('Express App', () => {
     let origStat;
     beforeEach(() => {
       origStat = global.__fsMock.stat;
-      global.__fsMock.stat = (p, cb) => cb(Object.assign(new Error('not found'), { code: 'ENOENT' }));
+      global.__fsMock.stat = (p, cb) =>
+        cb(Object.assign(new Error('not found'), { code: 'ENOENT' }));
     });
     afterEach(() => {
       global.__fsMock.stat = origStat;

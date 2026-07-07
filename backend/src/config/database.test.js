@@ -19,16 +19,18 @@ describe('DatabaseManager', () => {
 
     // Build a fresh mock db instance for this test
     mockDbInstance = {
-      export:  vi.fn().mockReturnValue(new Uint8Array([1, 2, 3])),
+      export: vi.fn().mockReturnValue(new Uint8Array([1, 2, 3])),
       prepare: vi.fn(),
-      run:     vi.fn(),
-      exec:    vi.fn().mockReturnValue([{ values: [[1]] }])
+      run: vi.fn(),
+      exec: vi.fn().mockReturnValue([{ values: [[1]] }]),
     };
 
     // Configure sql.js mock: initSqlJs() resolves to { Database: constructor }
     // Must use a regular function (not arrow) because database.js calls `new this.SQL.Database()`
     global.__sqlJsMock.initSqlJs.mockResolvedValue({
-      Database: function MockDatabase() { return mockDbInstance; }
+      Database: function MockDatabase() {
+        return mockDbInstance;
+      },
     });
 
     // By default, no database file exists → will create new empty db
@@ -71,15 +73,17 @@ describe('DatabaseManager', () => {
       const m = require('./database');
       m.db = null;
       const stmt = m.prepare('SELECT * FROM USERS');
-      stmt.run(); stmt.get(); stmt.all(); // Should not crash
+      stmt.run();
+      stmt.get();
+      stmt.all(); // Should not crash
     });
 
     it('wraps prepare statements correctly', () => {
       const mockStmt = {
-        bind:        vi.fn(),
-        step:        vi.fn().mockReturnValue(true),
+        bind: vi.fn(),
+        step: vi.fn().mockReturnValue(true),
         getAsObject: vi.fn().mockReturnValue({ id: 1 }),
-        free:        vi.fn()
+        free: vi.fn(),
       };
       mockDbInstance.prepare.mockReturnValue(mockStmt);
 
@@ -107,7 +111,7 @@ describe('DatabaseManager', () => {
     it('createUser and getters', () => {
       dbManager.prepare = vi.fn().mockReturnValue({
         run: vi.fn(),
-        get: vi.fn().mockReturnValue({ ID: 1, USERNAME: 'test' })
+        get: vi.fn().mockReturnValue({ ID: 1, USERNAME: 'test' }),
       });
       dbManager.createUser('test', 'pw');
       expect(dbManager.getUserByUsername('test')).toEqual({ ID: 1, USERNAME: 'test' });
@@ -185,8 +189,8 @@ describe('DatabaseManager', () => {
       const mockStmt = { get: vi.fn(), all: vi.fn() };
       dbManager.prepare = vi.fn().mockReturnValue(mockStmt);
 
-      mockStmt.get.mockReturnValueOnce({ ID: 1 });        // serie
-      mockStmt.all.mockReturnValueOnce([{ ID: 10 }]);     // seasons
+      mockStmt.get.mockReturnValueOnce({ ID: 1 }); // serie
+      mockStmt.all.mockReturnValueOnce([{ ID: 10 }]); // seasons
       mockStmt.get.mockReturnValueOnce({ ID: 100, NAME: 'file.mkv' }); // episode
 
       expect(dbManager.getEpisodeBySeriesAndFile('Valid', 'file.mkv')).toBeDefined();
@@ -198,7 +202,7 @@ describe('DatabaseManager', () => {
       const mockStmt = {
         get: vi.fn().mockReturnValue({ ID: 1 }),
         all: vi.fn().mockReturnValue([{ ID: 10 }]),
-        run: vi.fn()
+        run: vi.fn(),
       };
       dbManager.prepare = vi.fn().mockReturnValue(mockStmt);
       dbManager.deleteSeriesByPath('/path');
@@ -251,8 +255,10 @@ describe('DatabaseManager', () => {
     it('syncs movies correctly', () => {
       fs.existsSync.mockReturnValue(true);
       fs.readdirSync.mockImplementation((dir, options) => {
-        if (dir === '/media') return [{ name: 'My Movie', isDirectory: () => true, isFile: () => false }];
-        if (dir.includes('My Movie')) return [{ name: 'movie.mkv', isDirectory: () => false, isFile: () => true }];
+        if (dir === '/media')
+          return [{ name: 'My Movie', isDirectory: () => true, isFile: () => false }];
+        if (dir.includes('My Movie'))
+          return [{ name: 'movie.mkv', isDirectory: () => false, isFile: () => true }];
         return [];
       });
       fs.readFileSync.mockReturnValue(JSON.stringify({ type: 'movie' }));
@@ -260,20 +266,20 @@ describe('DatabaseManager', () => {
 
       const mockStmt = {
         get: vi.fn().mockImplementation((...args) => {
-             // force exists to be null on first run to hit INSERT
-             return null;
+          // force exists to be null on first run to hit INSERT
+          return null;
         }),
         run: vi.fn().mockReturnValue({ lastInsertRowid: 1 }),
-        all: vi.fn().mockReturnValue([])
+        all: vi.fn().mockReturnValue([]),
       };
       dbManager.prepare = vi.fn().mockReturnValue(mockStmt);
 
       dbManager.syncFilesystemToDatabase('/media', ['.mkv']);
-      
+
       // Call again but make things exist to hit UPDATE
       mockStmt.get.mockReturnValue({ ID: 1 });
       dbManager.syncFilesystemToDatabase('/media', ['.mkv']);
-      
+
       expect(mockStmt.run).toHaveBeenCalled();
     });
 
@@ -289,15 +295,23 @@ describe('DatabaseManager', () => {
         if (dir.includes('SerieA')) return [{ name: 'Season 1', isDirectory: () => true }];
         return [];
       });
-      fs.readFileSync.mockReturnValue(JSON.stringify({
-        title: 'Serie A', type: 'serie', localPoster: 'p.jpg', backdrop: 'b.jpg', overview: 'desc', rating: 9.0, id: 123
-      }));
+      fs.readFileSync.mockReturnValue(
+        JSON.stringify({
+          title: 'Serie A',
+          type: 'serie',
+          localPoster: 'p.jpg',
+          backdrop: 'b.jpg',
+          overview: 'desc',
+          rating: 9.0,
+          id: 123,
+        })
+      );
       fs.statSync.mockReturnValue({ size: 1000 });
 
       const mockStmt = {
         all: vi.fn().mockReturnValue([]),
         get: vi.fn().mockReturnValue(null),
-        run: vi.fn().mockReturnValue({ lastInsertRowid: 1 })
+        run: vi.fn().mockReturnValue({ lastInsertRowid: 1 }),
       };
       dbManager.prepare = vi.fn().mockReturnValue(mockStmt);
 
@@ -315,7 +329,7 @@ describe('DatabaseManager', () => {
     it('syncDatabase handles metadata parsing missing fields', () => {
       const mediaDir = 'C:\\Media';
       fs.existsSync.mockReturnValue(true);
-      
+
       // Return a directory that has metadata, but missing optional fields
       fs.readdirSync.mockImplementation((dir) => {
         if (dir === mediaDir) return [{ name: 'TestSerie', isDirectory: () => true }];
@@ -324,16 +338,17 @@ describe('DatabaseManager', () => {
       });
 
       fs.readFileSync.mockImplementation((p) => {
-        if (p.endsWith('metadata.json')) return JSON.stringify({
-           // Missing title, type, rating, id etc to trigger fallback branches
-        });
+        if (p.endsWith('metadata.json'))
+          return JSON.stringify({
+            // Missing title, type, rating, id etc to trigger fallback branches
+          });
         return '';
       });
 
       const mockStmt = {
         all: vi.fn().mockReturnValue([]),
         get: vi.fn().mockReturnValue(null),
-        run: vi.fn().mockReturnValue({ lastInsertRowid: 1 })
+        run: vi.fn().mockReturnValue({ lastInsertRowid: 1 }),
       };
       dbManager.prepare = vi.fn().mockReturnValue(mockStmt);
 
@@ -346,8 +361,10 @@ describe('DatabaseManager', () => {
 
     it('deletes missing records', () => {
       const mockStmt = { all: vi.fn(), run: vi.fn() };
-      mockStmt.all.mockReturnValue([{ ID: 1, FOLDER_PATH: '/missing', FILE_PATH: '/missing/file.mkv' }]);
-      fs.existsSync.mockImplementation(p => p === '/media');
+      mockStmt.all.mockReturnValue([
+        { ID: 1, FOLDER_PATH: '/missing', FILE_PATH: '/missing/file.mkv' },
+      ]);
+      fs.existsSync.mockImplementation((p) => p === '/media');
       fs.readdirSync.mockReturnValue([]);
 
       dbManager.prepare = vi.fn().mockReturnValue(mockStmt);

@@ -25,7 +25,9 @@ vi.mock('electron', () => {
           openDevTools: vi.fn(),
         };
       }
-      static getAllWindows() { return []; }
+      static getAllWindows() {
+        return [];
+      }
       loadURL() {}
       loadFile() {}
     },
@@ -34,7 +36,7 @@ vi.mock('electron', () => {
     },
     net: {
       fetch: vi.fn(() => Promise.resolve()),
-    }
+    },
   };
   return { ...electronMock, default: electronMock };
 });

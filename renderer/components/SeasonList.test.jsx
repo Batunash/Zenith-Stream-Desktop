@@ -10,8 +10,8 @@ import SeasonList from './SeasonList';
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key) => key
-  })
+    t: (key) => key,
+  }),
 }));
 
 describe('SeasonList', () => {
@@ -26,16 +26,25 @@ describe('SeasonList', () => {
 
   it('handles season selection', () => {
     const handleSelect = vi.fn();
-    render(<SeasonList seasons={mockSeasons} activeSeason="Season 1" onSelect={handleSelect} isMovie={false} />);
-    
+    render(
+      <SeasonList
+        seasons={mockSeasons}
+        activeSeason="Season 1"
+        onSelect={handleSelect}
+        isMovie={false}
+      />
+    );
+
     fireEvent.click(screen.getByText('Season 2'));
     expect(handleSelect).toHaveBeenCalledWith('Season 2');
   });
 
   it('handles add season button click', () => {
     const handleAdd = vi.fn();
-    render(<SeasonList seasons={mockSeasons} activeSeason="Season 1" onAdd={handleAdd} isMovie={false} />);
-    
+    render(
+      <SeasonList seasons={mockSeasons} activeSeason="Season 1" onAdd={handleAdd} isMovie={false} />
+    );
+
     fireEvent.click(screen.getByText('detail.new_season'));
     expect(handleAdd).toHaveBeenCalled();
   });
@@ -47,12 +56,19 @@ describe('SeasonList', () => {
 
   it('handles delete season badge click', () => {
     const handleDelete = vi.fn();
-    render(<SeasonList seasons={mockSeasons} activeSeason="Season 1" onDelete={handleDelete} isMovie={false} />);
-    
+    render(
+      <SeasonList
+        seasons={mockSeasons}
+        activeSeason="Season 1"
+        onDelete={handleDelete}
+        isMovie={false}
+      />
+    );
+
     // The delete badge has a title 'common.delete'
     const deleteBadges = screen.getAllByTitle('common.delete');
     expect(deleteBadges.length).toBe(2);
-    
+
     fireEvent.click(deleteBadges[1]);
     expect(handleDelete).toHaveBeenCalledWith('Season 2');
   });

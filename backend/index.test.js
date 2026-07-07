@@ -6,7 +6,10 @@ const path = require('path');
 // semantics (success callback, error event, close error) independently.
 const mockApp = vi.hoisted(() => ({ listen: vi.fn(), on: vi.fn(), close: vi.fn() }));
 const cfgMock = vi.hoisted(() => ({
-  PORT: 3001, MEDIA_DIR: '/tmp/media', JWT_SECRET: 's', JWT_EXPIRES_IN: '7d'
+  PORT: 3001,
+  MEDIA_DIR: '/tmp/media',
+  JWT_SECRET: 's',
+  JWT_EXPIRES_IN: '7d',
 }));
 
 vi.mock('./src/app', () => mockApp);
@@ -15,8 +18,22 @@ vi.mock('./src/config/config', () => ({ ...cfgMock }));
 const cwd = process.cwd();
 const appResolved = path.resolve(cwd, 'backend/src/app.js');
 const cfgResolved = path.resolve(cwd, 'backend/src/config/config.js');
-require.cache[appResolved] = { id: appResolved, filename: appResolved, loaded: true, exports: mockApp, children: [], paths: [] };
-require.cache[cfgResolved] = { id: cfgResolved, filename: cfgResolved, loaded: true, exports: cfgMock, children: [], paths: [] };
+require.cache[appResolved] = {
+  id: appResolved,
+  filename: appResolved,
+  loaded: true,
+  exports: mockApp,
+  children: [],
+  paths: [],
+};
+require.cache[cfgResolved] = {
+  id: cfgResolved,
+  filename: cfgResolved,
+  loaded: true,
+  exports: cfgMock,
+  children: [],
+  paths: [],
+};
 
 let serverManager;
 beforeEach(() => {
@@ -29,7 +46,11 @@ beforeEach(() => {
 
 // Helper: a server object capturing the 'error' handler so tests can fire it.
 const makeErrorServer = () => {
-  const s = { on: vi.fn((evt, handler) => { if (evt === 'error') s._err = handler; }) };
+  const s = {
+    on: vi.fn((evt, handler) => {
+      if (evt === 'error') s._err = handler;
+    }),
+  };
   return s;
 };
 
@@ -37,7 +58,10 @@ describe('Server Manager', () => {
   describe('start()', () => {
     it('starts and resolves true when listen succeeds', async () => {
       const mockServer = { on: vi.fn() };
-      mockApp.listen.mockImplementation((port, host, cb) => { cb(); return mockServer; });
+      mockApp.listen.mockImplementation((port, host, cb) => {
+        cb();
+        return mockServer;
+      });
 
       const result = await serverManager.start();
       expect(result).toBe(true);
@@ -47,14 +71,20 @@ describe('Server Manager', () => {
 
     it('uses PORT from config as the first listen argument', async () => {
       const mockServer = { on: vi.fn() };
-      mockApp.listen.mockImplementation((port, host, cb) => { cb(); return mockServer; });
+      mockApp.listen.mockImplementation((port, host, cb) => {
+        cb();
+        return mockServer;
+      });
       await serverManager.start();
       expect(mockApp.listen.mock.calls[0][0]).toBe(3001);
     });
 
     it('binds to 0.0.0.0', async () => {
       const mockServer = { on: vi.fn() };
-      mockApp.listen.mockImplementation((port, host, cb) => { cb(); return mockServer; });
+      mockApp.listen.mockImplementation((port, host, cb) => {
+        cb();
+        return mockServer;
+      });
       await serverManager.start();
       expect(mockApp.listen.mock.calls[0][1]).toBe('0.0.0.0');
     });
@@ -78,7 +108,10 @@ describe('Server Manager', () => {
 
     it('resolves true immediately if already running', async () => {
       const mockServer = { on: vi.fn() };
-      mockApp.listen.mockImplementation((p, h, cb) => { cb(); return mockServer; });
+      mockApp.listen.mockImplementation((p, h, cb) => {
+        cb();
+        return mockServer;
+      });
       await serverManager.start();
       const result = await serverManager.start();
       expect(result).toBe(true);
@@ -94,7 +127,10 @@ describe('Server Manager', () => {
 
     it('closes the running server and resolves false', async () => {
       const mockServer = { close: vi.fn((cb) => cb && cb()), on: vi.fn() };
-      mockApp.listen.mockImplementation((p, h, cb) => { cb(); return mockServer; });
+      mockApp.listen.mockImplementation((p, h, cb) => {
+        cb();
+        return mockServer;
+      });
       await serverManager.start();
 
       const result = await serverManager.stop();
@@ -105,14 +141,20 @@ describe('Server Manager', () => {
 
     it('rejects when close errors', async () => {
       const mockServer = { close: vi.fn((cb) => cb(new Error('Cannot close'))), on: vi.fn() };
-      mockApp.listen.mockImplementation((p, h, cb) => { cb(); return mockServer; });
+      mockApp.listen.mockImplementation((p, h, cb) => {
+        cb();
+        return mockServer;
+      });
       await serverManager.start();
       await expect(serverManager.stop()).rejects.toThrow('Cannot close');
     });
 
     it('nullifies the server reference after stop', async () => {
       const mockServer = { close: vi.fn((cb) => cb()), on: vi.fn() };
-      mockApp.listen.mockImplementation((p, h, cb) => { cb(); return mockServer; });
+      mockApp.listen.mockImplementation((p, h, cb) => {
+        cb();
+        return mockServer;
+      });
       await serverManager.start();
       expect(serverManager.isRunning()).toBe(true);
       await serverManager.stop();
@@ -127,14 +169,20 @@ describe('Server Manager', () => {
 
     it('returns true after a successful start', async () => {
       const mockServer = { on: vi.fn() };
-      mockApp.listen.mockImplementation((p, h, cb) => { cb(); return mockServer; });
+      mockApp.listen.mockImplementation((p, h, cb) => {
+        cb();
+        return mockServer;
+      });
       await serverManager.start();
       expect(serverManager.isRunning()).toBe(true);
     });
 
     it('returns false after a stop', async () => {
       const mockServer = { close: vi.fn((cb) => cb()), on: vi.fn() };
-      mockApp.listen.mockImplementation((p, h, cb) => { cb(); return mockServer; });
+      mockApp.listen.mockImplementation((p, h, cb) => {
+        cb();
+        return mockServer;
+      });
       await serverManager.start();
       await serverManager.stop();
       expect(serverManager.isRunning()).toBe(false);
@@ -144,7 +192,10 @@ describe('Server Manager', () => {
   describe('lifecycle', () => {
     it('survives a start-stop-start cycle', async () => {
       const s1 = { close: vi.fn((cb) => cb()), on: vi.fn() };
-      mockApp.listen.mockImplementation((p, h, cb) => { cb(); return s1; });
+      mockApp.listen.mockImplementation((p, h, cb) => {
+        cb();
+        return s1;
+      });
       await serverManager.start();
       expect(serverManager.isRunning()).toBe(true);
 
@@ -152,7 +203,10 @@ describe('Server Manager', () => {
       expect(serverManager.isRunning()).toBe(false);
 
       const s2 = { on: vi.fn() };
-      mockApp.listen.mockImplementation((p, h, cb) => { cb(); return s2; });
+      mockApp.listen.mockImplementation((p, h, cb) => {
+        cb();
+        return s2;
+      });
       await serverManager.start();
       expect(serverManager.isRunning()).toBe(true);
     });

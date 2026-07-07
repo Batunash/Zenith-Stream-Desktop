@@ -50,7 +50,7 @@ describe('i18n Configuration', () => {
       expect.objectContaining({
         fallbackLng: 'en',
         interpolation: expect.objectContaining({ escapeValue: false }),
-      }),
+      })
     );
   });
 
@@ -66,7 +66,7 @@ describe('i18n Configuration', () => {
           fr: expect.any(Object),
           ru: expect.any(Object),
         }),
-      }),
+      })
     );
   });
 

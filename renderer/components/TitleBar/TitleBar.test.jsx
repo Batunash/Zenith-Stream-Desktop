@@ -6,7 +6,7 @@ import React from 'react';
 describe('TitleBar Component', () => {
   beforeEach(() => {
     window.api = {
-      send: vi.fn()
+      send: vi.fn(),
     };
   });
 

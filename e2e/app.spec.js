@@ -6,7 +6,7 @@ test('App should launch and show Dashboard', async () => {
   // Launch Electron app
   const electronApp = await electron.launch({
     args: ['.'],
-    env: { ...process.env, NODE_ENV: 'test' }
+    env: { ...process.env, NODE_ENV: 'test' },
   });
 
   // Get the first window

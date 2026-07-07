@@ -102,7 +102,12 @@ describe('Formatters', () => {
     });
 
     it('rounds vote_average to one decimal', () => {
-      const apiResult = { id: 12345, name: 'Test', vote_average: 8.7654321, poster_path: '/poster.jpg' };
+      const apiResult = {
+        id: 12345,
+        name: 'Test',
+        vote_average: 8.7654321,
+        poster_path: '/poster.jpg',
+      };
       expect(formatTmdbData(apiResult, 'tt1234567').rating).toBe('8.8');
     });
 
@@ -134,7 +139,13 @@ describe('Formatters', () => {
     });
 
     it('passes through overview and status fields', () => {
-      const apiResult = { id: 1, name: 'T', overview: 'An overview', status: 'Ended', poster_path: '/p.jpg' };
+      const apiResult = {
+        id: 1,
+        name: 'T',
+        overview: 'An overview',
+        status: 'Ended',
+        poster_path: '/p.jpg',
+      };
       const result = formatTmdbData(apiResult, 'tt1');
       expect(result.overview).toBe('An overview');
       expect(result.status).toBe('Ended');

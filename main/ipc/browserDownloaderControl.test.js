@@ -15,18 +15,30 @@ vi.mock('fs', () => ({
 const browserDownloader = require('../utils/browserDownloader');
 const mockDownloadStream = vi.spyOn(browserDownloader, 'downloadStream').mockResolvedValue();
 // spies for every other browserDownloader method the control fans out to:
-const mockNavigateTo          = vi.spyOn(browserDownloader, 'navigateTo').mockResolvedValue({ ok: true });
-const mockResizeBrowserView   = vi.spyOn(browserDownloader, 'resizeBrowserView').mockReturnValue(undefined);
-const mockShowBrowserView     = vi.spyOn(browserDownloader, 'showBrowserView').mockReturnValue(undefined);
-const mockHideBrowserView     = vi.spyOn(browserDownloader, 'hideBrowserView').mockReturnValue(undefined);
-const mockGoBack              = vi.spyOn(browserDownloader, 'goBack').mockReturnValue(undefined);
-const mockGoForward           = vi.spyOn(browserDownloader, 'goForward').mockReturnValue(undefined);
-const mockReload              = vi.spyOn(browserDownloader, 'reload').mockReturnValue(undefined);
-const mockGetCapturedStreams  = vi.spyOn(browserDownloader, 'getCapturedStreams').mockReturnValue([]);
-const mockClearCapturedStreams= vi.spyOn(browserDownloader, 'clearCapturedStreams').mockReturnValue(undefined);
-const mockGetDownloads        = vi.spyOn(browserDownloader, 'getDownloads').mockReturnValue([]);
-const mockClearCompleted      = vi.spyOn(browserDownloader, 'clearCompletedDownloads').mockReturnValue(undefined);
-const mockCancelDownload      = vi.spyOn(browserDownloader, 'cancelDownload').mockReturnValue(undefined);
+const mockNavigateTo = vi.spyOn(browserDownloader, 'navigateTo').mockResolvedValue({ ok: true });
+const mockResizeBrowserView = vi
+  .spyOn(browserDownloader, 'resizeBrowserView')
+  .mockReturnValue(undefined);
+const mockShowBrowserView = vi
+  .spyOn(browserDownloader, 'showBrowserView')
+  .mockReturnValue(undefined);
+const mockHideBrowserView = vi
+  .spyOn(browserDownloader, 'hideBrowserView')
+  .mockReturnValue(undefined);
+const mockGoBack = vi.spyOn(browserDownloader, 'goBack').mockReturnValue(undefined);
+const mockGoForward = vi.spyOn(browserDownloader, 'goForward').mockReturnValue(undefined);
+const mockReload = vi.spyOn(browserDownloader, 'reload').mockReturnValue(undefined);
+const mockGetCapturedStreams = vi
+  .spyOn(browserDownloader, 'getCapturedStreams')
+  .mockReturnValue([]);
+const mockClearCapturedStreams = vi
+  .spyOn(browserDownloader, 'clearCapturedStreams')
+  .mockReturnValue(undefined);
+const mockGetDownloads = vi.spyOn(browserDownloader, 'getDownloads').mockReturnValue([]);
+const mockClearCompleted = vi
+  .spyOn(browserDownloader, 'clearCompletedDownloads')
+  .mockReturnValue(undefined);
+const mockCancelDownload = vi.spyOn(browserDownloader, 'cancelDownload').mockReturnValue(undefined);
 
 let handlers;
 let showSaveDialog;
@@ -157,7 +169,10 @@ describe('browserDownloaderControl', () => {
       const stream = { type: 'VIDEO' };
       const dirtyFilename = 'One Piece 1.Sezon 1. Bölüm izle – diziwatch?!';
       const libraryContext = { enabled: true, serieName: 'One Piece', seasonId: 'Season 1' };
-      const out = await handlers['browser:downloadStream']({}, { stream, filename: dirtyFilename, libraryContext });
+      const out = await handlers['browser:downloadStream'](
+        {},
+        { stream, filename: dirtyFilename, libraryContext }
+      );
       expect(out).toEqual({ success: true });
       expect(mockDownloadStream).toHaveBeenCalled();
       const passedFilePath = mockDownloadStream.mock.calls[0][1];
@@ -167,9 +182,14 @@ describe('browserDownloaderControl', () => {
 
     it('uses .vtt extension for SUBTITLE streams in library mode', async () => {
       const stream = { type: 'SUBTITLE' };
-      const out = await handlers['browser:downloadStream']({}, {
-        stream, filename: 'Ep1 Sub', libraryContext: { enabled: true, serieName: 'S', seasonId: 'Season 1' },
-      });
+      const out = await handlers['browser:downloadStream'](
+        {},
+        {
+          stream,
+          filename: 'Ep1 Sub',
+          libraryContext: { enabled: true, serieName: 'S', seasonId: 'Season 1' },
+        }
+      );
       expect(out).toEqual({ success: true });
       expect(mockDownloadStream.mock.calls[0][1].endsWith('.vtt')).toBe(true);
     });
@@ -178,27 +198,43 @@ describe('browserDownloaderControl', () => {
       const fs = require('fs');
       fs.existsSync.mockReturnValueOnce(false);
       const stream = { type: 'VIDEO' };
-      await handlers['browser:downloadStream']({}, {
-        stream, filename: 'Movie', libraryContext: { enabled: true, serieName: 'S', seasonId: 'Season 1' },
+      await handlers['browser:downloadStream'](
+        {},
+        {
+          stream,
+          filename: 'Movie',
+          libraryContext: { enabled: true, serieName: 'S', seasonId: 'Season 1' },
+        }
+      );
+      expect(fs.mkdirSync).toHaveBeenCalledWith(expect.stringContaining('Season 1'), {
+        recursive: true,
       });
-      expect(fs.mkdirSync).toHaveBeenCalledWith(expect.stringContaining('Season 1'), { recursive: true });
     });
 
     it('returns {success:false} when library mode is enabled but MEDIA_DIR is not configured', async () => {
       handlesettings.getSettings.mockReturnValueOnce({});
-      const out = await handlers['browser:downloadStream']({}, {
-        stream: { type: 'VIDEO' }, filename: 'Movie',
-        libraryContext: { enabled: true, serieName: 'S', seasonId: 'Season 1' },
-      });
+      const out = await handlers['browser:downloadStream'](
+        {},
+        {
+          stream: { type: 'VIDEO' },
+          filename: 'Movie',
+          libraryContext: { enabled: true, serieName: 'S', seasonId: 'Season 1' },
+        }
+      );
       expect(out).toEqual({ success: false, error: 'Media directory not configured in settings' });
       expect(mockDownloadStream).not.toHaveBeenCalled();
     });
 
     it('opens a save dialog in custom mode and uses the chosen filePath for a video', async () => {
       showSaveDialog.mockResolvedValueOnce({ filePath: 'C:\\out\\video.mkv' });
-      const out = await handlers['browser:downloadStream']({}, {
-        stream: { type: 'VIDEO' }, filename: 'Movie', libraryContext: { enabled: false },
-      });
+      const out = await handlers['browser:downloadStream'](
+        {},
+        {
+          stream: { type: 'VIDEO' },
+          filename: 'Movie',
+          libraryContext: { enabled: false },
+        }
+      );
       expect(out).toEqual({ success: true });
       expect(showSaveDialog).toHaveBeenCalled();
       expect(mockDownloadStream.mock.calls[0][1]).toBe('C:\\out\\video.mkv');
@@ -206,9 +242,14 @@ describe('browserDownloaderControl', () => {
 
     it('opens a save dialog with subtitle filters/title for a SUBTITLE stream in custom mode', async () => {
       showSaveDialog.mockResolvedValueOnce({ filePath: 'C:\\out\\sub.vtt' });
-      const out = await handlers['browser:downloadStream']({}, {
-        stream: { type: 'SUBTITLE' }, filename: 'Ep1 Sub', libraryContext: { enabled: false },
-      });
+      const out = await handlers['browser:downloadStream'](
+        {},
+        {
+          stream: { type: 'SUBTITLE' },
+          filename: 'Ep1 Sub',
+          libraryContext: { enabled: false },
+        }
+      );
       expect(out).toEqual({ success: true });
       const call = showSaveDialog.mock.calls[0][0];
       expect(call.title).toBe('Save Subtitle');
@@ -218,9 +259,14 @@ describe('browserDownloaderControl', () => {
 
     it('uses the Video filters and Save Video title in custom mode for a video stream', async () => {
       showSaveDialog.mockResolvedValueOnce({ filePath: 'C:\\out\\v.mkv' });
-      await handlers['browser:downloadStream']({}, {
-        stream: { type: 'VIDEO' }, filename: 'Vid', libraryContext: { enabled: false },
-      });
+      await handlers['browser:downloadStream'](
+        {},
+        {
+          stream: { type: 'VIDEO' },
+          filename: 'Vid',
+          libraryContext: { enabled: false },
+        }
+      );
       const call = showSaveDialog.mock.calls[0][0];
       expect(call.title).toBe('Save Video');
       expect(call.filters).toEqual([{ name: 'Videos', extensions: ['mkv', 'mp4', 'ts'] }]);
@@ -228,9 +274,14 @@ describe('browserDownloaderControl', () => {
 
     it('returns {success:false, Cancelled by user} when the save dialog is dismissed (no filePath)', async () => {
       showSaveDialog.mockResolvedValueOnce({ filePath: '' });
-      const out = await handlers['browser:downloadStream']({}, {
-        stream: { type: 'VIDEO' }, filename: 'Movie', libraryContext: { enabled: false },
-      });
+      const out = await handlers['browser:downloadStream'](
+        {},
+        {
+          stream: { type: 'VIDEO' },
+          filename: 'Movie',
+          libraryContext: { enabled: false },
+        }
+      );
       expect(out).toEqual({ success: false, error: 'Cancelled by user' });
       expect(mockDownloadStream).not.toHaveBeenCalled();
     });
@@ -238,30 +289,46 @@ describe('browserDownloaderControl', () => {
     it('returns {success:false,error} when a custom-mode download with no libraryContext (null branch)', async () => {
       // libraryContext null -> else branch (custom save dialog path).
       showSaveDialog.mockResolvedValueOnce({ filePath: 'C:\\out\\x.mkv' });
-      const out = await handlers['browser:downloadStream']({}, {
-        stream: { type: 'VIDEO' }, filename: 'NoCtx',
-      });
+      const out = await handlers['browser:downloadStream'](
+        {},
+        {
+          stream: { type: 'VIDEO' },
+          filename: 'NoCtx',
+        }
+      );
       expect(out).toEqual({ success: true });
       expect(mockDownloadStream.mock.calls[0][1]).toBe('C:\\out\\x.mkv');
     });
 
     it('returns {success:false,error} when downloadStream throws synchronously (outer try/catch)', async () => {
-      mockDownloadStream.mockImplementationOnce(() => { throw new Error('sync boom'); });
-      const out = await handlers['browser:downloadStream']({}, {
-        stream: { type: 'VIDEO' }, filename: 'Movie',
-        libraryContext: { enabled: true, serieName: 'S', seasonId: 'Season 1' },
+      mockDownloadStream.mockImplementationOnce(() => {
+        throw new Error('sync boom');
       });
+      const out = await handlers['browser:downloadStream'](
+        {},
+        {
+          stream: { type: 'VIDEO' },
+          filename: 'Movie',
+          libraryContext: { enabled: true, serieName: 'S', seasonId: 'Season 1' },
+        }
+      );
       expect(out).toEqual({ success: false, error: 'sync boom' });
     });
 
     it('returns {success:false,error} when mkdirSync throws (outer try/catch via fs)', async () => {
       const fs = require('fs');
       fs.existsSync.mockReturnValueOnce(false);
-      fs.mkdirSync.mockImplementationOnce(() => { throw new Error('mkdir denied'); });
-      const out = await handlers['browser:downloadStream']({}, {
-        stream: { type: 'VIDEO' }, filename: 'Movie',
-        libraryContext: { enabled: true, serieName: 'S', seasonId: 'Season 1' },
+      fs.mkdirSync.mockImplementationOnce(() => {
+        throw new Error('mkdir denied');
       });
+      const out = await handlers['browser:downloadStream'](
+        {},
+        {
+          stream: { type: 'VIDEO' },
+          filename: 'Movie',
+          libraryContext: { enabled: true, serieName: 'S', seasonId: 'Season 1' },
+        }
+      );
       expect(out).toEqual({ success: false, error: 'mkdir denied' });
     });
   });

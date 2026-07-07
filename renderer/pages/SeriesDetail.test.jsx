@@ -19,8 +19,12 @@ vi.mock('../components/SeriesBanner', () => ({
     <div data-testid="series-banner">
       <span data-testid="banner-title">{metadata?.title ?? ''}</span>
       <span data-testid="banner-season-count">{String(seasonCount)}</span>
-      <button data-testid="banner-back" onClick={onBack}>back</button>
-      <button data-testid="banner-auto-translate" onClick={onAutoTranslate}>auto</button>
+      <button data-testid="banner-back" onClick={onBack}>
+        back
+      </button>
+      <button data-testid="banner-auto-translate" onClick={onAutoTranslate}>
+        auto
+      </button>
     </div>
   ),
 }));
@@ -31,24 +35,46 @@ vi.mock('../components/SeasonList', () => ({
       {seasons.map((s, i) => (
         <div key={s} data-testid={`season-${i}`}>
           <span>{s}</span>
-          <button data-testid={`select-${i}`} onClick={() => onSelect(s)}>select</button>
-          <button data-testid={`delete-season-${i}`} onClick={() => onDelete(s)}>x</button>
+          <button data-testid={`select-${i}`} onClick={() => onSelect(s)}>
+            select
+          </button>
+          <button data-testid={`delete-season-${i}`} onClick={() => onDelete(s)}>
+            x
+          </button>
         </div>
       ))}
-      <button data-testid="add-season" onClick={onAdd}>add</button>
+      <button data-testid="add-season" onClick={onAdd}>
+        add
+      </button>
     </div>
   ),
 }));
 vi.mock('../components/EpisodeList', () => ({
-  default: ({ episodes, onUpload, onDelete, onConvert, onTranslate, conversionState, uploadDisabled }) => (
+  default: ({
+    episodes,
+    onUpload,
+    onDelete,
+    onConvert,
+    onTranslate,
+    conversionState,
+    uploadDisabled,
+  }) => (
     <div data-testid="episode-list">
-      <button data-testid="upload-btn" onClick={onUpload} disabled={!!uploadDisabled}>upload</button>
+      <button data-testid="upload-btn" onClick={onUpload} disabled={!!uploadDisabled}>
+        upload
+      </button>
       {episodes.map((ep, i) => (
         <div key={ep.path} data-testid={`ep-${i}`}>
           <span>{ep.name}</span>
-          <button data-testid={`ep-del-${i}`} onClick={() => onDelete(ep.path)}>del</button>
-          <button data-testid={`ep-convert-${i}`} onClick={() => onConvert(ep)}>convert</button>
-          <button data-testid={`ep-translate-${i}`} onClick={() => onTranslate(ep)}>translate</button>
+          <button data-testid={`ep-del-${i}`} onClick={() => onDelete(ep.path)}>
+            del
+          </button>
+          <button data-testid={`ep-convert-${i}`} onClick={() => onConvert(ep)}>
+            convert
+          </button>
+          <button data-testid={`ep-translate-${i}`} onClick={() => onTranslate(ep)}>
+            translate
+          </button>
           <span data-testid={`ep-conv-${i}`}>{conversionState?.[ep.path]?.progress ?? '-'}</span>
         </div>
       ))}
@@ -60,7 +86,8 @@ vi.mock('../components/TransferList', () => ({
     <div data-testid="transfer-list">
       {Object.entries(transfers || {}).map(([file, t]) => (
         <div key={file} data-testid={`transfer-${file}`}>
-          {t.percent}:{t.status}{t.error ? `:${t.error}` : ''}
+          {t.percent}:{t.status}
+          {t.error ? `:${t.error}` : ''}
         </div>
       ))}
     </div>
@@ -70,8 +97,12 @@ vi.mock('../components/ConversionModal', () => ({
   default: ({ filePath, onClose, onStart }) => (
     <div data-testid="conversion-modal">
       <span data-testid="conv-file">{filePath}</span>
-      <button data-testid="conv-start" onClick={() => onStart({ format: 'mp4' })}>start</button>
-      <button data-testid="conv-close" onClick={onClose}>close</button>
+      <button data-testid="conv-start" onClick={() => onStart({ format: 'mp4' })}>
+        start
+      </button>
+      <button data-testid="conv-close" onClick={onClose}>
+        close
+      </button>
     </div>
   ),
 }));
@@ -79,7 +110,9 @@ vi.mock('../components/TranslateSubtitleModal', () => ({
   default: ({ videoPath, onClose }) => (
     <div data-testid="translate-modal">
       <span data-testid="translate-file">{videoPath}</span>
-      <button data-testid="translate-close" onClick={onClose}>close</button>
+      <button data-testid="translate-close" onClick={onClose}>
+        close
+      </button>
     </div>
   ),
 }));
@@ -88,7 +121,9 @@ vi.mock('../components/AutoTranslateModal', () => ({
     <div data-testid="auto-translate-modal">
       <span data-testid="auto-name">{seriesName}</span>
       <span data-testid="auto-eps">{String(episodes.length)}</span>
-      <button data-testid="auto-close" onClick={onClose}>close</button>
+      <button data-testid="auto-close" onClick={onClose}>
+        close
+      </button>
     </div>
   ),
 }));
@@ -101,14 +136,18 @@ beforeEach(() => {
   vi.clearAllMocks();
   receiveCbs = {};
   mockInvoke = vi.fn(async (channel) => {
-    if (channel === 'file:getSeriesDetail') return { title: 'Test Show', type: 'serie', seasons: ['Season 1', 'Season 2'] };
+    if (channel === 'file:getSeriesDetail')
+      return { title: 'Test Show', type: 'serie', seasons: ['Season 1', 'Season 2'] };
     if (channel === 'file:getEpisodes') return [];
     return { success: true, isExist: true };
   });
   mockRemove = vi.fn();
   window.api = {
     invoke: mockInvoke,
-    receive: vi.fn((ch, cb) => { receiveCbs[ch] = cb; return vi.fn(); }),
+    receive: vi.fn((ch, cb) => {
+      receiveCbs[ch] = cb;
+      return vi.fn();
+    }),
     remove: mockRemove,
   };
   window.confirm = vi.fn(() => true);
@@ -118,7 +157,9 @@ beforeEach(() => {
 const renderPage = () =>
   render(
     <MemoryRouter initialEntries={[`/series/${FOLDER}`]}>
-      <Routes><Route path="/series/:folderName" element={<SeriesDetail />} /></Routes>
+      <Routes>
+        <Route path="/series/:folderName" element={<SeriesDetail />} />
+      </Routes>
     </MemoryRouter>
   );
 
@@ -126,7 +167,10 @@ const renderPage = () =>
 const settled = () =>
   waitFor(() => {
     expect(mockInvoke).toHaveBeenCalledWith('file:getSeriesDetail', FOLDER);
-    expect(mockInvoke).toHaveBeenCalledWith('file:getEpisodes', { folderName: FOLDER, season: 'Season 1' });
+    expect(mockInvoke).toHaveBeenCalledWith('file:getEpisodes', {
+      folderName: FOLDER,
+      season: 'Season 1',
+    });
   });
 
 const countCh = (ch) => mockInvoke.mock.calls.filter((c) => c[0] === ch).length;
@@ -134,7 +178,8 @@ const countCh = (ch) => mockInvoke.mock.calls.filter((c) => c[0] === ch).length;
 describe('SeriesDetail - rendering & data loading', () => {
   it('renders the loading screen first, then seasons + episodes after fetch', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'Test Show', type: 'serie', seasons: ['Season 1', 'Season 2'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'Test Show', type: 'serie', seasons: ['Season 1', 'Season 2'] };
       if (ch === 'file:getEpisodes') return [{ name: 'E1.mp4', path: 'p1' }];
       return null;
     });
@@ -146,7 +191,10 @@ describe('SeriesDetail - rendering & data loading', () => {
     expect(screen.getByTestId('banner-title').textContent).toBe('Test Show');
     expect(screen.getByTestId('banner-season-count').textContent).toBe('2');
     expect(screen.queryByText('common.loading')).not.toBeInTheDocument();
-    expect(mockInvoke).toHaveBeenCalledWith('file:getEpisodes', { folderName: FOLDER, season: 'Season 1' });
+    expect(mockInvoke).toHaveBeenCalledWith('file:getEpisodes', {
+      folderName: FOLDER,
+      season: 'Season 1',
+    });
   });
 
   it('auto-selects the first season and fetches its episodes', async () => {
@@ -193,8 +241,12 @@ describe('SeriesDetail - rendering & data loading', () => {
 describe('SeriesDetail - season switching', () => {
   it('refetches episodes when a different season is selected', async () => {
     mockInvoke.mockImplementation(async (ch, args) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'Test Show', type: 'serie', seasons: ['Season 1', 'Season 2'] };
-      if (ch === 'file:getEpisodes') return args.season === 'Season 2' ? [{ name: 'S2E1', path: 's2e1' }] : [{ name: 'S1E1', path: 's1e1' }];
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'Test Show', type: 'serie', seasons: ['Season 1', 'Season 2'] };
+      if (ch === 'file:getEpisodes')
+        return args.season === 'Season 2'
+          ? [{ name: 'S2E1', path: 's2e1' }]
+          : [{ name: 'S1E1', path: 's1e1' }];
       return null;
     });
     renderPage();
@@ -202,7 +254,10 @@ describe('SeriesDetail - season switching', () => {
     expect(screen.getByText('S1E1')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('select-1'));
     await waitFor(() => expect(screen.getByText('S2E1')).toBeInTheDocument());
-    expect(mockInvoke).toHaveBeenCalledWith('file:getEpisodes', { folderName: FOLDER, season: 'Season 2' });
+    expect(mockInvoke).toHaveBeenCalledWith('file:getEpisodes', {
+      folderName: FOLDER,
+      season: 'Season 2',
+    });
     expect(screen.getByTestId('active-season').textContent).toBe('Season 2');
   });
 });
@@ -210,14 +265,20 @@ describe('SeriesDetail - season switching', () => {
 describe('SeriesDetail - add season', () => {
   it('parses the max season number and creates the next, then activates it', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [];
       return { success: true, isExist: true };
     });
     renderPage();
     await waitFor(() => expect(screen.getByTestId('season-0')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('add-season'));
-    await waitFor(() => expect(mockInvoke).toHaveBeenCalledWith('file:createSeason', { serieName: FOLDER, seasonId: 'Season 2' }));
+    await waitFor(() =>
+      expect(mockInvoke).toHaveBeenCalledWith('file:createSeason', {
+        serieName: FOLDER,
+        seasonId: 'Season 2',
+      })
+    );
     await waitFor(() => expect(screen.getByTestId('active-season').textContent).toBe('Season 2'));
     expect(screen.getByTestId('season-1')).toBeInTheDocument();
   });
@@ -231,16 +292,23 @@ describe('SeriesDetail - add season', () => {
     renderPage();
     await waitFor(() => expect(screen.getByTestId('season-list')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('add-season'));
-    await waitFor(() => expect(mockInvoke).toHaveBeenCalledWith('file:createSeason', { serieName: FOLDER, seasonId: 'Season 1' }));
+    await waitFor(() =>
+      expect(mockInvoke).toHaveBeenCalledWith('file:createSeason', {
+        serieName: FOLDER,
+        seasonId: 'Season 1',
+      })
+    );
     expect(screen.getByTestId('season-0')).toBeInTheDocument();
     expect(screen.getByTestId('active-season').textContent).toBe('Season 1');
   });
 
   it('alerts the error message when createSeason returns isExist:false', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [];
-      if (ch === 'file:createSeason') return { success: false, isExist: false, message: 'Duplicate' };
+      if (ch === 'file:createSeason')
+        return { success: false, isExist: false, message: 'Duplicate' };
       return null;
     });
     renderPage();
@@ -253,8 +321,12 @@ describe('SeriesDetail - add season', () => {
 describe('SeriesDetail - delete season', () => {
   it('deletes the active season, resets active to the first remaining + clears episodes', async () => {
     mockInvoke.mockImplementation(async (ch, args) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1', 'Season 2'] };
-      if (ch === 'file:getEpisodes') return args.season === 'Season 2' ? [{ name: 'S2E1', path: 's2e1' }] : [{ name: 'S1E1', path: 's1e1' }];
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1', 'Season 2'] };
+      if (ch === 'file:getEpisodes')
+        return args.season === 'Season 2'
+          ? [{ name: 'S2E1', path: 's2e1' }]
+          : [{ name: 'S1E1', path: 's1e1' }];
       if (ch === 'file:deleteSeason') return { success: true };
       return null;
     });
@@ -262,14 +334,20 @@ describe('SeriesDetail - delete season', () => {
     await settled();
     expect(screen.getByText('S1E1')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('delete-season-0'));
-    await waitFor(() => expect(mockInvoke).toHaveBeenCalledWith('file:deleteSeason', { folderName: FOLDER, season: 'Season 1' }));
+    await waitFor(() =>
+      expect(mockInvoke).toHaveBeenCalledWith('file:deleteSeason', {
+        folderName: FOLDER,
+        season: 'Season 1',
+      })
+    );
     expect(screen.queryByText('Season 1')).not.toBeInTheDocument();
     expect(screen.getByTestId('active-season').textContent).toBe('Season 2');
   });
 
   it('deleting a non-active season keeps the active season unchanged', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1', 'Season 2'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1', 'Season 2'] };
       if (ch === 'file:getEpisodes') return [{ name: 'S1E1', path: 's1e1' }];
       if (ch === 'file:deleteSeason') return { success: true };
       return null;
@@ -277,7 +355,12 @@ describe('SeriesDetail - delete season', () => {
     renderPage();
     await settled();
     fireEvent.click(screen.getByTestId('delete-season-1'));
-    await waitFor(() => expect(mockInvoke).toHaveBeenCalledWith('file:deleteSeason', { folderName: FOLDER, season: 'Season 2' }));
+    await waitFor(() =>
+      expect(mockInvoke).toHaveBeenCalledWith('file:deleteSeason', {
+        folderName: FOLDER,
+        season: 'Season 2',
+      })
+    );
     expect(screen.queryByText('Season 2')).not.toBeInTheDocument();
     expect(screen.getByTestId('active-season').textContent).toBe('Season 1');
     expect(screen.getByText('S1E1')).toBeInTheDocument();
@@ -294,7 +377,8 @@ describe('SeriesDetail - delete season', () => {
 
   it('makes no state change when deleteSeason returns success:false', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1', 'Season 2'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1', 'Season 2'] };
       if (ch === 'file:getEpisodes') return [];
       if (ch === 'file:deleteSeason') return { success: false };
       return null;
@@ -302,7 +386,9 @@ describe('SeriesDetail - delete season', () => {
     renderPage();
     await settled();
     fireEvent.click(screen.getByTestId('delete-season-0'));
-    await waitFor(() => expect(mockInvoke).toHaveBeenCalledWith('file:deleteSeason', expect.anything()));
+    await waitFor(() =>
+      expect(mockInvoke).toHaveBeenCalledWith('file:deleteSeason', expect.anything())
+    );
     expect(screen.getByTestId('season-0')).toBeInTheDocument();
     expect(screen.getByTestId('season-1')).toBeInTheDocument();
   });
@@ -325,7 +411,8 @@ describe('SeriesDetail - upload episode', () => {
 
   it('opens the dialog with multiSelections:true for a serie and adds episodes', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [];
       if (ch === 'dialog:openVideoFiles') return ['p1', 'p2'];
       return null;
@@ -333,15 +420,22 @@ describe('SeriesDetail - upload episode', () => {
     renderPage();
     await settled();
     fireEvent.click(screen.getByTestId('upload-btn'));
-    await waitFor(() => expect(mockInvoke).toHaveBeenCalledWith('dialog:openVideoFiles', { multiSelections: true }));
-    expect(mockInvoke).toHaveBeenCalledWith('file:addEpisode', { serieName: FOLDER, seasonId: 'Season 1', videos: [{ path: 'p1' }, { path: 'p2' }] });
+    await waitFor(() =>
+      expect(mockInvoke).toHaveBeenCalledWith('dialog:openVideoFiles', { multiSelections: true })
+    );
+    expect(mockInvoke).toHaveBeenCalledWith('file:addEpisode', {
+      serieName: FOLDER,
+      seasonId: 'Season 1',
+      videos: [{ path: 'p1' }, { path: 'p2' }],
+    });
     expect(screen.getByTestId('transfer-p1').textContent).toBe('0:pending');
     expect(screen.getByTestId('transfer-p2').textContent).toBe('0:pending');
   });
 
   it('opens the dialog with multiSelections:false for a movie', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'M', type: 'movie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'M', type: 'movie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [];
       if (ch === 'dialog:openVideoFiles') return ['p9'];
       return null;
@@ -349,13 +443,19 @@ describe('SeriesDetail - upload episode', () => {
     renderPage();
     await settled();
     fireEvent.click(screen.getByTestId('upload-btn'));
-    await waitFor(() => expect(mockInvoke).toHaveBeenCalledWith('dialog:openVideoFiles', { multiSelections: false }));
-    expect(mockInvoke).toHaveBeenCalledWith('file:addEpisode', expect.objectContaining({ videos: [{ path: 'p9' }] }));
+    await waitFor(() =>
+      expect(mockInvoke).toHaveBeenCalledWith('dialog:openVideoFiles', { multiSelections: false })
+    );
+    expect(mockInvoke).toHaveBeenCalledWith(
+      'file:addEpisode',
+      expect.objectContaining({ videos: [{ path: 'p9' }] })
+    );
   });
 
   it('disables the upload button for a movie that already has 1 episode', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'M', type: 'movie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'M', type: 'movie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [{ name: 'E1', path: 'p1' }];
       return null;
     });
@@ -366,7 +466,8 @@ describe('SeriesDetail - upload episode', () => {
 
   it('returns early when the dialog returns an empty file list', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [];
       if (ch === 'dialog:openVideoFiles') return [];
       return null;
@@ -381,7 +482,8 @@ describe('SeriesDetail - upload episode', () => {
 
   it('returns early when the dialog returns null', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [];
       if (ch === 'dialog:openVideoFiles') return null;
       return null;
@@ -397,7 +499,8 @@ describe('SeriesDetail - upload episode', () => {
 describe('SeriesDetail - delete episode', () => {
   it('removes the episode from the list on success', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [{ name: 'E1', path: 'p1' }];
       if (ch === 'file:deleteEpisode') return { success: true };
       return null;
@@ -412,7 +515,8 @@ describe('SeriesDetail - delete episode', () => {
 
   it('does not invoke deleteEpisode when confirm is dismissed', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [{ name: 'E1', path: 'p1' }];
       return null;
     });
@@ -428,7 +532,8 @@ describe('SeriesDetail - delete episode', () => {
 describe('SeriesDetail - conversion', () => {
   it('opens the conversion modal with the episode path', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [{ name: 'E1', path: 'p1' }];
       return null;
     });
@@ -442,7 +547,8 @@ describe('SeriesDetail - conversion', () => {
 
   it('on success invokes media:process, clears conversion state, and refetches episodes', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [{ name: 'E1', path: 'p1' }];
       return null;
     });
@@ -451,7 +557,12 @@ describe('SeriesDetail - conversion', () => {
     fireEvent.click(screen.getByTestId('ep-convert-0'));
     const before = countCh('file:getEpisodes');
     fireEvent.click(screen.getByTestId('conv-start'));
-    await waitFor(() => expect(mockInvoke).toHaveBeenCalledWith('media:process', { filePath: 'p1', userPreferences: { format: 'mp4' } }));
+    await waitFor(() =>
+      expect(mockInvoke).toHaveBeenCalledWith('media:process', {
+        filePath: 'p1',
+        userPreferences: { format: 'mp4' },
+      })
+    );
     await waitFor(() => expect(countCh('file:getEpisodes')).toBe(before + 1));
     expect(screen.queryByTestId('conversion-modal')).not.toBeInTheDocument();
     expect(screen.getByTestId('ep-conv-0').textContent).toBe('-');
@@ -460,7 +571,8 @@ describe('SeriesDetail - conversion', () => {
   it('on failure logs to console.error and keeps the processing entry', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [{ name: 'E1', path: 'p1' }];
       if (ch === 'media:process') throw new Error('boom');
       return null;
@@ -478,7 +590,8 @@ describe('SeriesDetail - conversion', () => {
 
   it('closes the conversion modal via the close button', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [{ name: 'E1', path: 'p1' }];
       return null;
     });
@@ -494,7 +607,8 @@ describe('SeriesDetail - conversion', () => {
 describe('SeriesDetail - translate', () => {
   it('opens the translate modal with the episode path', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [{ name: 'E1', path: 'p1' }];
       return null;
     });
@@ -507,7 +621,8 @@ describe('SeriesDetail - translate', () => {
 
   it('closes the translate modal via the close button', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [{ name: 'E1', path: 'p1' }];
       return null;
     });
@@ -522,7 +637,8 @@ describe('SeriesDetail - translate', () => {
 describe('SeriesDetail - auto-translate', () => {
   it('opens the auto-translate modal with the title + episode count', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'Test Show', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'Test Show', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [{ name: 'E1', path: 'p1' }];
       return null;
     });
@@ -551,7 +667,9 @@ describe('SeriesDetail - auto-translate', () => {
     await settled();
     fireEvent.click(screen.getByTestId('banner-auto-translate'));
     fireEvent.click(screen.getByTestId('auto-close'));
-    await waitFor(() => expect(screen.queryByTestId('auto-translate-modal')).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.queryByTestId('auto-translate-modal')).not.toBeInTheDocument()
+    );
   });
 });
 
@@ -569,16 +687,24 @@ describe('SeriesDetail - IPC listeners', () => {
   it('file:addEpisode:progress updates the transfer percent + status', async () => {
     renderPage();
     await settled();
-    act(() => { receiveCbs['file:addEpisode:progress']?.({ file: 'p9', percent: 42 }); });
-    await waitFor(() => expect(screen.getByTestId('transfer-p9').textContent).toBe('42:transferring'));
+    act(() => {
+      receiveCbs['file:addEpisode:progress']?.({ file: 'p9', percent: 42 });
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId('transfer-p9').textContent).toBe('42:transferring')
+    );
   });
 
   it('file:addEpisode:done with error sets error status and does NOT refetch episodes', async () => {
     renderPage();
     await settled();
     const before = countCh('file:getEpisodes');
-    act(() => { receiveCbs['file:addEpisode:done']?.({ file: 'p9', error: 'boom' }); });
-    await waitFor(() => expect(screen.getByTestId('transfer-p9').textContent).toBe('100:error:boom'));
+    act(() => {
+      receiveCbs['file:addEpisode:done']?.({ file: 'p9', error: 'boom' });
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId('transfer-p9').textContent).toBe('100:error:boom')
+    );
     await new Promise((r) => setTimeout(r, 0));
     expect(countCh('file:getEpisodes')).toBe(before);
   });
@@ -587,21 +713,28 @@ describe('SeriesDetail - IPC listeners', () => {
     renderPage();
     await settled();
     const before = countCh('file:getEpisodes');
-    act(() => { receiveCbs['file:addEpisode:done']?.({ file: 'p9' }); });
-    await waitFor(() => expect(screen.getByTestId('transfer-p9').textContent).toBe('100:completed'));
+    act(() => {
+      receiveCbs['file:addEpisode:done']?.({ file: 'p9' });
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId('transfer-p9').textContent).toBe('100:completed')
+    );
     await waitFor(() => expect(countCh('file:getEpisodes')).toBe(before + 1));
   });
 
   it('media:progress updates the conversion state for the matching file', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [{ name: 'E1', path: 'p1' }];
       return null;
     });
     renderPage();
     await settled();
     expect(screen.getByTestId('ep-conv-0').textContent).toBe('-');
-    act(() => { receiveCbs['media:progress']?.({ filePath: 'p1', percent: 75 }); });
+    act(() => {
+      receiveCbs['media:progress']?.({ filePath: 'p1', percent: 75 });
+    });
     await waitFor(() => expect(screen.getByTestId('ep-conv-0').textContent).toBe('75'));
   });
 });
@@ -623,20 +756,27 @@ describe('SeriesDetail - unmount cleanup', () => {
 describe('SeriesDetail - branch coverage edges', () => {
   it('covers the || 0 fallback in the season-number sort comparator via no-digit names', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Alpha', 'Beta'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Alpha', 'Beta'] };
       if (ch === 'file:getEpisodes') return [];
       return { success: true, isExist: true };
     });
     renderPage();
     await waitFor(() => expect(screen.getByTestId('season-1')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('add-season'));
-    await waitFor(() => expect(mockInvoke).toHaveBeenCalledWith('file:createSeason', { serieName: FOLDER, seasonId: 'Season 1' }));
+    await waitFor(() =>
+      expect(mockInvoke).toHaveBeenCalledWith('file:createSeason', {
+        serieName: FOLDER,
+        seasonId: 'Season 1',
+      })
+    );
     await waitFor(() => expect(screen.getByTestId('active-season').textContent).toBe('Season 1'));
   });
 
   it('resets activeSeason to null when deleting the only remaining season', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [{ name: 'E1', path: 'p1' }];
       if (ch === 'file:deleteSeason') return { success: true };
       return null;
@@ -644,14 +784,20 @@ describe('SeriesDetail - branch coverage edges', () => {
     renderPage();
     await settled();
     fireEvent.click(screen.getByTestId('delete-season-0'));
-    await waitFor(() => expect(mockInvoke).toHaveBeenCalledWith('file:deleteSeason', { folderName: FOLDER, season: 'Season 1' }));
+    await waitFor(() =>
+      expect(mockInvoke).toHaveBeenCalledWith('file:deleteSeason', {
+        folderName: FOLDER,
+        season: 'Season 1',
+      })
+    );
     expect(screen.queryAllByTestId(/season-\d/)).toHaveLength(0);
     expect(screen.getByTestId('active-season').textContent).toBe('');
   });
 
   it('leaves the episode list unchanged when deleteEpisode returns success:false', async () => {
     mockInvoke.mockImplementation(async (ch) => {
-      if (ch === 'file:getSeriesDetail') return { title: 'S', type: 'serie', seasons: ['Season 1'] };
+      if (ch === 'file:getSeriesDetail')
+        return { title: 'S', type: 'serie', seasons: ['Season 1'] };
       if (ch === 'file:getEpisodes') return [{ name: 'E1', path: 'p1' }];
       if (ch === 'file:deleteEpisode') return { success: false };
       return null;

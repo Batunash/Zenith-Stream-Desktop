@@ -133,8 +133,11 @@ describe('Config Module', () => {
       loadConfig();
       const path = require('path');
       const os = require('os');
-      const expectedBase = process.env.APPDATA
-        || (process.platform === 'darwin' ? os.homedir() + '/Library/Preferences' : os.homedir() + '/.config');
+      const expectedBase =
+        process.env.APPDATA ||
+        (process.platform === 'darwin'
+          ? os.homedir() + '/Library/Preferences'
+          : os.homedir() + '/.config');
       const calledPath = fs.existsSync.mock.calls[0][0];
       expect(calledPath).toBe(path.join(expectedBase, 'Video Hub', 'settings.json'));
     });
@@ -150,9 +153,12 @@ describe('Config Module', () => {
     });
 
     it('should always expose four keys', () => {
-      expect(Object.keys(loadConfig()).sort()).toEqual(
-        ['JWT_EXPIRES_IN', 'JWT_SECRET', 'MEDIA_DIR', 'PORT']
-      );
+      expect(Object.keys(loadConfig()).sort()).toEqual([
+        'JWT_EXPIRES_IN',
+        'JWT_SECRET',
+        'MEDIA_DIR',
+        'PORT',
+      ]);
     });
   });
 });

@@ -10,20 +10,27 @@ const ControlPanel = ({ isServerRunning, toggleServer, onOpenSettings }) => {
   return (
     <div style={styles.container}>
       <div style={styles.statusSection}>
-        <h3 style={{marginBottom: '20px', color: '#eee'}}>{t('control_panel.server_status')}</h3>
-        
-        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px'}}>
+        <h3 style={{ marginBottom: '20px', color: '#eee' }}>{t('control_panel.server_status')}</h3>
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '10px',
+          }}
+        >
           <span style={styles.statusIndicator}></span>
-          <span style={{fontWeight: '500', color: isServerRunning ? '#4ade80' : '#ef4444'}}>
+          <span style={{ fontWeight: '500', color: isServerRunning ? '#4ade80' : '#ef4444' }}>
             {isServerRunning ? t('control_panel.running') : t('control_panel.stopped')}
           </span>
         </div>
-        
-        <button 
-          style={styles.serverBtn} 
+
+        <button
+          style={styles.serverBtn}
           onClick={toggleServer}
-          onMouseEnter={(e) => e.target.style.opacity = '0.9'}
-          onMouseLeave={(e) => e.target.style.opacity = '1'}
+          onMouseEnter={(e) => (e.target.style.opacity = '0.9')}
+          onMouseLeave={(e) => (e.target.style.opacity = '1')}
         >
           {isServerRunning ? t('control_panel.stop_server') : t('control_panel.start_server')}
         </button>
@@ -32,10 +39,18 @@ const ControlPanel = ({ isServerRunning, toggleServer, onOpenSettings }) => {
         <button
           style={styles.settingsBtn}
           onClick={() => navigate('/add-series')}
-          onMouseEnter={(e) => e.target.style.backgroundColor = '#444'}
-          onMouseLeave={(e) => e.target.style.backgroundColor = '#333'}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = '#444')}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = '#333')}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '8px'}}>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            style={{ marginRight: '8px' }}
+          >
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
@@ -44,10 +59,18 @@ const ControlPanel = ({ isServerRunning, toggleServer, onOpenSettings }) => {
         <button
           style={styles.settingsBtn}
           onClick={() => navigate('/download')}
-          onMouseEnter={(e) => e.target.style.backgroundColor = '#444'}
-          onMouseLeave={(e) => e.target.style.backgroundColor = '#333'}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = '#444')}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = '#333')}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '8px'}}>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            style={{ marginRight: '8px' }}
+          >
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7,10 12,15 17,10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -55,16 +78,24 @@ const ControlPanel = ({ isServerRunning, toggleServer, onOpenSettings }) => {
           {t('control_panel.download_manager', 'Web Downloader (1DM)')}
         </button>
         <button
-          style={styles.settingsBtn} 
+          style={styles.settingsBtn}
           onClick={onOpenSettings}
-          onMouseEnter={(e) => e.target.style.backgroundColor = '#444'}
-          onMouseLeave={(e) => e.target.style.backgroundColor = '#333'}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = '#444')}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = '#333')}
         >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '8px'}}>
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-            </svg>
-            {t('control_panel.settings')}
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            style={{ marginRight: '8px' }}
+          >
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          {t('control_panel.settings')}
         </button>
       </div>
     </div>
@@ -93,7 +124,7 @@ const getStyles = (isServerRunning) => ({
     width: '15px',
     height: '15px',
     borderRadius: '50%',
-    backgroundColor: isServerRunning ? '#4ade80' : '#ef4444', 
+    backgroundColor: isServerRunning ? '#4ade80' : '#ef4444',
     display: 'inline-block',
     marginRight: '10px',
     boxShadow: isServerRunning ? '0 0 10px #4ade80' : 'none',
@@ -115,7 +146,7 @@ const getStyles = (isServerRunning) => ({
   settingsBtn: {
     width: '100%',
     padding: '12px',
-    marginTop:'20px',
+    marginTop: '20px',
     backgroundColor: '#333',
     color: '#bbb',
     border: '1px solid #444',
@@ -126,7 +157,7 @@ const getStyles = (isServerRunning) => ({
     justifyContent: 'center',
     fontSize: '0.9rem',
     transition: 'background-color 0.2s',
-  }
+  },
 });
 
 export default ControlPanel;

@@ -1,34 +1,34 @@
 const { ipcMain, app } = require('electron');
-const handleSettings = require("./../utils/handlesettings");
-const db = require("../../backend/src/config/database");
-const { VIDEO_EXTS } = require("../../backend/src/constants");
+const handleSettings = require('./../utils/handlesettings');
+const db = require('../../backend/src/config/database');
+const { VIDEO_EXTS } = require('../../backend/src/constants');
 
 module.exports = function registerSettingsControl() {
-    ipcMain.handle("settings:get", async () => {
-        return handleSettings.getSettings();
-    });
+  ipcMain.handle('settings:get', async () => {
+    return handleSettings.getSettings();
+  });
 
-    ipcMain.handle("settings:save", async (event, newConfig) => {
-        try {
-            const currentSettings = handleSettings.getSettings();
-            const oldPath = currentSettings.MEDIA_DIR;
-            const newPath = newConfig.MEDIA_DIR;
+  ipcMain.handle('settings:save', async (event, newConfig) => {
+    try {
+      const currentSettings = handleSettings.getSettings();
+      const oldPath = currentSettings.MEDIA_DIR;
+      const newPath = newConfig.MEDIA_DIR;
 
-            if (newPath && newPath !== oldPath) {
-                handleSettings.moveArchiveContents(oldPath, newPath);
-            }
-            handleSettings.saveSettings(newConfig);
-            db.syncFilesystemToDatabase(newPath, VIDEO_EXTS);
+      if (newPath && newPath !== oldPath) {
+        handleSettings.moveArchiveContents(oldPath, newPath);
+      }
+      handleSettings.saveSettings(newConfig);
+      db.syncFilesystemToDatabase(newPath, VIDEO_EXTS);
 
-            return { success: true };
-        } catch (err) {
-            console.error("Settings save error:", err);
-            return { success: false, error: err.message };
-        }
-    });
+      return { success: true };
+    } catch (err) {
+      console.error('Settings save error:', err);
+      return { success: false, error: err.message };
+    }
+  });
 
-    ipcMain.handle("app:restart", () => {
-        app.relaunch();
-        app.exit();
-    });
+  ipcMain.handle('app:restart', () => {
+    app.relaunch();
+    app.exit();
+  });
 };

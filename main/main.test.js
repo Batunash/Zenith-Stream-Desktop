@@ -6,7 +6,11 @@ const Module = require('module');
 let readyCb = null;
 function buildElectronMock() {
   readyCb = null;
-  const readyable = { then: (cb) => { readyCb = cb; } };
+  const readyable = {
+    then: (cb) => {
+      readyCb = cb;
+    },
+  };
 
   class MockBrowserWindow {
     constructor(opts) {
@@ -22,7 +26,9 @@ function buildElectronMock() {
       this.loadURL = vi.fn();
       this.loadFile = vi.fn();
     }
-    static getAllWindows = vi.fn(function () { return MockBrowserWindow.instances; });
+    static getAllWindows = vi.fn(function () {
+      return MockBrowserWindow.instances;
+    });
   }
   MockBrowserWindow.instances = [];
   MockBrowserWindow.lastOpts = null;
@@ -50,9 +56,19 @@ function buildElectronMock() {
 // and require.cache injection can reference the SAME vi.fn instances).
 const ipcMocks = vi.hoisted(() => {
   const fns = {};
-  ['serverControl', 'fileControl', 'dialogManager', 'authControl', 'settingsControl',
-   'windowControl', 'translateControl', 'burnControl', 'browserDownloaderControl']
-    .forEach((m) => { fns[m] = vi.fn(); });
+  [
+    'serverControl',
+    'fileControl',
+    'dialogManager',
+    'authControl',
+    'settingsControl',
+    'windowControl',
+    'translateControl',
+    'burnControl',
+    'browserDownloaderControl',
+  ].forEach((m) => {
+    fns[m] = vi.fn();
+  });
   return fns;
 });
 
@@ -71,8 +87,17 @@ let originalRequire;
 let originalNodeEnv;
 let originalPlatform;
 
-const IPC_MODULES = ['serverControl', 'fileControl', 'dialogManager', 'authControl', 'settingsControl',
-  'windowControl', 'translateControl', 'burnControl', 'browserDownloaderControl'];
+const IPC_MODULES = [
+  'serverControl',
+  'fileControl',
+  'dialogManager',
+  'authControl',
+  'settingsControl',
+  'windowControl',
+  'translateControl',
+  'burnControl',
+  'browserDownloaderControl',
+];
 
 function fireReady() {
   if (readyCb) readyCb();
@@ -94,16 +119,26 @@ beforeEach(() => {
   // alongside vi.mock, mirroring the auth.test.js CJS interop pattern).
   IPC_MODULES.forEach((m) => {
     const resolved = require.resolve(`./ipc/${m}`);
-    require.cache[resolved] = { id: resolved, filename: resolved, loaded: true, exports: ipcMocks[m], children: [], paths: [] };
+    require.cache[resolved] = {
+      id: resolved,
+      filename: resolved,
+      loaded: true,
+      exports: ipcMocks[m],
+      children: [],
+      paths: [],
+    };
   });
   delete require.cache[require.resolve('./main')];
 });
 
 afterEach(() => {
   Module.prototype.require = originalRequire;
-  if (originalNodeEnv === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV = originalNodeEnv;
+  if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
+  else process.env.NODE_ENV = originalNodeEnv;
   Object.defineProperty(process, 'platform', { value: originalPlatform, writable: true });
-  IPC_MODULES.forEach((m) => { delete require.cache[require.resolve(`./ipc/${m}`)]; });
+  IPC_MODULES.forEach((m) => {
+    delete require.cache[require.resolve(`./ipc/${m}`)];
+  });
 });
 
 describe('Electron Main Process', () => {
@@ -119,13 +154,17 @@ describe('Electron Main Process', () => {
     it('disables the Vaapi/Ozone features', () => {
       require('./main');
       expect(electronMock.app.commandLine.appendSwitch).toHaveBeenCalledWith(
-        'disable-features', 'VaapiVideoDecoder,UseOzonePlatform'
+        'disable-features',
+        'VaapiVideoDecoder,UseOzonePlatform'
       );
     });
 
     it('sets the ozone platform to x11', () => {
       require('./main');
-      expect(electronMock.app.commandLine.appendSwitch).toHaveBeenCalledWith('ozone-platform', 'x11');
+      expect(electronMock.app.commandLine.appendSwitch).toHaveBeenCalledWith(
+        'ozone-platform',
+        'x11'
+      );
     });
 
     it('disableHardwareAcceleration is called', () => {
@@ -204,7 +243,10 @@ describe('Electron Main Process', () => {
     it('registers the "media" file protocol', () => {
       require('./main');
       fireReady();
-      expect(electronMock.protocol.registerFileProtocol).toHaveBeenCalledWith('media', expect.any(Function));
+      expect(electronMock.protocol.registerFileProtocol).toHaveBeenCalledWith(
+        'media',
+        expect.any(Function)
+      );
     });
 
     it('handler resolves an absolute decoded URL directly', () => {
@@ -286,7 +328,10 @@ describe('Electron Main Process', () => {
       const wc = electronMock.BrowserWindow.instances[0].webContents;
       const handler = wc.on.mock.calls.find((c) => c[0] === 'console-message')[1];
       handler(null, 0, 'hello console');
-      expect(global.__fsMock.appendFileSync).toHaveBeenCalledWith('frontend.log', 'hello console\n');
+      expect(global.__fsMock.appendFileSync).toHaveBeenCalledWith(
+        'frontend.log',
+        'hello console\n'
+      );
     });
   });
 });

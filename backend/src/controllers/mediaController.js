@@ -2,7 +2,7 @@ const mediaService = require('../services/mediaService');
 
 async function listSeries(req, res) {
   try {
-    const userId = req.user?.id; 
+    const userId = req.user?.id;
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     const series = mediaService.getSeries(userId, baseUrl);
     res.json({ series });
@@ -24,5 +24,5 @@ async function getSeriesEpisodes(req, res) {
 }
 module.exports = {
   listSeries,
-  getSeriesEpisodes
+  getSeriesEpisodes,
 };

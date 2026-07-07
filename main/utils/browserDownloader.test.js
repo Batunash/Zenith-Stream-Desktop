@@ -42,18 +42,24 @@ function makeView(opts) {
 function setupModules(opts = {}) {
   // ffmpegHelper mock: a function returning a chainable command with .save/.kill.
   const commandMock = {
-    inputOptions:  vi.fn().mockReturnThis(),
+    inputOptions: vi.fn().mockReturnThis(),
     outputOptions: vi.fn().mockReturnThis(),
-    input:         vi.fn().mockReturnThis(),
-    on:            vi.fn().mockReturnThis(),
-    save:          vi.fn(),
-    kill:          vi.fn(),
+    input: vi.fn().mockReturnThis(),
+    on: vi.fn().mockReturnThis(),
+    save: vi.fn(),
+    kill: vi.fn(),
   };
   const ffmpegHelperMock = vi.fn(() => commandMock);
 
   // Rich electron mock.
-  const BrowserView = vi.fn(function () { return makeView(opts); });
-  const mainWindow = { setBrowserView: vi.fn(), removeBrowserView: vi.fn(), webContents: { send: vi.fn() } };
+  const BrowserView = vi.fn(function () {
+    return makeView(opts);
+  });
+  const mainWindow = {
+    setBrowserView: vi.fn(),
+    removeBrowserView: vi.fn(),
+    webContents: { send: vi.fn() },
+  };
   const BrowserWindow = Object.assign(vi.fn(), {
     getAllWindows: vi.fn(() => opts.windows ?? [mainWindow]),
     fromWebContents: vi.fn(),
@@ -72,7 +78,14 @@ function setupModules(opts = {}) {
   // Inject ffmpegHelper mock into Node's cache so browserDownloader's require gets it.
   const ffResolved = require.resolve('./ffmpegHelper');
   delete require.cache[ffResolved];
-  require.cache[ffResolved] = { id: ffResolved, filename: ffResolved, loaded: true, exports: ffmpegHelperMock, children: [], paths: [] };
+  require.cache[ffResolved] = {
+    id: ffResolved,
+    filename: ffResolved,
+    loaded: true,
+    exports: ffmpegHelperMock,
+    children: [],
+    paths: [],
+  };
 
   // Fresh browserDownloader module (resets module-level `let` state).
   vi.resetModules();
@@ -98,15 +111,31 @@ const flush = (n = 6) => {
 
 describe('browserDownloader', () => {
   let env;
-  beforeEach(() => { vi.clearAllMocks(); env = setupModules(); });
-  afterEach(() => { restoreRequire(); });
+  beforeEach(() => {
+    vi.clearAllMocks();
+    env = setupModules();
+  });
+  afterEach(() => {
+    restoreRequire();
+  });
 
   describe('module exports', () => {
     it('exports the full public API', () => {
       expect(Object.keys(env.mod).sort()).toEqual([
-        'cancelDownload', 'clearCapturedStreams', 'clearCompletedDownloads', 'downloadStream',
-        'getCapturedStreams', 'getDownloads', 'goBack', 'goForward', 'hideBrowserView',
-        'initBrowserView', 'navigateTo', 'reload', 'resizeBrowserView', 'showBrowserView',
+        'cancelDownload',
+        'clearCapturedStreams',
+        'clearCompletedDownloads',
+        'downloadStream',
+        'getCapturedStreams',
+        'getDownloads',
+        'goBack',
+        'goForward',
+        'hideBrowserView',
+        'initBrowserView',
+        'navigateTo',
+        'reload',
+        'resizeBrowserView',
+        'showBrowserView',
       ]);
     });
   });
@@ -116,27 +145,38 @@ describe('browserDownloader', () => {
       const r = await env.mod.navigateTo('http://example.com');
       expect(r).toEqual({ success: true, url: 'http://example.com' });
       const view = env.BrowserView.mock.results[0].value;
-      expect(view.webContents.loadURL).toHaveBeenCalledWith('http://example.com', expect.objectContaining({ extraHeaders: expect.any(String) }));
+      expect(view.webContents.loadURL).toHaveBeenCalledWith(
+        'http://example.com',
+        expect.objectContaining({ extraHeaders: expect.any(String) })
+      );
     });
 
     it('passes https URLs through', async () => {
       await env.mod.navigateTo('https://secure.test/path?q=1');
-      expect(env.BrowserView.mock.results[0].value.webContents.loadURL.mock.calls[0][0]).toBe('https://secure.test/path?q=1');
+      expect(env.BrowserView.mock.results[0].value.webContents.loadURL.mock.calls[0][0]).toBe(
+        'https://secure.test/path?q=1'
+      );
     });
 
     it('prepends https:// to a bare host with a dot and no spaces', async () => {
       await env.mod.navigateTo('example.com');
-      expect(env.BrowserView.mock.results[0].value.webContents.loadURL.mock.calls[0][0]).toBe('https://example.com');
+      expect(env.BrowserView.mock.results[0].value.webContents.loadURL.mock.calls[0][0]).toBe(
+        'https://example.com'
+      );
     });
 
     it('treats a space-containing term as a Google search', async () => {
       await env.mod.navigateTo('breaking bad season 1');
-      expect(env.BrowserView.mock.results[0].value.webContents.loadURL.mock.calls[0][0]).toBe('https://www.google.com/search?q=' + encodeURIComponent('breaking bad season 1'));
+      expect(env.BrowserView.mock.results[0].value.webContents.loadURL.mock.calls[0][0]).toBe(
+        'https://www.google.com/search?q=' + encodeURIComponent('breaking bad season 1')
+      );
     });
 
     it('treats a dot-less term as a Google search', async () => {
       await env.mod.navigateTo('superman');
-      expect(env.BrowserView.mock.results[0].value.webContents.loadURL.mock.calls[0][0]).toBe('https://www.google.com/search?q=superman');
+      expect(env.BrowserView.mock.results[0].value.webContents.loadURL.mock.calls[0][0]).toBe(
+        'https://www.google.com/search?q=superman'
+      );
     });
   });
 
@@ -150,8 +190,14 @@ describe('browserDownloader', () => {
 
     it('registers onBeforeSendHeaders and onResponseStarted interceptors with url filter', () => {
       const v = env.mod.initBrowserView();
-      expect(v.webContents.session.webRequest.onBeforeSendHeaders).toHaveBeenCalledWith({ urls: ['*://*/*'] }, expect.any(Function));
-      expect(v.webContents.session.webRequest.onResponseStarted).toHaveBeenCalledWith({ urls: ['*://*/*'] }, expect.any(Function));
+      expect(v.webContents.session.webRequest.onBeforeSendHeaders).toHaveBeenCalledWith(
+        { urls: ['*://*/*'] },
+        expect.any(Function)
+      );
+      expect(v.webContents.session.webRequest.onResponseStarted).toHaveBeenCalledWith(
+        { urls: ['*://*/*'] },
+        expect.any(Function)
+      );
     });
 
     it('is idempotent while the existing view is alive', () => {
@@ -175,111 +221,278 @@ describe('browserDownloader', () => {
     }
 
     it('ignores non-2xx responses', () => {
-      fire({ url: 'https://x.com/v.m3u8', statusCode: 404, bytesReceived: 1000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith('browser:streamDetected', expect.anything());
+      fire({
+        url: 'https://x.com/v.m3u8',
+        statusCode: 404,
+        bytesReceived: 1000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.anything()
+      );
     });
 
     it('captures an HLS .m3u8 stream (type HLS)', () => {
-      fire({ url: 'https://x.com/playlist.m3u8', statusCode: 200, bytesReceived: 5000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:streamDetected', expect.objectContaining({ type: 'HLS' }));
+      fire({
+        url: 'https://x.com/playlist.m3u8',
+        statusCode: 200,
+        bytesReceived: 5000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.objectContaining({ type: 'HLS' })
+      );
     });
 
     it('captures an MP4 stream (type MP4)', () => {
-      fire({ url: 'https://x.com/movie.mp4', statusCode: 200, bytesReceived: 100000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:streamDetected', expect.objectContaining({ type: 'MP4' }));
+      fire({
+        url: 'https://x.com/movie.mp4',
+        statusCode: 200,
+        bytesReceived: 100000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.objectContaining({ type: 'MP4' })
+      );
     });
 
     it('does not classify googlevideo .mp4 as MP4', () => {
-      fire({ url: 'https://googlevideo.com/v.mp4', statusCode: 200, bytesReceived: 100000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith('browser:streamDetected', expect.objectContaining({ type: 'MP4' }));
+      fire({
+        url: 'https://googlevideo.com/v.mp4',
+        statusCode: 200,
+        bytesReceived: 100000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.objectContaining({ type: 'MP4' })
+      );
     });
 
     it('captures a .ts segment (type TS)', () => {
-      fire({ url: 'https://x.com/seg.ts', statusCode: 200, bytesReceived: 100000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:streamDetected', expect.objectContaining({ type: 'TS' }));
+      fire({
+        url: 'https://x.com/seg.ts',
+        statusCode: 200,
+        bytesReceived: 100000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.objectContaining({ type: 'TS' })
+      );
     });
 
     it('skips googletagmanager .ts', () => {
-      fire({ url: 'https://googletagmanager.com/x.ts', statusCode: 200, bytesReceived: 100000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith('browser:streamDetected', expect.anything());
+      fire({
+        url: 'https://googletagmanager.com/x.ts',
+        statusCode: 200,
+        bytesReceived: 100000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.anything()
+      );
     });
 
     it('captures a .m4s segment (type DASH)', () => {
-      fire({ url: 'https://x.com/a.m4s', statusCode: 200, bytesReceived: 100000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:streamDetected', expect.objectContaining({ type: 'DASH' }));
+      fire({
+        url: 'https://x.com/a.m4s',
+        statusCode: 200,
+        bytesReceived: 100000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.objectContaining({ type: 'DASH' })
+      );
     });
 
     it('captures .vtt subtitles (type SUBTITLE)', () => {
-      fire({ url: 'https://x.com/sub.vtt', statusCode: 200, bytesReceived: 5000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:streamDetected', expect.objectContaining({ type: 'SUBTITLE' }));
+      fire({
+        url: 'https://x.com/sub.vtt',
+        statusCode: 200,
+        bytesReceived: 5000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.objectContaining({ type: 'SUBTITLE' })
+      );
     });
 
     it('classifies content-type video/* as STREAM', () => {
-      fire({ url: 'https://x.com/blob?id=1', statusCode: 200, bytesReceived: 100000, responseHeaders: { 'content-type': ['video/mp4'] } });
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:streamDetected', expect.objectContaining({ type: 'STREAM' }));
+      fire({
+        url: 'https://x.com/blob?id=1',
+        statusCode: 200,
+        bytesReceived: 100000,
+        responseHeaders: { 'content-type': ['video/mp4'] },
+      });
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.objectContaining({ type: 'STREAM' })
+      );
     });
 
     it('classifies content-type mpegurl as STREAM', () => {
-      fire({ url: 'https://x.com/blob?id=2', statusCode: 200, bytesReceived: 100000, responseHeaders: { 'content-type': ['application/vnd.apple.mpegurl'] } });
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:streamDetected', expect.objectContaining({ type: 'STREAM' }));
+      fire({
+        url: 'https://x.com/blob?id=2',
+        statusCode: 200,
+        bytesReceived: 100000,
+        responseHeaders: { 'content-type': ['application/vnd.apple.mpegurl'] },
+      });
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.objectContaining({ type: 'STREAM' })
+      );
     });
 
     it('skips known ad/tracking patterns', () => {
-      fire({ url: 'https://google-analytics.com/collect.mp4', statusCode: 200, bytesReceived: 100000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith('browser:streamDetected', expect.anything());
+      fire({
+        url: 'https://google-analytics.com/collect.mp4',
+        statusCode: 200,
+        bytesReceived: 100000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.anything()
+      );
     });
 
     it('skips static image extensions when not disguised', () => {
-      fire({ url: 'https://x.com/poster.jpg', statusCode: 200, bytesReceived: 100000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith('browser:streamDetected', expect.anything());
+      fire({
+        url: 'https://x.com/poster.jpg',
+        statusCode: 200,
+        bytesReceived: 100000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.anything()
+      );
     });
 
     it('skips plain .txt that is not master.txt/index.txt', () => {
-      fire({ url: 'https://x.com/notes.txt', statusCode: 200, bytesReceived: 100000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith('browser:streamDetected', expect.anything());
+      fire({
+        url: 'https://x.com/notes.txt',
+        statusCode: 200,
+        bytesReceived: 100000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.anything()
+      );
     });
 
     it('captures master.txt as an HLS playlist', () => {
-      fire({ url: 'https://x.com/master.txt', statusCode: 200, bytesReceived: 5000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:streamDetected', expect.objectContaining({ type: 'HLS' }));
+      fire({
+        url: 'https://x.com/master.txt',
+        statusCode: 200,
+        bytesReceived: 5000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.objectContaining({ type: 'HLS' })
+      );
     });
 
     it('captures index.txt as an HLS playlist', () => {
-      fire({ url: 'https://x.com/index.txt', statusCode: 200, bytesReceived: 5000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:streamDetected', expect.objectContaining({ type: 'HLS' }));
+      fire({
+        url: 'https://x.com/index.txt',
+        statusCode: 200,
+        bytesReceived: 5000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.objectContaining({ type: 'HLS' })
+      );
     });
 
     it('skips disguised .jpg segment files under /hls/', () => {
-      fire({ url: 'https://x.com/hls/image001.jpg', statusCode: 200, bytesReceived: 100000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith('browser:streamDetected', expect.anything());
+      fire({
+        url: 'https://x.com/hls/image001.jpg',
+        statusCode: 200,
+        bytesReceived: 100000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.anything()
+      );
     });
 
     it('keeps a disguised .m3u8 under /hls/', () => {
-      fire({ url: 'https://x.com/hls/playlist.m3u8', statusCode: 200, bytesReceived: 5000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:streamDetected', expect.objectContaining({ type: 'HLS' }));
+      fire({
+        url: 'https://x.com/hls/playlist.m3u8',
+        statusCode: 200,
+        bytesReceived: 5000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.objectContaining({ type: 'HLS' })
+      );
     });
 
     it('skips seg-/chunk/index- fragments (non-m3u8)', () => {
-      fire({ url: 'https://x.com/seg-1.ts', statusCode: 200, bytesReceived: 100000, responseHeaders: {} });
-      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith('browser:streamDetected', expect.anything());
+      fire({
+        url: 'https://x.com/seg-1.ts',
+        statusCode: 200,
+        bytesReceived: 100000,
+        responseHeaders: {},
+      });
+      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.anything()
+      );
     });
 
     it('skips small (<50000B) non-video, non-sub, non-m3u8 bodies', () => {
-      fire({ url: 'https://x.com/data.bin', statusCode: 200, bytesReceived: 500, responseHeaders: { 'content-type': ['application/octet-stream'] } });
-      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith('browser:streamDetected', expect.anything());
+      fire({
+        url: 'https://x.com/data.bin',
+        statusCode: 200,
+        bytesReceived: 500,
+        responseHeaders: { 'content-type': ['application/octet-stream'] },
+      });
+      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith(
+        'browser:streamDetected',
+        expect.anything()
+      );
     });
 
     it('deduplicates identical URLs (only the first notifies)', () => {
       const v = env.mod.initBrowserView();
       const cb = v.webContents.session.webRequest.onResponseStarted.mock.calls[0][1];
-      cb({ url: 'https://x.com/p.m3u8', statusCode: 200, bytesReceived: 1000, responseHeaders: {} });
-      cb({ url: 'https://x.com/p.m3u8', statusCode: 200, bytesReceived: 1000, responseHeaders: {} });
+      cb({
+        url: 'https://x.com/p.m3u8',
+        statusCode: 200,
+        bytesReceived: 1000,
+        responseHeaders: {},
+      });
+      cb({
+        url: 'https://x.com/p.m3u8',
+        statusCode: 200,
+        bytesReceived: 1000,
+        responseHeaders: {},
+      });
       expect(env.mod.getCapturedStreams()).toHaveLength(1);
       expect(env.mainWindow.webContents.send).toHaveBeenCalledTimes(1);
     });
 
     it('streamInfo carries url/type/size/pageTitle/contentType/timestamp/id (and sizeMB via getter)', () => {
-      fire({ url: 'https://x.com/movie.mp4', statusCode: 200, bytesReceived: 12345, responseHeaders: { 'content-type': ['video/mp4'] } });
+      fire({
+        url: 'https://x.com/movie.mp4',
+        statusCode: 200,
+        bytesReceived: 12345,
+        responseHeaders: { 'content-type': ['video/mp4'] },
+      });
       const s = env.mod.getCapturedStreams()[0];
       expect(s.url).toBe('https://x.com/movie.mp4');
       expect(s.type).toBe('MP4');
@@ -292,7 +505,12 @@ describe('browserDownloader', () => {
     });
 
     it('cleanUrl strips #fragment and exact fbclid param (utm_ is NOT prefix-stripped — documents source quirk)', () => {
-      fire({ url: 'https://x.com/p.m3u8?fbclid=xyz&utm_source=foo#frag', statusCode: 200, bytesReceived: 1000, responseHeaders: {} });
+      fire({
+        url: 'https://x.com/p.m3u8?fbclid=xyz&utm_source=foo#frag',
+        statusCode: 200,
+        bytesReceived: 1000,
+        responseHeaders: {},
+      });
       // fbclid (exact key) is removed; utm_source stays because URLSearchParams.delete is exact-match,
       // not prefix-match — the source's `delete('utm_')` only removes a key literally named "utm_".
       expect(env.mod.getCapturedStreams()[0].url).toBe('https://x.com/p.m3u8?utm_source=foo');
@@ -302,7 +520,12 @@ describe('browserDownloader', () => {
     it('resizeBrowserView sets bounds when a view exists', () => {
       env.mod.initBrowserView();
       env.mod.resizeBrowserView({ x: 0, y: 0, width: 800, height: 600 });
-      expect(env.BrowserView.mock.results[0].value.setBounds).toHaveBeenCalledWith({ x: 0, y: 0, width: 800, height: 600 });
+      expect(env.BrowserView.mock.results[0].value.setBounds).toHaveBeenCalledWith({
+        x: 0,
+        y: 0,
+        width: 800,
+        height: 600,
+      });
     });
 
     it('resizeBrowserView is a no-op without a view', () => {
@@ -313,7 +536,9 @@ describe('browserDownloader', () => {
     it('showBrowserView attaches the existing view to the main window', () => {
       env.mod.initBrowserView();
       env.mod.showBrowserView();
-      expect(env.mainWindow.setBrowserView).toHaveBeenCalledWith(env.BrowserView.mock.results[0].value);
+      expect(env.mainWindow.setBrowserView).toHaveBeenCalledWith(
+        env.BrowserView.mock.results[0].value
+      );
     });
 
     it('showBrowserView lazily creates a view when none exists', () => {
@@ -332,7 +557,9 @@ describe('browserDownloader', () => {
     it('hideBrowserView removes the view from the main window', () => {
       env.mod.initBrowserView();
       env.mod.hideBrowserView();
-      expect(env.mainWindow.removeBrowserView).toHaveBeenCalledWith(env.BrowserView.mock.results[0].value);
+      expect(env.mainWindow.removeBrowserView).toHaveBeenCalledWith(
+        env.BrowserView.mock.results[0].value
+      );
     });
 
     it('hideBrowserView is a no-op without a main window', () => {
@@ -382,21 +609,30 @@ describe('browserDownloader', () => {
       const v = env.mod.initBrowserView();
       const cb = v.webContents.on.mock.calls.find((c) => c[0] === 'did-start-navigation')[1];
       cb({}, 'https://x.com/page', false, true); // isMainFrame=true
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:urlChanged', 'https://x.com/page');
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:urlChanged',
+        'https://x.com/page'
+      );
     });
 
     it('did-start-navigation on a sub frame does not notify', () => {
       const v = env.mod.initBrowserView();
       const cb = v.webContents.on.mock.calls.find((c) => c[0] === 'did-start-navigation')[1];
       cb({}, 'https://x.com/frame', false, false);
-      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith('browser:urlChanged', expect.anything());
+      expect(env.mainWindow.webContents.send).not.toHaveBeenCalledWith(
+        'browser:urlChanged',
+        expect.anything()
+      );
     });
 
     it('page-title-updated notifies browser:titleChanged', () => {
       const v = env.mod.initBrowserView();
       const cb = v.webContents.on.mock.calls.find((c) => c[0] === 'page-title-updated')[1];
       cb({}, 'New Title');
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:titleChanged', 'New Title');
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:titleChanged',
+        'New Title'
+      );
     });
 
     it('app-command browser-backward navigates back when allowed', () => {
@@ -430,7 +666,12 @@ describe('browserDownloader', () => {
 
     it('clearCapturedStreams empties the list', () => {
       const v = env.mod.initBrowserView();
-      v.webContents.session.webRequest.onResponseStarted.mock.calls[0][1]({ url: 'https://x.com/p.m3u8', statusCode: 200, bytesReceived: 1048576, responseHeaders: {} });
+      v.webContents.session.webRequest.onResponseStarted.mock.calls[0][1]({
+        url: 'https://x.com/p.m3u8',
+        statusCode: 200,
+        bytesReceived: 1048576,
+        responseHeaders: {},
+      });
       expect(env.mod.getCapturedStreams()).toHaveLength(1);
       env.mod.clearCapturedStreams();
       expect(env.mod.getCapturedStreams()).toEqual([]);
@@ -448,8 +689,13 @@ describe('browserDownloader', () => {
       await expect(p).resolves.toEqual({ success: true, path: out });
       expect(fs.mkdirSync).toHaveBeenCalledWith('C:/Media', { recursive: true });
       expect(env.commandMock.save).toHaveBeenCalledWith(out);
-      expect(env.mod.getDownloads().some((d) => d.url === stream.url && d.outputPath === out)).toBe(true);
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:complete', expect.objectContaining({ outputPath: out }));
+      expect(env.mod.getDownloads().some((d) => d.url === stream.url && d.outputPath === out)).toBe(
+        true
+      );
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:complete',
+        expect.objectContaining({ outputPath: out })
+      );
     });
 
     it('builds HLS reconnect/probe options for an .m3u8 stream', async () => {
@@ -510,7 +756,10 @@ describe('browserDownloader', () => {
       await flush();
       const progCb = env.commandMock.on.mock.calls.find((c) => c[0] === 'progress')[1];
       progCb({ percent: 42, targetSize: 100 });
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:progress', expect.objectContaining({ percent: 42, status: 'downloading' }));
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:progress',
+        expect.objectContaining({ percent: 42, status: 'downloading' })
+      );
       env.commandMock.on.mock.calls.find((c) => c[0] === 'end')[1]();
       await p;
     });
@@ -521,7 +770,9 @@ describe('browserDownloader', () => {
       await flush();
       const progCb = env.commandMock.on.mock.calls.find((c) => c[0] === 'progress')[1];
       progCb({ percent: 250 });
-      expect(env.mainWindow.webContents.send.mock.calls.some((c) => c[1].percent === 100)).toBe(true);
+      expect(env.mainWindow.webContents.send.mock.calls.some((c) => c[1].percent === 100)).toBe(
+        true
+      );
       env.commandMock.on.mock.calls.find((c) => c[0] === 'end')[1]();
       await p;
     });
@@ -532,7 +783,9 @@ describe('browserDownloader', () => {
       await flush();
       const progCb = env.commandMock.on.mock.calls.find((c) => c[0] === 'progress')[1];
       progCb({ targetSize: 500 }); // no percent
-      expect(env.mainWindow.webContents.send.mock.calls.some((c) => c[1].sizeKB === 500)).toBe(true);
+      expect(env.mainWindow.webContents.send.mock.calls.some((c) => c[1].sizeKB === 500)).toBe(
+        true
+      );
       env.commandMock.on.mock.calls.find((c) => c[0] === 'end')[1]();
       await p;
     });
@@ -543,7 +796,10 @@ describe('browserDownloader', () => {
       await flush();
       env.commandMock.on.mock.calls.find((c) => c[0] === 'error')[1](new Error('boom'));
       await expect(p).rejects.toThrow('Download failed: boom');
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:error', expect.objectContaining({ error: 'boom' }));
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:error',
+        expect.objectContaining({ error: 'boom' })
+      );
     });
   });
 
@@ -552,7 +808,13 @@ describe('browserDownloader', () => {
       const v = env.mod.initBrowserView();
       // Prime requestHeadersMap via onBeforeSendHeaders for the stream URL.
       const beforeCb = v.webContents.session.webRequest.onBeforeSendHeaders.mock.calls[0][1];
-      const headers = { Referer: 'https://x.com/watch', Cookie: 'sid=1', Origin: 'https://x.com', authorization: 'Bearer t', 'X-Other': 'z' };
+      const headers = {
+        Referer: 'https://x.com/watch',
+        Cookie: 'sid=1',
+        Origin: 'https://x.com',
+        authorization: 'Bearer t',
+        'X-Other': 'z',
+      };
       beforeCb({ url: 'https://x.com/movie.mp4', requestHeaders: headers }, () => {});
       const stream = { url: 'https://x.com/movie.mp4', type: 'MP4', pageTitle: 'M' };
       const p = env.mod.downloadStream(stream, 'C:/Media/m.mp4');
@@ -572,7 +834,10 @@ describe('browserDownloader', () => {
     it('uses the captured User-Agent when present', async () => {
       const v = env.mod.initBrowserView();
       const beforeCb = v.webContents.session.webRequest.onBeforeSendHeaders.mock.calls[0][1];
-      beforeCb({ url: 'https://x.com/movie.mp4', requestHeaders: { 'User-Agent': 'MyUA/1.0' } }, () => {});
+      beforeCb(
+        { url: 'https://x.com/movie.mp4', requestHeaders: { 'User-Agent': 'MyUA/1.0' } },
+        () => {}
+      );
       const stream = { url: 'https://x.com/movie.mp4', type: 'MP4', pageTitle: 'M' };
       const p = env.mod.downloadStream(stream, 'C:/Media/m.mp4');
       await flush();
@@ -590,24 +855,39 @@ describe('browserDownloader', () => {
       const out = 'C:/Media/sub.vtt';
       const p = env.mod.downloadStream(stream, out);
       await flush();
-      expect(env.net.fetch).toHaveBeenCalledWith('https://x.com/sub.vtt', expect.objectContaining({ headers: expect.objectContaining({ 'User-Agent': expect.any(String) }) }));
-      expect(fs.writeFileSync).toHaveBeenCalledWith(expect.stringContaining('zenith_standalone_sub'), 'WEBVTT\n');
+      expect(env.net.fetch).toHaveBeenCalledWith(
+        'https://x.com/sub.vtt',
+        expect.objectContaining({
+          headers: expect.objectContaining({ 'User-Agent': expect.any(String) }),
+        })
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        expect.stringContaining('zenith_standalone_sub'),
+        'WEBVTT\n'
+      );
       expect(env.commandMock.save).toHaveBeenCalledWith(out);
       env.commandMock.on.mock.calls.find((c) => c[0] === 'end')[1]();
       await expect(p).resolves.toEqual({ success: true, path: out });
-      expect(fs.unlink).toHaveBeenCalledWith(expect.stringContaining('zenith_standalone_sub'), expect.any(Function));
+      expect(fs.unlink).toHaveBeenCalledWith(
+        expect.stringContaining('zenith_standalone_sub'),
+        expect.any(Function)
+      );
     });
 
     it('rejects with "Subtitle download failed (HTTP <status>)" when fetch !ok', async () => {
       env.net.fetch.mockResolvedValueOnce({ ok: false, status: 404 });
       const stream = { url: 'https://x.com/sub.vtt', type: 'SUBTITLE', pageTitle: 'S' };
-      await expect(env.mod.downloadStream(stream, 'C:/Media/sub.vtt')).rejects.toThrow('Subtitle download failed (HTTP 404)');
+      await expect(env.mod.downloadStream(stream, 'C:/Media/sub.vtt')).rejects.toThrow(
+        'Subtitle download failed (HTTP 404)'
+      );
     });
 
     it('rejects with "Subtitle fetch error" when net.fetch throws', async () => {
       env.net.fetch.mockRejectedValueOnce(new Error('network down'));
       const stream = { url: 'https://x.com/sub.vtt', type: 'SUBTITLE', pageTitle: 'S' };
-      await expect(env.mod.downloadStream(stream, 'C:/Media/sub.vtt')).rejects.toThrow('Subtitle fetch error: network down');
+      await expect(env.mod.downloadStream(stream, 'C:/Media/sub.vtt')).rejects.toThrow(
+        'Subtitle fetch error: network down'
+      );
     });
   });
 
@@ -616,14 +896,25 @@ describe('browserDownloader', () => {
       const fs = require('fs');
       // Capture a SUBTITLE stream first so capturedStreams has an external sub.
       const v = env.mod.initBrowserView();
-      v.webContents.session.webRequest.onResponseStarted.mock.calls[0][1]({ url: 'https://x.com/sub_eng.vtt', statusCode: 200, bytesReceived: 5000, responseHeaders: {} });
-      env.net.fetch.mockResolvedValueOnce({ ok: true, text: () => Promise.resolve('WEBVTT ENG\n') });
+      v.webContents.session.webRequest.onResponseStarted.mock.calls[0][1]({
+        url: 'https://x.com/sub_eng.vtt',
+        statusCode: 200,
+        bytesReceived: 5000,
+        responseHeaders: {},
+      });
+      env.net.fetch.mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve('WEBVTT ENG\n'),
+      });
       const stream = { url: 'https://x.com/movie.mp4', type: 'MP4', pageTitle: 'M' };
       const out = 'C:/Media/movie.mkv';
       const p = env.mod.downloadStream(stream, out);
       await flush();
       expect(env.net.fetch).toHaveBeenCalledWith('https://x.com/sub_eng.vtt', expect.any(Object));
-      expect(fs.writeFileSync).toHaveBeenCalledWith(expect.stringContaining('zenith_sub'), 'WEBVTT ENG\n');
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        expect.stringContaining('zenith_sub'),
+        'WEBVTT ENG\n'
+      );
       expect(env.commandMock.input).toHaveBeenCalledWith(expect.stringContaining('zenith_sub'));
       const outOpts = env.commandMock.outputOptions.mock.calls[0][0];
       expect(outOpts).toContain('-map');
@@ -636,9 +927,17 @@ describe('browserDownloader', () => {
 
     it('labels a forced subtitle as Turkish (Forced)', async () => {
       const v = env.mod.initBrowserView();
-      v.webContents.session.webRequest.onResponseStarted.mock.calls[0][1]({ url: 'https://x.com/sub_forced.vtt', statusCode: 200, bytesReceived: 5000, responseHeaders: {} });
+      v.webContents.session.webRequest.onResponseStarted.mock.calls[0][1]({
+        url: 'https://x.com/sub_forced.vtt',
+        statusCode: 200,
+        bytesReceived: 5000,
+        responseHeaders: {},
+      });
       env.net.fetch.mockResolvedValueOnce({ ok: true, text: () => Promise.resolve('WEBVTT\n') });
-      const p = env.mod.downloadStream({ url: 'https://x.com/movie.mp4', type: 'MP4', pageTitle: 'M' }, 'C:/Media/m.mkv');
+      const p = env.mod.downloadStream(
+        { url: 'https://x.com/movie.mp4', type: 'MP4', pageTitle: 'M' },
+        'C:/Media/m.mkv'
+      );
       await flush();
       const outOpts = env.commandMock.outputOptions.mock.calls[0][0];
       expect(outOpts).toContain('language=tur');
@@ -649,9 +948,17 @@ describe('browserDownloader', () => {
 
     it('skips an external subtitle whose fetch returns !ok (continue)', async () => {
       const v = env.mod.initBrowserView();
-      v.webContents.session.webRequest.onResponseStarted.mock.calls[0][1]({ url: 'https://x.com/sub_eng.vtt', statusCode: 200, bytesReceived: 5000, responseHeaders: {} });
+      v.webContents.session.webRequest.onResponseStarted.mock.calls[0][1]({
+        url: 'https://x.com/sub_eng.vtt',
+        statusCode: 200,
+        bytesReceived: 5000,
+        responseHeaders: {},
+      });
       env.net.fetch.mockResolvedValueOnce({ ok: false, status: 403 });
-      const p = env.mod.downloadStream({ url: 'https://x.com/movie.mp4', type: 'MP4', pageTitle: 'M' }, 'C:/Media/m.mkv');
+      const p = env.mod.downloadStream(
+        { url: 'https://x.com/movie.mp4', type: 'MP4', pageTitle: 'M' },
+        'C:/Media/m.mkv'
+      );
       await flush();
       expect(env.commandMock.input).not.toHaveBeenCalled();
       expect(env.commandMock.save).toHaveBeenCalled();
@@ -661,14 +968,20 @@ describe('browserDownloader', () => {
   });
   describe('download lifecycle helpers', () => {
     it('cancelDownload kills the ffmpeg command and marks the job cancelled', async () => {
-      const p = env.mod.downloadStream({ url: 'https://x.com/movie.mp4', type: 'MP4', pageTitle: 'M' }, 'C:/Media/m.mp4');
+      const p = env.mod.downloadStream(
+        { url: 'https://x.com/movie.mp4', type: 'MP4', pageTitle: 'M' },
+        'C:/Media/m.mp4'
+      );
       p.catch(() => {}); // swallow eventual rejection so the run stays clean
       await flush();
       const jobId = env.mod.getDownloads()[0].id;
       env.mod.cancelDownload(jobId);
       expect(env.commandMock.kill).toHaveBeenCalledWith('SIGKILL');
       expect(env.mod.getDownloads()[0].status).toBe('cancelled');
-      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith('browser:cancelDownload', expect.objectContaining({ jobId }));
+      expect(env.mainWindow.webContents.send).toHaveBeenCalledWith(
+        'browser:cancelDownload',
+        expect.objectContaining({ jobId })
+      );
       env.commandMock.on.mock.calls.find((c) => c[0] === 'error')[1](new Error('killed'));
       await flush();
     });
@@ -679,7 +992,10 @@ describe('browserDownloader', () => {
     });
 
     it('clearCompletedDownloads removes completed jobs', async () => {
-      const p = env.mod.downloadStream({ url: 'https://x.com/a.mp4', type: 'MP4', pageTitle: 'A' }, 'C:/Media/a.mp4');
+      const p = env.mod.downloadStream(
+        { url: 'https://x.com/a.mp4', type: 'MP4', pageTitle: 'A' },
+        'C:/Media/a.mp4'
+      );
       p.catch(() => {});
       await flush();
       expect(env.mod.getDownloads()).toHaveLength(1);
@@ -692,7 +1008,10 @@ describe('browserDownloader', () => {
 
     it('clearCompletedDownloads removes cancelled jobs', async () => {
       // One download per test so the jobId (Date.now ms) is unique.
-      const p = env.mod.downloadStream({ url: 'https://x.com/a.mp4', type: 'MP4', pageTitle: 'A' }, 'C:/Media/a.mp4');
+      const p = env.mod.downloadStream(
+        { url: 'https://x.com/a.mp4', type: 'MP4', pageTitle: 'A' },
+        'C:/Media/a.mp4'
+      );
       p.catch(() => {});
       await flush();
       env.mod.cancelDownload(env.mod.getDownloads()[0].id);
@@ -704,7 +1023,10 @@ describe('browserDownloader', () => {
     });
 
     it('clearCompletedDownloads removes failed jobs', async () => {
-      const p = env.mod.downloadStream({ url: 'https://x.com/a.mp4', type: 'MP4', pageTitle: 'A' }, 'C:/Media/a.mp4');
+      const p = env.mod.downloadStream(
+        { url: 'https://x.com/a.mp4', type: 'MP4', pageTitle: 'A' },
+        'C:/Media/a.mp4'
+      );
       await flush();
       env.commandMock.on.mock.calls.find((c) => c[0] === 'error')[1](new Error('boom'));
       await expect(p).rejects.toThrow('Download failed: boom');
@@ -715,11 +1037,22 @@ describe('browserDownloader', () => {
     });
 
     it('getDownloads returns serializable job shapes', async () => {
-      const p = env.mod.downloadStream({ url: 'https://x.com/a.mp4', type: 'MP4', pageTitle: 'A' }, 'C:/Media/a.mp4');
+      const p = env.mod.downloadStream(
+        { url: 'https://x.com/a.mp4', type: 'MP4', pageTitle: 'A' },
+        'C:/Media/a.mp4'
+      );
       p.catch(() => {});
       await flush();
       const d = env.mod.getDownloads()[0];
-      expect(d).toEqual(expect.objectContaining({ url: 'https://x.com/a.mp4', outputPath: 'C:/Media/a.mp4', title: 'A', status: 'starting', percent: 0 }));
+      expect(d).toEqual(
+        expect.objectContaining({
+          url: 'https://x.com/a.mp4',
+          outputPath: 'C:/Media/a.mp4',
+          title: 'A',
+          status: 'starting',
+          percent: 0,
+        })
+      );
       env.commandMock.on.mock.calls.find((c) => c[0] === 'end')[1]();
       await flush();
     });

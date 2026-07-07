@@ -10,8 +10,8 @@ import SeriesBanner from './SeriesBanner';
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key) => key
-  })
+    t: (key) => key,
+  }),
 }));
 
 describe('SeriesBanner', () => {
@@ -20,12 +20,12 @@ describe('SeriesBanner', () => {
     rating: '9.0',
     overview: 'This is a test overview.',
     backdrop: 'http://example.com/backdrop.jpg',
-    fullPosterPath: '/local/poster.jpg'
+    fullPosterPath: '/local/poster.jpg',
   };
 
   it('renders correctly with given metadata', () => {
     render(<SeriesBanner metadata={mockMetadata} seasonCount={3} />);
-    
+
     expect(screen.getByText('Test Banner Title')).toBeInTheDocument();
     expect(screen.getByText('IMDB: 9.0')).toBeInTheDocument();
     expect(screen.getByText('3 detail.seasons')).toBeInTheDocument();
@@ -35,7 +35,7 @@ describe('SeriesBanner', () => {
   it('renders correctly when backdrop is a local path', () => {
     const localMeta = { ...mockMetadata, backdrop: null };
     render(<SeriesBanner metadata={localMeta} seasonCount={1} />);
-    
+
     expect(screen.getByText('Test Banner Title')).toBeInTheDocument();
     // Background image assertion would require checking styles, skipping for basic DOM assert
   });
@@ -43,7 +43,7 @@ describe('SeriesBanner', () => {
   it('handles back button click', () => {
     const handleBack = vi.fn();
     render(<SeriesBanner metadata={mockMetadata} seasonCount={3} onBack={handleBack} />);
-    
+
     const backBtn = screen.getByText('← common.back');
     fireEvent.click(backBtn);
     expect(handleBack).toHaveBeenCalled();
@@ -51,11 +51,13 @@ describe('SeriesBanner', () => {
 
   it('renders auto translate button if onAutoTranslate is provided and handles click', () => {
     const handleTranslate = vi.fn();
-    render(<SeriesBanner metadata={mockMetadata} seasonCount={3} onAutoTranslate={handleTranslate} />);
-    
+    render(
+      <SeriesBanner metadata={mockMetadata} seasonCount={3} onAutoTranslate={handleTranslate} />
+    );
+
     const translateBtn = screen.getByText('auto_translate.button');
     expect(translateBtn).toBeInTheDocument();
-    
+
     fireEvent.click(translateBtn);
     expect(handleTranslate).toHaveBeenCalled();
   });

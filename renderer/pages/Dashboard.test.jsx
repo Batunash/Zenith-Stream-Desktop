@@ -8,18 +8,35 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import Dashboard from './Dashboard';
 
+vi.mock('react-virtualized-auto-sizer', () => ({
+  default: ({ children }) => children({ width: 1000, height: 1000 }),
+}));
+
+vi.mock('react-window', () => ({
+  FixedSizeGrid: ({ children, columnCount, rowCount }) => {
+    const Component = children;
+    const items = [];
+    for (let r = 0; r < rowCount; r++) {
+      for (let c = 0; c < columnCount; c++) {
+        items.push(<Component key={`${r}-${c}`} rowIndex={r} columnIndex={c} style={{}} />);
+      }
+    }
+    return <div>{items}</div>;
+  },
+}));
+
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key, params) => {
-       if (key === 'dashboard.delete_confirm') return `Delete ${params.title}?`;
-       const dict = {
-         'dashboard.title': 'Dashboard',
-         'dashboard.no_series_title': 'No series',
-         'dashboard.no_series_desc': 'Empty list'
-       };
-       return dict[key] || key;
-    }
-  })
+      if (key === 'dashboard.delete_confirm') return `Delete ${params.title}?`;
+      const dict = {
+        'dashboard.title': 'Dashboard',
+        'dashboard.no_series_title': 'No series',
+        'dashboard.no_series_desc': 'Empty list',
+      };
+      return dict[key] || key;
+    },
+  }),
 }));
 
 const mockInvoke = vi.fn();
@@ -32,18 +49,19 @@ describe('Dashboard', () => {
     window.alert = vi.fn();
   });
 
-  const renderComponent = () => render(
-    <MemoryRouter>
-      <Dashboard />
-    </MemoryRouter>
-  );
+  const renderComponent = () =>
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
 
   it('renders empty state when no series', async () => {
     mockInvoke.mockResolvedValueOnce([]); // getSeries
     mockInvoke.mockResolvedValueOnce({ running: false }); // status
 
     renderComponent();
-    
+
     await waitFor(() => {
       expect(screen.getByText('No series')).toBeInTheDocument();
       expect(screen.getByText('Empty list')).toBeInTheDocument();
@@ -53,20 +71,20 @@ describe('Dashboard', () => {
   it('renders series cards and handles server toggle', async () => {
     const mockSeries = [
       { id: 1, title: 'Test Series 1', folderName: 'Test_Series_1', posterPath: null },
-      { id: 2, title: 'Test Series 2', folderName: 'Test_Series_2', posterPath: null }
+      { id: 2, title: 'Test Series 2', folderName: 'Test_Series_2', posterPath: null },
     ];
     mockInvoke.mockImplementation(async (channel) => {
-        if (channel === 'file:getSeries') return mockSeries;
-        if (channel === 'server:status') return { running: false };
-        if (channel === 'server:start') return { success: true };
-        return {};
+      if (channel === 'file:getSeries') return mockSeries;
+      if (channel === 'server:status') return { running: false };
+      if (channel === 'server:start') return { success: true };
+      return {};
     });
 
     renderComponent();
 
     await waitFor(() => {
-        expect(screen.getByText('Test Series 1')).toBeInTheDocument();
-        expect(screen.getByText('Test Series 2')).toBeInTheDocument();
+      expect(screen.getByText('Test Series 1')).toBeInTheDocument();
+      expect(screen.getByText('Test Series 2')).toBeInTheDocument();
     });
 
     // Test server toggle from ControlPanel
@@ -75,7 +93,7 @@ describe('Dashboard', () => {
     fireEvent.click(toggleBtn);
 
     await waitFor(() => {
-        expect(mockInvoke).toHaveBeenCalledWith('server:start');
+      expect(mockInvoke).toHaveBeenCalledWith('server:start');
     });
   });
 
@@ -86,15 +104,15 @@ describe('Dashboard', () => {
 
     window.confirm.mockReturnValueOnce(true);
     mockInvoke.mockImplementation(async (ch) => {
-        if (ch === 'file:deleteSerie') return { success: true };
-        if (ch === 'file:getSeries') return mockSeries;
-        return [];
+      if (ch === 'file:deleteSerie') return { success: true };
+      if (ch === 'file:getSeries') return mockSeries;
+      return [];
     });
 
     renderComponent();
 
     await waitFor(() => {
-        expect(screen.getByText('DeleteMe')).toBeInTheDocument();
+      expect(screen.getByText('DeleteMe')).toBeInTheDocument();
     });
 
     // Hover over the card to reveal delete button
@@ -106,8 +124,8 @@ describe('Dashboard', () => {
     expect(window.confirm).toHaveBeenCalledWith('Delete DeleteMe?');
 
     await waitFor(() => {
-        expect(mockInvoke).toHaveBeenCalledWith('file:deleteSerie', 'del_me');
-        expect(screen.queryByText('DeleteMe')).not.toBeInTheDocument();
+      expect(mockInvoke).toHaveBeenCalledWith('file:deleteSerie', 'del_me');
+      expect(screen.queryByText('DeleteMe')).not.toBeInTheDocument();
     });
   });
 
@@ -117,7 +135,7 @@ describe('Dashboard', () => {
     renderComponent();
 
     await waitFor(() => {
-        expect(screen.getByText('control_panel.running')).toBeInTheDocument();
+      expect(screen.getByText('control_panel.running')).toBeInTheDocument();
     });
 
     // Toggle to stop server
@@ -156,16 +174,16 @@ describe('Dashboard', () => {
     renderComponent();
 
     await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith('Error loading series:', expect.any(Error));
-        expect(consoleSpy).toHaveBeenCalledWith('IPC Hatası (Status):', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith('Error loading series:', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith('IPC Hatası (Status):', expect.any(Error));
     });
 
     // Toggle server error
     mockInvoke.mockRejectedValueOnce(new Error('Toggle Error'));
     fireEvent.click(screen.getByRole('button', { name: /start/i }));
-    
+
     await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith('IPC Hatası (Start/Stop):', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith('IPC Hatası (Start/Stop):', expect.any(Error));
     });
 
     consoleSpy.mockRestore();
@@ -178,22 +196,22 @@ describe('Dashboard', () => {
 
     window.confirm.mockReturnValueOnce(true);
     mockInvoke.mockImplementation(async (ch) => {
-        if (ch === 'file:deleteSerie') return { success: false, error: 'File locked' };
-        if (ch === 'file:getSeries') return mockSeries;
-        return [];
+      if (ch === 'file:deleteSerie') return { success: false, error: 'File locked' };
+      if (ch === 'file:getSeries') return mockSeries;
+      return [];
     });
 
     renderComponent();
 
     await waitFor(() => {
-        expect(screen.getByText('ErrorDelete')).toBeInTheDocument();
+      expect(screen.getByText('ErrorDelete')).toBeInTheDocument();
     });
 
     fireEvent.mouseEnter(screen.getByText('ErrorDelete').closest('div').parentElement);
     fireEvent.click(screen.getByText('🗑️'));
 
     await waitFor(() => {
-        expect(window.alert).toHaveBeenCalledWith('common.error: File locked');
+      expect(window.alert).toHaveBeenCalledWith('common.error: File locked');
     });
   });
 
@@ -205,22 +223,22 @@ describe('Dashboard', () => {
 
     window.confirm.mockReturnValueOnce(true);
     mockInvoke.mockImplementation(async (ch) => {
-        if (ch === 'file:deleteSerie') throw new Error('Crash');
-        if (ch === 'file:getSeries') return mockSeries;
-        return [];
+      if (ch === 'file:deleteSerie') throw new Error('Crash');
+      if (ch === 'file:getSeries') return mockSeries;
+      return [];
     });
 
     renderComponent();
 
     await waitFor(() => {
-        expect(screen.getByText('CrashDelete')).toBeInTheDocument();
+      expect(screen.getByText('CrashDelete')).toBeInTheDocument();
     });
 
     fireEvent.mouseEnter(screen.getByText('CrashDelete').closest('div').parentElement);
     fireEvent.click(screen.getByText('🗑️'));
 
     await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
     });
     consoleSpy.mockRestore();
   });
@@ -235,7 +253,7 @@ describe('Dashboard', () => {
     renderComponent();
 
     await waitFor(() => {
-        expect(screen.getByText('CancelDelete')).toBeInTheDocument();
+      expect(screen.getByText('CancelDelete')).toBeInTheDocument();
     });
 
     fireEvent.mouseEnter(screen.getByText('CancelDelete').closest('div').parentElement);
@@ -246,28 +264,32 @@ describe('Dashboard', () => {
 
   it('tests SeriesCard image variations', async () => {
     window.api.paths = { userData: 'C:\\Users\\Test\\AppData\\Roaming\\VideoHub' };
-    
+
     const mockSeries = [
       { id: 1, title: 'HTTP Image', image: 'http://example.com/img.jpg' },
-      { id: 2, title: 'Full Path Image', fullPosterPath: 'C:\\Users\\Test\\AppData\\Roaming\\VideoHub\\posters\\img.jpg' },
-      { id: 3, title: 'Broken Image', fullPosterPath: '/broken/img.jpg' }
+      {
+        id: 2,
+        title: 'Full Path Image',
+        fullPosterPath: 'C:\\Users\\Test\\AppData\\Roaming\\VideoHub\\posters\\img.jpg',
+      },
+      { id: 3, title: 'Broken Image', fullPosterPath: '/broken/img.jpg' },
     ];
-    
+
     mockInvoke.mockResolvedValueOnce(mockSeries); // file:getSeries
     mockInvoke.mockResolvedValueOnce({ running: false }); // server:status
 
     renderComponent();
 
     await waitFor(() => {
-        expect(screen.getByText('HTTP Image')).toBeInTheDocument();
-        expect(screen.getByText('Full Path Image')).toBeInTheDocument();
+      expect(screen.getByText('HTTP Image')).toBeInTheDocument();
+      expect(screen.getByText('Full Path Image')).toBeInTheDocument();
     });
 
     const images = screen.getAllByRole('img');
     expect(images[0]).toHaveAttribute('src', 'http://example.com/img.jpg');
     // For 'Full Path Image', it should normalize by replacing the userData path:
     expect(images[1]).toHaveAttribute('src', 'media://posters/img.jpg');
-    
+
     // Simulate image error to trigger fallback
     fireEvent.error(images[2]);
     expect(images[2]).toHaveAttribute('src', 'https://via.placeholder.com/300x450?text=No+Image');

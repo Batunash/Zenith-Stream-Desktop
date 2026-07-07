@@ -3,14 +3,20 @@ const request = require('supertest');
 const path = require('path');
 
 const ctrl = vi.hoisted(() => ({
-  startWatch:      vi.fn((req, res) => res.status(200).json({ watching: true, episodeId: req.params.episodeId })),
-  updateProgress:  vi.fn((req, res) => res.status(200).json({ saved: true, episodeId: req.params.episodeId, body: req.body })),
-  downloadEpisode: vi.fn((req, res) => res.status(200).json({ downloading: true, episodeId: req.params.episodeId }))
+  startWatch: vi.fn((req, res) =>
+    res.status(200).json({ watching: true, episodeId: req.params.episodeId })
+  ),
+  updateProgress: vi.fn((req, res) =>
+    res.status(200).json({ saved: true, episodeId: req.params.episodeId, body: req.body })
+  ),
+  downloadEpisode: vi.fn((req, res) =>
+    res.status(200).json({ downloading: true, episodeId: req.params.episodeId })
+  ),
 }));
 
 const mw = vi.hoisted(() => ({
-  optionalAuth:      vi.fn((req, res, next) => next()),
-  authenticateToken: vi.fn((req, res, next) => next())
+  optionalAuth: vi.fn((req, res, next) => next()),
+  authenticateToken: vi.fn((req, res, next) => next()),
 }));
 
 vi.mock('../controllers/watchController', () => ctrl);
@@ -19,7 +25,14 @@ vi.mock('../middleware/auth', () => mw);
 const cwd = process.cwd();
 const ctrlP = path.resolve(cwd, 'backend/src/controllers/watchController.js');
 const mwP = path.resolve(cwd, 'backend/src/middleware/auth.js');
-require.cache[ctrlP] = { id: ctrlP, filename: ctrlP, loaded: true, exports: ctrl, children: [], paths: [] };
+require.cache[ctrlP] = {
+  id: ctrlP,
+  filename: ctrlP,
+  loaded: true,
+  exports: ctrl,
+  children: [],
+  paths: [],
+};
 require.cache[mwP] = { id: mwP, filename: mwP, loaded: true, exports: mw, children: [], paths: [] };
 
 let app;

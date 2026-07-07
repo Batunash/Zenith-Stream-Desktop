@@ -21,8 +21,9 @@ function findFirstVideoFile(dir, exts) {
     if (e.name.startsWith('.')) continue;
     const subDir = path.join(dir, e.name);
     try {
-      const subFile = fs.readdirSync(subDir)
-        .find(f => exts.includes(path.extname(f).toLowerCase()));
+      const subFile = fs
+        .readdirSync(subDir)
+        .find((f) => exts.includes(path.extname(f).toLowerCase()));
       if (subFile) return path.join(subDir, subFile);
     } catch (err) {
       console.warn('[findFirstVideoFile] cannot read subdir', subDir, err && err.message);
@@ -32,7 +33,7 @@ function findFirstVideoFile(dir, exts) {
 }
 
 class DatabaseManager {
-    constructor() {
+  constructor() {
     this.db = null;
     this.SQL = null;
     if (app && app.isPackaged) {
@@ -42,7 +43,7 @@ class DatabaseManager {
     } else {
       this.dbPath = path.join(__dirname, '../../../../video-hub.sqlite');
     }
-    console.log("Veritabanı Yolu:", this.dbPath);
+    console.log('Veritabanı Yolu:', this.dbPath);
     this.initPromise = this.init();
   }
 
@@ -58,7 +59,7 @@ class DatabaseManager {
     }
 
     this.initializeTables();
-    this.exec("PRAGMA foreign_keys = ON;");
+    this.exec('PRAGMA foreign_keys = ON;');
   }
 
   save() {
@@ -70,7 +71,7 @@ class DatabaseManager {
 
   prepare(sql) {
     if (!this.db) {
-      console.warn("DB not ready yet");
+      console.warn('DB not ready yet');
       return { run: () => {}, get: () => {}, all: () => [] };
     }
 
@@ -78,15 +79,15 @@ class DatabaseManager {
     const self = this;
 
     return {
-      run: function(...args) {
+      run: function (...args) {
         stmt.bind(args);
         stmt.step();
         stmt.free();
-        const lastInsertRowid = self.db.exec("SELECT last_insert_rowid()")[0].values[0][0];
+        const lastInsertRowid = self.db.exec('SELECT last_insert_rowid()')[0].values[0][0];
         self.save();
         return { lastInsertRowid };
       },
-      get: function(...args) {
+      get: function (...args) {
         stmt.bind(args);
         const hasRow = stmt.step();
         let result = null;
@@ -96,7 +97,7 @@ class DatabaseManager {
         stmt.free();
         return result;
       },
-      all: function(...args) {
+      all: function (...args) {
         stmt.bind(args);
         const results = [];
         while (stmt.step()) {
@@ -104,7 +105,7 @@ class DatabaseManager {
         }
         stmt.free();
         return results;
-      }
+      },
     };
   }
 
@@ -119,7 +120,7 @@ class DatabaseManager {
     return () => {
       func();
       this.save();
-    }
+    };
   }
 
   initializeTables() {
@@ -132,27 +133,46 @@ class DatabaseManager {
     `);
   }
 
-  getUserByUsername(username) { return this.prepare('SELECT * FROM USERS WHERE USERNAME = ?').get(username); }
-  getUserById(id) { return this.prepare('SELECT * FROM USERS WHERE ID = ?').get(id); }
-  createUser(username, password) { return this.prepare('INSERT INTO USERS (USERNAME, PASSWORD) VALUES (?, ?)').run(username, password); }
+  getUserByUsername(username) {
+    return this.prepare('SELECT * FROM USERS WHERE USERNAME = ?').get(username);
+  }
+  getUserById(id) {
+    return this.prepare('SELECT * FROM USERS WHERE ID = ?').get(id);
+  }
+  createUser(username, password) {
+    return this.prepare('INSERT INTO USERS (USERNAME, PASSWORD) VALUES (?, ?)').run(
+      username,
+      password
+    );
+  }
 
-  getAllSeries() { return this.prepare('SELECT * FROM SERIES ORDER BY TITLE').all(); }
-  getSeriesWithUserProgress(userId) { return this.getAllSeries(); }
+  getAllSeries() {
+    return this.prepare('SELECT * FROM SERIES ORDER BY TITLE').all();
+  }
+  getSeriesWithUserProgress(userId) {
+    return this.getAllSeries();
+  }
 
   getSeasonsWithEpisodes(serieId, userId = null) {
-    const seasons = this.prepare('SELECT * FROM SEASONS WHERE SERIE_ID = ? ORDER BY SEASON_NUMBER').all(serieId);
+    const seasons = this.prepare(
+      'SELECT * FROM SEASONS WHERE SERIE_ID = ? ORDER BY SEASON_NUMBER'
+    ).all(serieId);
 
     for (const season of seasons) {
-      const episodes = this.prepare('SELECT * FROM EPISODES WHERE SEASON_ID = ? ORDER BY EPISODE_NUMBER').all(season.ID);
+      const episodes = this.prepare(
+        'SELECT * FROM EPISODES WHERE SEASON_ID = ? ORDER BY EPISODE_NUMBER'
+      ).all(season.ID);
 
       if (userId) {
-        season.episodes = episodes.map(ep => {
-          const history = this.prepare('SELECT * FROM WATCH_HISTORY WHERE USER_ID = ? AND EPISODE_ID = ?').get(userId, ep.ID);
+        season.episodes = episodes.map((ep) => {
+          const history = this.prepare(
+            'SELECT * FROM WATCH_HISTORY WHERE USER_ID = ? AND EPISODE_ID = ?'
+          ).get(userId, ep.ID);
           return {
             ...ep,
             progress: history ? history.PROGRESS : 0,
             watchTime: history ? history.WATCH_TIME : 0,
-            watched: history ? (history.PROGRESS > 0.9) : false
+            watched: history ? history.PROGRESS > 0.9 : false,
           };
         });
       } else {
@@ -163,14 +183,22 @@ class DatabaseManager {
   }
 
   getEpisodesBySeries(serieId) {
-    const seasons = this.prepare('SELECT * FROM SEASONS WHERE SERIE_ID = ? ORDER BY SEASON_NUMBER').all(serieId);
+    const seasons = this.prepare(
+      'SELECT * FROM SEASONS WHERE SERIE_ID = ? ORDER BY SEASON_NUMBER'
+    ).all(serieId);
     let allEpisodes = [];
     for (const season of seasons) {
-      const episodes = this.prepare('SELECT * FROM EPISODES WHERE SEASON_ID = ? ORDER BY EPISODE_NUMBER').all(season.ID);
-      const episodesWithMeta = episodes.map(ep => ({
-        ...ep, SEASON_NUMBER: season.SEASON_NUMBER, SERIE_ID: serieId,
+      const episodes = this.prepare(
+        'SELECT * FROM EPISODES WHERE SEASON_ID = ? ORDER BY EPISODE_NUMBER'
+      ).all(season.ID);
+      const episodesWithMeta = episodes.map((ep) => ({
+        ...ep,
+        SEASON_NUMBER: season.SEASON_NUMBER,
+        SERIE_ID: serieId,
         SERIE_NAME: this.prepare('SELECT TITLE FROM SERIES WHERE ID = ?').get(serieId).TITLE,
-        EPISODE_NAME: ep.NAME, EPISODE_NUMBER: ep.EPISODE_NUMBER, EPISODE_ID: ep.ID
+        EPISODE_NAME: ep.NAME,
+        EPISODE_NUMBER: ep.EPISODE_NUMBER,
+        EPISODE_ID: ep.ID,
       }));
       allEpisodes = [...allEpisodes, ...episodesWithMeta];
     }
@@ -182,25 +210,36 @@ class DatabaseManager {
     if (!serie) return null;
     const seasons = this.prepare('SELECT ID FROM SEASONS WHERE SERIE_ID = ?').all(serie.ID);
     if (seasons.length === 0) return null;
-    const seasonIds = seasons.map(s => s.ID);
+    const seasonIds = seasons.map((s) => s.ID);
     if (seasonIds.length === 0) return null;
 
-    const episode = this.prepare(`
+    const episode = this.prepare(
+      `
         SELECT * FROM EPISODES 
         WHERE SEASON_ID IN (${seasonIds.join(',')}) AND NAME = ?
-    `).get(fileName);
+    `
+    ).get(fileName);
     return episode;
   }
 
-  getEpisodeById(id) { return this.prepare('SELECT * FROM EPISODES WHERE ID = ?').get(id); }
+  getEpisodeById(id) {
+    return this.prepare('SELECT * FROM EPISODES WHERE ID = ?').get(id);
+  }
 
-  getUserEpisodeProgress(userId, episodeId) { return this.prepare('SELECT * FROM WATCH_HISTORY WHERE USER_ID = ? AND EPISODE_ID = ?').get(userId, episodeId); }
+  getUserEpisodeProgress(userId, episodeId) {
+    return this.prepare('SELECT * FROM WATCH_HISTORY WHERE USER_ID = ? AND EPISODE_ID = ?').get(
+      userId,
+      episodeId
+    );
+  }
 
   updateWatchProgress(userId, episodeId, progress, watchTime) {
-    return this.prepare(`
+    return this.prepare(
+      `
         INSERT INTO WATCH_HISTORY (USER_ID, EPISODE_ID, PROGRESS, WATCH_TIME, WATCHED_AT) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
         ON CONFLICT(USER_ID, EPISODE_ID) DO UPDATE SET PROGRESS=excluded.PROGRESS, WATCH_TIME=excluded.WATCH_TIME, WATCHED_AT=CURRENT_TIMESTAMP
-      `).run(userId, episodeId, progress, watchTime);
+      `
+    ).run(userId, episodeId, progress, watchTime);
   }
 
   deleteSeriesByPath(p) {
@@ -223,25 +262,35 @@ class DatabaseManager {
     }
   }
 
-  deleteEpisodeByPath(p) { this.prepare('DELETE FROM EPISODES WHERE FILE_PATH = ?').run(p); }
-syncFilesystemToDatabase(mediaDir, videoExts) {
+  deleteEpisodeByPath(p) {
+    this.prepare('DELETE FROM EPISODES WHERE FILE_PATH = ?').run(p);
+  }
+  syncFilesystemToDatabase(mediaDir, videoExts) {
     if (!fs.existsSync(mediaDir)) return;
     const syncTransaction = this.transaction(() => {
-      const seriesFolders = fs.readdirSync(mediaDir, { withFileTypes: true }).filter(d => d.isDirectory());
+      const seriesFolders = fs
+        .readdirSync(mediaDir, { withFileTypes: true })
+        .filter((d) => d.isDirectory());
 
       for (const dir of seriesFolders) {
         const contentPath = path.join(mediaDir, dir.name);
         const metaPath = path.join(contentPath, 'metadata.json');
         let title = dir.name;
         let type = 'serie';
-        let poster = null, backdrop = null, overview = null, rating = null, tmdbId = null;
+        let poster = null,
+          backdrop = null,
+          overview = null,
+          rating = null,
+          tmdbId = null;
 
         if (fs.existsSync(metaPath)) {
           try {
             const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
             title = meta.title || dir.name;
             type = meta.type || 'serie';
-            poster = meta.localPoster ? `/images/${encodeURIComponent(dir.name)}/${meta.localPoster}` : null;
+            poster = meta.localPoster
+              ? `/images/${encodeURIComponent(dir.name)}/${meta.localPoster}`
+              : null;
             backdrop = meta.backdrop || null;
             overview = meta.overview || null;
             rating = meta.rating || null;
@@ -251,65 +300,110 @@ syncFilesystemToDatabase(mediaDir, videoExts) {
 
         let serie = this.prepare('SELECT * FROM SERIES WHERE TITLE = ?').get(title);
         if (!serie) {
-          const info = this.prepare('INSERT INTO SERIES (TITLE, FOLDER_PATH, POSTER_PATH, BACKDROP_PATH, OVERVIEW, RATING, TMDB_ID, TYPE) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(title, contentPath, poster, backdrop, overview, rating, tmdbId, type);
+          const info = this.prepare(
+            'INSERT INTO SERIES (TITLE, FOLDER_PATH, POSTER_PATH, BACKDROP_PATH, OVERVIEW, RATING, TMDB_ID, TYPE) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+          ).run(title, contentPath, poster, backdrop, overview, rating, tmdbId, type);
           serie = { ID: info.lastInsertRowid };
         } else {
           this.prepare('UPDATE SERIES SET FOLDER_PATH = ? WHERE ID = ?').run(contentPath, serie.ID);
         }
 
         if (type === 'movie') {
-          let season = this.prepare('SELECT * FROM SEASONS WHERE SERIE_ID = ? AND SEASON_NUMBER = 1').get(serie.ID);
+          let season = this.prepare(
+            'SELECT * FROM SEASONS WHERE SERIE_ID = ? AND SEASON_NUMBER = 1'
+          ).get(serie.ID);
           if (!season) {
-            const info = this.prepare('INSERT INTO SEASONS (SERIE_ID, SEASON_NUMBER, NAME, FOLDER_PATH) VALUES (?, ?, ?, ?)').run(serie.ID, 1, "Film", contentPath);
+            const info = this.prepare(
+              'INSERT INTO SEASONS (SERIE_ID, SEASON_NUMBER, NAME, FOLDER_PATH) VALUES (?, ?, ?, ?)'
+            ).run(serie.ID, 1, 'Film', contentPath);
             season = { ID: info.lastInsertRowid };
           } else {
-            this.prepare('UPDATE SEASONS SET FOLDER_PATH = ? WHERE ID = ?').run(contentPath, season.ID);
+            this.prepare('UPDATE SEASONS SET FOLDER_PATH = ? WHERE ID = ?').run(
+              contentPath,
+              season.ID
+            );
           }
           const filePath = findFirstVideoFile(contentPath, videoExts);
           if (filePath) {
             const stats = fs.statSync(filePath);
-            const exists = this.prepare('SELECT ID FROM EPISODES WHERE SEASON_ID = ?').get(season.ID);
+            const exists = this.prepare('SELECT ID FROM EPISODES WHERE SEASON_ID = ?').get(
+              season.ID
+            );
             if (!exists) {
-              this.prepare('INSERT INTO EPISODES (SEASON_ID, EPISODE_NUMBER, NAME, FILE_PATH, FILE_SIZE) VALUES (?, ?, ?, ?, ?)').run(season.ID, 1, title, filePath, stats.size);
+              this.prepare(
+                'INSERT INTO EPISODES (SEASON_ID, EPISODE_NUMBER, NAME, FILE_PATH, FILE_SIZE) VALUES (?, ?, ?, ?, ?)'
+              ).run(season.ID, 1, title, filePath, stats.size);
             } else {
-              this.prepare('UPDATE EPISODES SET FILE_PATH = ?, FILE_SIZE = ? WHERE ID = ?').run(filePath, stats.size, exists.ID);
+              this.prepare('UPDATE EPISODES SET FILE_PATH = ?, FILE_SIZE = ? WHERE ID = ?').run(
+                filePath,
+                stats.size,
+                exists.ID
+              );
             }
           }
         } else {
-          const seasonFolders = fs.readdirSync(contentPath, { withFileTypes: true }).filter(d => d.isDirectory() && d.name.startsWith('Season'));
+          const seasonFolders = fs
+            .readdirSync(contentPath, { withFileTypes: true })
+            .filter((d) => d.isDirectory() && d.name.startsWith('Season'));
           for (const seasonDir of seasonFolders) {
             const seasonPath = path.join(contentPath, seasonDir.name);
             const seasonNum = parseInt(seasonDir.name.replace(/\D/g, '')) || 0;
-            let season = this.prepare('SELECT * FROM SEASONS WHERE SERIE_ID = ? AND SEASON_NUMBER = ?').get(serie.ID, seasonNum);
+            let season = this.prepare(
+              'SELECT * FROM SEASONS WHERE SERIE_ID = ? AND SEASON_NUMBER = ?'
+            ).get(serie.ID, seasonNum);
             if (!season) {
-              const info = this.prepare('INSERT INTO SEASONS (SERIE_ID, SEASON_NUMBER, NAME, FOLDER_PATH) VALUES (?, ?, ?, ?)').run(serie.ID, seasonNum, seasonDir.name, seasonPath);
+              const info = this.prepare(
+                'INSERT INTO SEASONS (SERIE_ID, SEASON_NUMBER, NAME, FOLDER_PATH) VALUES (?, ?, ?, ?)'
+              ).run(serie.ID, seasonNum, seasonDir.name, seasonPath);
               season = { ID: info.lastInsertRowid };
             } else {
-              this.prepare('UPDATE SEASONS SET FOLDER_PATH = ? WHERE ID = ?').run(seasonPath, season.ID);
+              this.prepare('UPDATE SEASONS SET FOLDER_PATH = ? WHERE ID = ?').run(
+                seasonPath,
+                season.ID
+              );
             }
-            const files = fs.readdirSync(seasonPath).filter(f => videoExts.includes(path.extname(f).toLowerCase()));
+            const files = fs
+              .readdirSync(seasonPath)
+              .filter((f) => videoExts.includes(path.extname(f).toLowerCase()));
             files.forEach((file, index) => {
               const filePath = path.join(seasonPath, file);
               const stats = fs.statSync(filePath);
-              const exists = this.prepare('SELECT ID FROM EPISODES WHERE SEASON_ID = ? AND NAME = ?').get(season.ID, file);
+              const exists = this.prepare(
+                'SELECT ID FROM EPISODES WHERE SEASON_ID = ? AND NAME = ?'
+              ).get(season.ID, file);
               if (!exists) {
-                this.prepare('INSERT INTO EPISODES (SEASON_ID, EPISODE_NUMBER, NAME, FILE_PATH, FILE_SIZE) VALUES (?, ?, ?, ?, ?)').run(season.ID, index + 1, file, filePath, stats.size);
+                this.prepare(
+                  'INSERT INTO EPISODES (SEASON_ID, EPISODE_NUMBER, NAME, FILE_PATH, FILE_SIZE) VALUES (?, ?, ?, ?, ?)'
+                ).run(season.ID, index + 1, file, filePath, stats.size);
               } else {
-                this.prepare('UPDATE EPISODES SET FILE_PATH = ?, FILE_SIZE = ? WHERE ID = ?').run(filePath, stats.size, exists.ID);
+                this.prepare('UPDATE EPISODES SET FILE_PATH = ?, FILE_SIZE = ? WHERE ID = ?').run(
+                  filePath,
+                  stats.size,
+                  exists.ID
+                );
               }
             });
           }
         }
       }
-      this.prepare("SELECT ID, FILE_PATH FROM EPISODES").all().forEach(ep => {
-        if (ep.FILE_PATH && !fs.existsSync(ep.FILE_PATH)) this.prepare("DELETE FROM EPISODES WHERE ID = ?").run(ep.ID);
-      });
-      this.prepare("SELECT ID, FOLDER_PATH FROM SEASONS").all().forEach(s => {
-        if (s.FOLDER_PATH && !fs.existsSync(s.FOLDER_PATH)) this.prepare("DELETE FROM SEASONS WHERE ID = ?").run(s.ID);
-      });
-      this.prepare("SELECT ID, FOLDER_PATH FROM SERIES").all().forEach(ser => {
-        if (ser.FOLDER_PATH && !fs.existsSync(ser.FOLDER_PATH)) this.prepare("DELETE FROM SERIES WHERE ID = ?").run(ser.ID);
-      });
+      this.prepare('SELECT ID, FILE_PATH FROM EPISODES')
+        .all()
+        .forEach((ep) => {
+          if (ep.FILE_PATH && !fs.existsSync(ep.FILE_PATH))
+            this.prepare('DELETE FROM EPISODES WHERE ID = ?').run(ep.ID);
+        });
+      this.prepare('SELECT ID, FOLDER_PATH FROM SEASONS')
+        .all()
+        .forEach((s) => {
+          if (s.FOLDER_PATH && !fs.existsSync(s.FOLDER_PATH))
+            this.prepare('DELETE FROM SEASONS WHERE ID = ?').run(s.ID);
+        });
+      this.prepare('SELECT ID, FOLDER_PATH FROM SERIES')
+        .all()
+        .forEach((ser) => {
+          if (ser.FOLDER_PATH && !fs.existsSync(ser.FOLDER_PATH))
+            this.prepare('DELETE FROM SERIES WHERE ID = ?').run(ser.ID);
+        });
     });
     syncTransaction();
   }

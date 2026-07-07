@@ -50,7 +50,9 @@ const renderPage = () =>
 // Wait for the mount effect (settings:get) to settle, then the link input is
 // present on the auto tab (hasApiKey true).
 const settleAuto = () =>
-  waitFor(() => expect(screen.getByPlaceholderText('add_series.link_placeholder')).toBeInTheDocument());
+  waitFor(() =>
+    expect(screen.getByPlaceholderText('add_series.link_placeholder')).toBeInTheDocument()
+  );
 
 // Drive the auto-tab fetch flow: render, type a link, click fetch, await preview.
 const doFetch = async (responseData) => {
@@ -61,8 +63,12 @@ const doFetch = async (responseData) => {
   });
   if (responseData !== undefined) fetchSeriesByImdb.mockResolvedValue(responseData);
   fireEvent.click(screen.getByText('add_series.fetch_btn'));
-  if (responseData) await waitFor(() => expect(screen.getByText(responseData.title)).toBeInTheDocument());
-  else await waitFor(() => expect(screen.getByPlaceholderText('add_series.link_placeholder')).toBeInTheDocument());
+  if (responseData)
+    await waitFor(() => expect(screen.getByText(responseData.title)).toBeInTheDocument());
+  else
+    await waitFor(() =>
+      expect(screen.getByPlaceholderText('add_series.link_placeholder')).toBeInTheDocument()
+    );
   return utils;
 };
 
@@ -188,8 +194,13 @@ describe('AddSeriesPage - saveAuto', () => {
     await waitFor(() =>
       expect(mockInvoke).toHaveBeenCalledWith('file:createSerie', {
         serieName: 'Auto Serie',
-        metadata: expect.objectContaining({ type: 'serie', numberOfSeasons: 2, title: 'Auto Serie' }),
-      }));
+        metadata: expect.objectContaining({
+          type: 'serie',
+          numberOfSeasons: 2,
+          title: 'Auto Serie',
+        }),
+      })
+    );
     expect(alertMock).toHaveBeenCalledWith('add_series.success_added');
   });
 
@@ -197,16 +208,25 @@ describe('AddSeriesPage - saveAuto', () => {
     await doFetch({ ...fetchedSerie, numberOfSeasons: undefined });
     fireEvent.click(screen.getByText('add_series.add_this_serie'));
     await waitFor(() =>
-      expect(mockInvoke).toHaveBeenCalledWith('file:createSerie',
-        expect.objectContaining({ metadata: expect.objectContaining({ numberOfSeasons: 0 }) })));
+      expect(mockInvoke).toHaveBeenCalledWith(
+        'file:createSerie',
+        expect.objectContaining({ metadata: expect.objectContaining({ numberOfSeasons: 0 }) })
+      )
+    );
   });
 
   it('forces numberOfSeasons to 1 when saving a movie', async () => {
     await doFetch({ ...fetchedSerie, type: 'movie', numberOfSeasons: 9, title: 'Auto Movie' });
     fireEvent.click(screen.getByText('add_series.add_this_serie'));
     await waitFor(() =>
-      expect(mockInvoke).toHaveBeenCalledWith('file:createSerie',
-        expect.objectContaining({ serieName: 'Auto Movie', metadata: expect.objectContaining({ type: 'movie', numberOfSeasons: 1 }) })));
+      expect(mockInvoke).toHaveBeenCalledWith(
+        'file:createSerie',
+        expect.objectContaining({
+          serieName: 'Auto Movie',
+          metadata: expect.objectContaining({ type: 'movie', numberOfSeasons: 1 }),
+        })
+      )
+    );
   });
 
   it('alerts the error message when createSerie returns success:false', async () => {
@@ -237,14 +257,28 @@ describe('AddSeriesPage - saveAuto', () => {
 
 describe('AddSeriesPage - preview cancel & image wrapper', () => {
   it('clears the preview when the cancel button is clicked', async () => {
-    await doFetch({ title: 'Cancel Me', rating: '5', overview: 'v', image: 'http://t/i.jpg', type: 'serie', numberOfSeasons: 1 });
+    await doFetch({
+      title: 'Cancel Me',
+      rating: '5',
+      overview: 'v',
+      image: 'http://t/i.jpg',
+      type: 'serie',
+      numberOfSeasons: 1,
+    });
     expect(screen.getByText('Cancel Me')).toBeInTheDocument();
     fireEvent.click(screen.getByText('common.cancel'));
     await waitFor(() => expect(screen.queryByText('Cancel Me')).not.toBeInTheDocument());
   });
 
   it('renders the previewPoster with the fetched http image on the auto tab', async () => {
-    const { container } = await doFetch({ title: 'Img', rating: '5', overview: 'v', image: 'http://t/i.jpg', type: 'serie', numberOfSeasons: 1 });
+    const { container } = await doFetch({
+      title: 'Img',
+      rating: '5',
+      overview: 'v',
+      image: 'http://t/i.jpg',
+      type: 'serie',
+      numberOfSeasons: 1,
+    });
     // On the auto tab only previewPoster (alt="") renders; its src mirrors fetchedData.image verbatim.
     const poster = container.querySelector('img');
     expect(poster.getAttribute('src')).toBe('http://t/i.jpg');
@@ -291,7 +325,8 @@ describe('AddSeriesPage - manual tab interactions', () => {
     const r = renderPage();
     return r;
   };
-  const awaitManual = () => waitFor(() => expect(screen.getByText('add_series.manual_title')).toBeInTheDocument());
+  const awaitManual = () =>
+    waitFor(() => expect(screen.getByText('add_series.manual_title')).toBeInTheDocument());
 
   it('updates the title via handleManualChange', async () => {
     const { container } = renderManual();
@@ -395,7 +430,8 @@ describe('AddSeriesPage - saveManual', () => {
           type: 'serie',
           imdb_id: null,
         }),
-      }));
+      })
+    );
     expect(alertMock).toHaveBeenCalledWith('add_series.success_added');
   });
 
@@ -404,8 +440,13 @@ describe('AddSeriesPage - saveManual', () => {
     fireEvent.change(container.querySelector('textarea'), { target: { value: 'Custom overview' } });
     fireEvent.click(screen.getByText('common.save'));
     await waitFor(() =>
-      expect(mockInvoke).toHaveBeenCalledWith('file:createSerie',
-        expect.objectContaining({ metadata: expect.objectContaining({ overview: 'Custom overview' }) })));
+      expect(mockInvoke).toHaveBeenCalledWith(
+        'file:createSerie',
+        expect.objectContaining({
+          metadata: expect.objectContaining({ overview: 'Custom overview' }),
+        })
+      )
+    );
   });
 
   it('saves a movie with numberOfSeasons 1 when contentType is movie', async () => {
@@ -413,8 +454,13 @@ describe('AddSeriesPage - saveManual', () => {
     fireEvent.change(r.container.querySelector('select'), { target: { value: 'movie' } });
     fireEvent.click(screen.getByText('common.save'));
     await waitFor(() =>
-      expect(mockInvoke).toHaveBeenCalledWith('file:createSerie',
-        expect.objectContaining({ metadata: expect.objectContaining({ numberOfSeasons: 1, type: 'movie' }) })));
+      expect(mockInvoke).toHaveBeenCalledWith(
+        'file:createSerie',
+        expect.objectContaining({
+          metadata: expect.objectContaining({ numberOfSeasons: 1, type: 'movie' }),
+        })
+      )
+    );
   });
 
   it('alerts the error message when createSerie returns success:false', async () => {
@@ -459,14 +505,18 @@ describe('AddSeriesPage - tab switching & navigation', () => {
     await settleAuto();
     // Trigger an error first.
     extractImdbId.mockReturnValue(null);
-    fireEvent.change(screen.getByPlaceholderText('add_series.link_placeholder'), { target: { value: 'bad' } });
+    fireEvent.change(screen.getByPlaceholderText('add_series.link_placeholder'), {
+      target: { value: 'bad' },
+    });
     fireEvent.click(screen.getByText('add_series.fetch_btn'));
     await waitFor(() => expect(screen.getByText('add_series.error_link')).toBeInTheDocument());
     // Switch to manual -> auto tab click clears the error (setError(null)).
     fireEvent.click(screen.getByText('✏️ add_series.tab_manual'));
     expect(screen.getByText('add_series.manual_title')).toBeInTheDocument();
     fireEvent.click(screen.getByText('🔗 add_series.tab_link'));
-    await waitFor(() => expect(screen.queryByText('add_series.error_link')).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.queryByText('add_series.error_link')).not.toBeInTheDocument()
+    );
     expect(screen.getByPlaceholderText('add_series.link_placeholder')).toBeInTheDocument();
   });
 
