@@ -228,7 +228,9 @@ function cleanUrl(url) {
 async function navigateTo(url) {
   const view = initBrowserView();
 
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+  if (url.startsWith('http://')) {
+    url = url.replace('http://', 'https://');
+  } else if (!url.startsWith('https://')) {
     // Treat as search if no dots
     if (!url.includes('.') || url.includes(' ')) {
       url = `https://www.google.com/search?q=${encodeURIComponent(url)}`;

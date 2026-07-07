@@ -141,12 +141,12 @@ describe('browserDownloader', () => {
   });
 
   describe('navigateTo', () => {
-    it('passes http URLs through and resolves with {success, url}', async () => {
+    it('converts http URLs to https and resolves with {success, url}', async () => {
       const r = await env.mod.navigateTo('http://example.com');
-      expect(r).toEqual({ success: true, url: 'http://example.com' });
+      expect(r).toEqual({ success: true, url: 'https://example.com' });
       const view = env.BrowserView.mock.results[0].value;
       expect(view.webContents.loadURL).toHaveBeenCalledWith(
-        'http://example.com',
+        'https://example.com',
         expect.objectContaining({ extraHeaders: expect.any(String) })
       );
     });
