@@ -51,7 +51,7 @@ function initBrowserView() {
     (details, callback) => {
       if (isCapturing) {
           const u = details.url.split('?')[0].toLowerCase();
-          if (u.endsWith('.m3u8') || u.endsWith('.mp4') || u.endsWith('.ts') || u.endsWith('.m4s') || u.includes('master.txt') || u.includes('index.txt')) {
+          if (u.endsWith('.m3u8') || u.endsWith('.mp4') || u.endsWith('.ts') || u.endsWith('.m4s') || u.includes('master.txt') || u.includes('index.txt') || u.endsWith('.vtt') || u.endsWith('.srt')) {
              requestHeadersMap.set(cleanUrl(details.url), details.requestHeaders);
           }
       }
@@ -280,9 +280,6 @@ async function downloadStream(stream, outputPath) {
     activeDownloads.push(downloadObj);
     notifyRenderer('browser:downloads', getDownloads());
 
-    const isHLS = stream.url.includes('.m3u8') || stream.type === 'HLS';
-    let command = ffmpegHelper(stream.url);
-
     // Fetch captured headers to bypass 404s
     let headerStr = '';
     const reqHeaders = requestHeadersMap.get(stream.url);
@@ -323,18 +320,65 @@ async function downloadStream(stream, outputPath) {
         }
     }
 
+    const isSubStream = stream.type === 'SUBTITLE';
+    let targetStreamUrl = stream.url;
+    let tempStandaloneSubFile = null;
+
+    if (isSubStream) {
+        try {
+            const fetchHeaders = {};
+            if (reqHeaders) {
+                for (const [key, value] of Object.entries(reqHeaders)) {
+                    fetchHeaders[key] = value;
+                }
+            }
+            if (headerStr) {
+                const lines = headerStr.split('\r\n').filter(Boolean);
+                for (const line of lines) {
+                    const colonIdx = line.indexOf(':');
+                    if (colonIdx > -1) {
+                        fetchHeaders[line.substring(0, colonIdx).trim()] = line.substring(colonIdx + 1).trim();
+                    }
+                }
+            }
+            if (!fetchHeaders['User-Agent'] && !fetchHeaders['user-agent']) {
+               fetchHeaders['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+            }
+            
+            const response = await net.fetch(stream.url, { headers: fetchHeaders });
+            if (response.ok) {
+                const text = await response.text();
+                tempStandaloneSubFile = path.join(os.tmpdir(), `zenith_standalone_sub_${Date.now()}_${Math.random().toString(36).substr(2, 5)}.vtt`);
+                fs.writeFileSync(tempStandaloneSubFile, text);
+                targetStreamUrl = tempStandaloneSubFile;
+                console.log(`[BrowserDownloader] Fetched standalone subtitle locally: ${targetStreamUrl}`);
+            } else {
+                console.warn(`[BrowserDownloader] Standalone subtitle fetch failed with ${response.status}`);
+                return reject(new Error(`Subtitle download failed (HTTP ${response.status}). The link might be expired or blocked.`));
+            }
+        } catch(err) {
+            console.error(`[BrowserDownloader] Error fetching standalone subtitle: ${err.message}`);
+            return reject(new Error(`Subtitle fetch error: ${err.message}`));
+        }
+    }
+
+    const isHLS = stream.url.includes('.m3u8') || stream.type === 'HLS';
+    let command = ffmpegHelper(targetStreamUrl);
+
     let userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
     if (reqHeaders) {
         const uaKey = Object.keys(reqHeaders).find(k => k.toLowerCase() === 'user-agent');
         if (uaKey) userAgent = reqHeaders[uaKey];
     }
 
-    const inputOptions = [
-      '-user_agent', userAgent,
-    ];
+    const inputOptions = [];
+    const isLocalInput = targetStreamUrl.startsWith('/') || targetStreamUrl.match(/^[a-zA-Z]:\\/);
 
-    if (headerStr) {
-      inputOptions.push('-headers', headerStr);
+    if (!isLocalInput) {
+      inputOptions.push('-user_agent', userAgent);
+      if (headerStr) {
+        inputOptions.push('-headers', headerStr);
+      }
     }
 
     const outputOptions = [];
@@ -352,16 +396,17 @@ async function downloadStream(stream, outputPath) {
     }
 
     if (isHLS) {
-      inputOptions.push(
-        '-protocol_whitelist', 'file,http,https,tcp,udp,tls,crypto',
-        '-fflags', '+discardcorrupt',
-        '-reconnect', '1',
-        '-reconnect_streamed', '1',
-        '-reconnect_delay_max', '5',
-        '-rw_timeout', '60000000',
-        '-analyzeduration', '20000000',
-        '-probesize', '20000000'
-      );
+      if (!isLocalInput) {
+        inputOptions.push(
+          '-protocol_whitelist', 'file,http,https,tcp,udp,tls,crypto',
+          '-fflags', '+discardcorrupt',
+          '-reconnect', '1',
+          '-reconnect_streamed', '1',
+          '-reconnect_delay_max', '5',
+          '-rw_timeout', '60000000'
+        );
+      }
+      inputOptions.push('-analyzeduration', '20000000', '-probesize', '20000000');
       outputOptions.push('-c:v', 'copy', '-c:a', 'copy');
       if (isMp4) {
           outputOptions.push('-c:s', 'mov_text', '-bsf:a', 'aac_adtstoasc', '-movflags', '+faststart');
@@ -369,12 +414,14 @@ async function downloadStream(stream, outputPath) {
           outputOptions.push('-c:s', 'srt');
       }
     } else {
-      inputOptions.push(
-        '-reconnect', '1',
-        '-reconnect_streamed', '1',
-        '-reconnect_delay_max', '5',
-        '-rw_timeout', '60000000'
-      );
+      if (!isLocalInput) {
+        inputOptions.push(
+          '-reconnect', '1',
+          '-reconnect_streamed', '1',
+          '-reconnect_delay_max', '5',
+          '-rw_timeout', '60000000'
+        );
+      }
       outputOptions.push('-c:v', 'copy', '-c:a', 'copy');
       if (isMp4) {
           outputOptions.push('-c:s', 'mov_text', '-movflags', '+faststart');
@@ -483,6 +530,7 @@ async function downloadStream(stream, outputPath) {
       notifyRenderer('browser:downloads', getDownloads());
       // Temizleme
       tempSubFiles.forEach(f => fs.unlink(f, () => {}));
+      if (tempStandaloneSubFile) fs.unlink(tempStandaloneSubFile, () => {});
       resolve({ success: true, path: outputPath });
     });
 
@@ -493,6 +541,7 @@ async function downloadStream(stream, outputPath) {
       notifyRenderer('browser:downloads', getDownloads());
       // Temizleme
       tempSubFiles.forEach(f => fs.unlink(f, () => {}));
+      if (tempStandaloneSubFile) fs.unlink(tempStandaloneSubFile, () => {});
       reject(new Error(`Download failed: ${err.message}`));
     });
 

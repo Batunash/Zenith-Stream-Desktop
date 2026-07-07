@@ -173,7 +173,19 @@
       "completed": "Completed",
       "failed": "Failed",
       "cancelled": "Cancelled"
-    }
+    },
+    "modalTitle": "Download Options",
+    "tabLibrary": "Add to Library",
+    "tabCustom": "Custom Folder",
+    "selectSeries": "Select Series / Movie:",
+    "noSeriesFound": "No series found in library. Please add a series first from Dashboard.",
+    "seasonFolder": "Season Folder:",
+    "typeNewSeason": "or type new (e.g. Season 2)",
+    "episodeName": "Episode Name:",
+    "episodePlaceholder": "e.g. S01E01 or Episode 1",
+    "customFolderInfo": "You will be prompted to choose a specific folder on your computer to save this file. The file will not be automatically added to your Zenith Stream library.",
+    "defaultFileName": "Default File Name:",
+    "quickSave": "⚡ Quick Save"
   },
   "control_panel": {
     "server_status": "Server Status",

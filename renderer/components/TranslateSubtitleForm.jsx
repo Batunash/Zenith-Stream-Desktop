@@ -217,7 +217,7 @@ const TranslateSubtitleForm = ({ videoPath, analysis, compact = false }) => {
                 </div>
             )}
 
-            <button style={styles.btn} onClick={handleTranslate} disabled={busy || !sourceIndex}>
+            <button style={styles.btn} onClick={handleTranslate} disabled={busy}>
                 <FaLanguage />
                 <span style={{ marginLeft: 6 }}>{busy ? stageLabel() : t('translate.translate_btn')}</span>
             </button>

@@ -119,10 +119,11 @@ const AddSeriesPage = () => {
   };
 
   const handleAddImage = async () => {
-        const filePath = await window.api.invoke('dialog:openFileImage');
-        if (filePath) {
-          handleManualChange('image', filePath);
-        }
+    const result = await window.api.invoke('dialog:openFileImage');
+    
+    if (result) {
+      setManualForm(prev => ({ ...prev, image: result }));
+    }
   };
 
   return (

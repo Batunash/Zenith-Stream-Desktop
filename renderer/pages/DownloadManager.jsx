@@ -1,14 +1,54 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaArrowRight, FaRedo, FaSearch, FaDownload, FaTimes, FaList, FaTrash, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 const DownloadManager = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [urlInput, setUrlInput] = useState('');
   const [streams, setStreams] = useState([]);
   const [downloads, setDownloads] = useState([]);
   const [showDownloads, setShowDownloads] = useState(false);
   const browserContainerRef = useRef(null);
+
+  // New states for Modal
+  const [showModal, setShowModal] = useState(false);
+  const [selectedStream, setSelectedStream] = useState(null);
+  const [saveMode, setSaveMode] = useState('LIBRARY');
+  const [librarySeries, setLibrarySeries] = useState([]);
+  const [selectedSerie, setSelectedSerie] = useState('');
+  const [librarySeasons, setLibrarySeasons] = useState([]);
+  const [selectedSeason, setSelectedSeason] = useState('');
+  const [episodeName, setEpisodeName] = useState('');
+  
+  // Quick Save States
+  const [lastLibraryContext, setLastLibraryContext] = useState(null);
+  const [lastEpisodeName, setLastEpisodeName] = useState('');
+
+  const incrementEpisodeName = (name) => {
+    if (!name) return '';
+    const match = name.match(/(\d+)(?!.*\d)/); // Bulunan SON sayıyı yakala
+    if (match) {
+      const numStr = match[1];
+      const numLength = numStr.length;
+      const nextNum = String(parseInt(numStr, 10) + 1).padStart(numLength, '0');
+      return name.slice(0, match.index) + nextNum + name.slice(match.index + numLength);
+    }
+    return name;
+  };
+
+  useEffect(() => {
+    if (showModal) {
+      window.api.invoke('browser:hide');
+    } else {
+      window.api.invoke('browser:show');
+      // Boyutların tekrar hesaplanması için küçük bir gecikmeyle resize tetikleyelim
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 100);
+    }
+  }, [showModal]);
 
   useEffect(() => {
     window.api.invoke('browser:show');
@@ -60,7 +100,10 @@ const DownloadManager = () => {
     };
 
     window.api.receive('browser:progress', refreshDownloads);
-    window.api.receive('browser:complete', refreshDownloads);
+    window.api.receive('browser:complete', () => {
+      refreshDownloads();
+      window.api.invoke('file:syncDatabase').catch(console.error);
+    });
     window.api.receive('browser:error', refreshDownloads);
     window.api.receive('browser:downloads', setDownloads);
     window.api.receive('browser:cancelDownload', refreshDownloads);
@@ -90,10 +133,95 @@ const DownloadManager = () => {
     }
   };
 
+  const fetchSeasons = async (serieName) => {
+    const details = await window.api.invoke('file:getSeriesDetail', serieName);
+    if (details && details.seasons) {
+      setLibrarySeasons(details.seasons);
+      if (details.seasons.length > 0) {
+        setSelectedSeason(details.seasons[0]);
+      } else {
+        setSelectedSeason('Season 1');
+      }
+    } else {
+      setLibrarySeasons([]);
+      setSelectedSeason('Season 1');
+    }
+  };
+
+  const handleSerieChange = (e) => {
+    const val = e.target.value;
+    setSelectedSerie(val);
+    fetchSeasons(val);
+  };
+
   const handleDownloadStream = async (stream) => {
-    // Provide a default filename based on the page title
-    const safeTitle = (stream.pageTitle || 'video').replace(/[<>:"/\\|?*]/g, '_').trim();
-    await window.api.invoke('browser:downloadStream', { stream, filename: safeTitle });
+    setSelectedStream(stream);
+    
+    // Fetch series list if we haven't already
+    const series = await window.api.invoke('file:getSeries');
+    if (series && series.length > 0) {
+      setLibrarySeries(series);
+      // Pre-select first series if none selected
+      if (!selectedSerie) {
+        setSelectedSerie(series[0].folderName);
+        fetchSeasons(series[0].folderName);
+      }
+    }
+    
+    // Auto-fill episode name
+    if (lastEpisodeName && saveMode === 'LIBRARY') {
+      setEpisodeName(lastEpisodeName);
+    } else {
+      const safeTitle = (stream.pageTitle || 'video').replace(/[<>:"/\\|?*]/g, '_').trim();
+      setEpisodeName(safeTitle);
+    }
+    
+    setShowModal(true);
+  };
+
+  const handleQuickSave = async (stream) => {
+    if (!lastLibraryContext) return;
+    
+    const currentEpName = lastEpisodeName || 'video';
+    const contextToUse = { ...lastLibraryContext, episodeName: currentEpName, enabled: true };
+
+    // Gelecek sefer için sayacı şimdiden artır
+    const nextEp = incrementEpisodeName(currentEpName);
+    setLastEpisodeName(nextEp);
+    setEpisodeName(nextEp);
+
+    await window.api.invoke('browser:downloadStream', { 
+      stream: stream, 
+      filename: currentEpName,
+      libraryContext: contextToUse
+    });
+  };
+
+  const confirmDownload = async () => {
+    setShowModal(false);
+    
+    const libraryContext = {
+      enabled: saveMode === 'LIBRARY',
+      serieName: selectedSerie,
+      seasonId: selectedSeason || 'Season 1',
+      episodeName: episodeName || 'video'
+    };
+
+    if (saveMode === 'LIBRARY') {
+      setLastLibraryContext(libraryContext);
+      const nextEp = incrementEpisodeName(episodeName);
+      setLastEpisodeName(nextEp);
+      setEpisodeName(nextEp);
+    }
+
+    const safeTitle = (selectedStream.pageTitle || 'video').replace(/[<>:"/\\|?*]/g, '_').trim();
+    const filename = saveMode === 'LIBRARY' ? libraryContext.episodeName : (episodeName || safeTitle);
+
+    await window.api.invoke('browser:downloadStream', { 
+      stream: selectedStream, 
+      filename: filename,
+      libraryContext
+    });
   };
 
   const clearStreams = () => {
@@ -119,7 +247,7 @@ const DownloadManager = () => {
       {/* Browser Toolbar */}
       <div style={styles.toolbar}>
         <div style={styles.navControls}>
-          <button onClick={() => navigate('/')} style={styles.backToHomeBtn} title="Back to App">
+          <button onClick={() => navigate('/')} style={styles.backToHomeBtn} title={t('common.back')}>
             <FaArrowLeft /> App
           </button>
           <div style={styles.divider}></div>
@@ -140,7 +268,7 @@ const DownloadManager = () => {
             type="text"
             value={urlInput}
             onChange={(e) => setUrlInput(e.target.value)}
-            placeholder="Search Google or enter URL"
+            placeholder={t('downloadManager.urlPlaceholder')}
             style={styles.addressInput}
           />
         </form>
@@ -160,9 +288,9 @@ const DownloadManager = () => {
         <div style={styles.streamsBanner}>
           <div style={styles.streamsHeader}>
             <span style={{ fontWeight: 'bold', color: '#4ade80' }}>
-              🎯 {streams.length} Video Stream(s) Detected
+              🎯 {streams.length} {t('streamCapture.detectedStreams')}
             </span>
-            <button onClick={clearStreams} style={styles.clearBtn}><FaTrash /> Clear</button>
+            <button onClick={clearStreams} style={styles.clearBtn}><FaTrash /> {t('streamCapture.clear')}</button>
           </div>
           <div style={styles.streamsList}>
             {streams.map((stream, idx) => (
@@ -172,11 +300,116 @@ const DownloadManager = () => {
                   <div style={styles.streamTitle} title={stream.pageTitle}>{stream.pageTitle}</div>
                   <div style={styles.streamUrl} title={stream.url}>{stream.url}</div>
                 </div>
-                <button onClick={() => handleDownloadStream(stream)} style={styles.downloadBtn} className="btn-hover">
-                  <FaDownload /> Download
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {lastLibraryContext && (
+                    <button 
+                      onClick={() => handleQuickSave(stream)} 
+                      style={{...styles.downloadBtn, backgroundColor: '#8b5cf6'}} 
+                      className="btn-hover"
+                      title={`${lastLibraryContext.serieName} > ${lastLibraryContext.seasonId} > ${lastEpisodeName}`}
+                    >
+                      {t('downloadManager.quickSave')}
+                    </button>
+                  )}
+                  <button onClick={() => handleDownloadStream(stream)} style={styles.downloadBtn} className="btn-hover">
+                    <FaDownload /> {t('downloadManager.downloadButton')}
+                  </button>
+                </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Download Options Modal */}
+      {showModal && selectedStream && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modalContent}>
+            <h2 style={{marginTop: 0, borderBottom: '1px solid #444', paddingBottom: '10px'}}>{t('downloadManager.modalTitle')}</h2>
+            
+            <div style={styles.tabsContainer}>
+              <button 
+                style={saveMode === 'LIBRARY' ? styles.activeTab : styles.tab}
+                onClick={() => setSaveMode('LIBRARY')}
+              >
+                {t('downloadManager.tabLibrary')}
+              </button>
+              <button 
+                style={saveMode === 'CUSTOM' ? styles.activeTab : styles.tab}
+                onClick={() => setSaveMode('CUSTOM')}
+              >
+                {t('downloadManager.tabCustom')}
+              </button>
+            </div>
+
+            {saveMode === 'LIBRARY' ? (
+              <div style={styles.formGroup}>
+                <label>{t('downloadManager.selectSeries')}</label>
+                {librarySeries.length > 0 ? (
+                  <select value={selectedSerie} onChange={handleSerieChange} style={styles.input}>
+                    {librarySeries.map((s, idx) => (
+                      <option key={idx} value={s.folderName}>{s.title || s.folderName}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div style={{color: '#ef4444', fontSize: '13px', marginBottom: '10px'}}>
+                    {t('downloadManager.noSeriesFound')}
+                  </div>
+                )}
+                
+                <label>{t('downloadManager.seasonFolder')}</label>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <select 
+                    value={selectedSeason} 
+                    onChange={(e) => setSelectedSeason(e.target.value)} 
+                    style={{...styles.input, flex: 1}}
+                    disabled={librarySeasons.length === 0}
+                  >
+                    {librarySeasons.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                  <input 
+                    type="text" 
+                    placeholder={t('downloadManager.typeNewSeason')} 
+                    value={selectedSeason}
+                    onChange={(e) => setSelectedSeason(e.target.value)}
+                    style={{...styles.input, flex: 1}} 
+                  />
+                </div>
+
+                <label>{t('downloadManager.episodeName')}</label>
+                <input 
+                  type="text" 
+                  value={episodeName} 
+                  onChange={(e) => setEpisodeName(e.target.value)} 
+                  style={styles.input} 
+                  placeholder={t('downloadManager.episodePlaceholder')}
+                />
+              </div>
+            ) : (
+              <div style={styles.formGroup}>
+                <p style={{color: '#aaa', fontSize: '14px', margin: '0 0 10px 0'}}>
+                  {t('downloadManager.customFolderInfo')}
+                </p>
+                <label>{t('downloadManager.defaultFileName')}</label>
+                <input 
+                  type="text" 
+                  value={episodeName} 
+                  onChange={(e) => setEpisodeName(e.target.value)} 
+                  style={styles.input} 
+                />
+              </div>
+            )}
+
+            <div style={styles.modalActions}>
+              <button onClick={() => setShowModal(false)} style={styles.cancelBtn}>{t('common.cancel')}</button>
+              <button 
+                onClick={confirmDownload} 
+                style={styles.downloadBtn} 
+                disabled={saveMode === 'LIBRARY' && (!selectedSerie || librarySeries.length === 0)}
+              >
+                {t('downloadManager.downloadButton')}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -194,15 +427,15 @@ const DownloadManager = () => {
         {showDownloads && (
           <div style={styles.downloadsSidebar}>
             <div style={styles.sidebarHeader}>
-              <h3 style={{ margin: 0, fontSize: 16 }}>Downloads Queue</h3>
+              <h3 style={{ margin: 0, fontSize: 16 }}>{t('downloadManager.downloadQueue')}</h3>
               <div style={{ display: 'flex', gap: 10 }}>
-                <button onClick={() => window.api.invoke('browser:clearCompleted')} style={styles.clearBtn}>Clear Done</button>
+                <button onClick={() => window.api.invoke('browser:clearCompleted')} style={styles.clearBtn}>{t('downloadManager.clearCompleted')}</button>
                 <button onClick={() => setShowDownloads(false)} style={styles.iconBtn}><FaTimes /></button>
               </div>
             </div>
             <div style={styles.downloadsList}>
               {downloads.length === 0 ? (
-                <div style={{ padding: 20, textAlign: 'center', color: '#888' }}>No active downloads</div>
+                <div style={{ padding: 20, textAlign: 'center', color: '#888' }}>{t('downloadManager.noDownloads')}</div>
               ) : (
                 downloads.map(d => {
                   const isUnknownProgress = (!d.percent || d.percent === 0) && d.sizeKB > 0;
@@ -228,8 +461,8 @@ const DownloadManager = () => {
                       ></div>
                     </div>
                     <div style={styles.downloadStatus}>
-                      <span>{d.status === 'completed' ? <FaCheckCircle color="#4ade80"/> : d.status === 'failed' ? <FaTimesCircle color="#ef4444"/> : d.status}</span>
-                      <span>{d.status === 'completed' ? '100%' : isUnknownProgress ? `${(d.sizeKB / 1024).toFixed(1)} MB İndirildi` : `${d.percent || 0}%`}</span>
+                      <span>{d.status === 'completed' ? <FaCheckCircle color="#4ade80"/> : d.status === 'failed' ? <FaTimesCircle color="#ef4444"/> : t(`downloadManager.status.${d.status}`)}</span>
+                      <span>{d.status === 'completed' ? '100%' : isUnknownProgress ? `${(d.sizeKB / 1024).toFixed(1)} MB` : `${d.percent || 0}%`}</span>
                     </div>
                   </div>
                 )})
@@ -496,6 +729,69 @@ const styles = {
     justifyContent: 'space-between',
     fontSize: '11px',
     color: '#aaa',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    zIndex: 9999,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  modalContent: {
+    backgroundColor: '#1e1e1e',
+    padding: '25px',
+    borderRadius: '12px',
+    width: '450px',
+    border: '1px solid #333',
+    boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+  },
+  tabsContainer: {
+    display: 'flex',
+    gap: '10px',
+    marginBottom: '20px'
+  },
+  tab: {
+    flex: 1,
+    padding: '10px',
+    backgroundColor: '#2d2d2d',
+    color: '#aaa',
+    border: '1px solid #444',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontWeight: 'bold'
+  },
+  activeTab: {
+    flex: 1,
+    padding: '10px',
+    backgroundColor: '#2563eb',
+    color: '#fff',
+    border: '1px solid #2563eb',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontWeight: 'bold'
+  },
+  formGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    marginBottom: '20px'
+  },
+  input: {
+    padding: '10px',
+    backgroundColor: '#121212',
+    border: '1px solid #444',
+    borderRadius: '6px',
+    color: '#fff',
+    outline: 'none',
+    width: '100%',
+    boxSizing: 'border-box'
+  },
+  modalActions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '10px'
   }
 };
 

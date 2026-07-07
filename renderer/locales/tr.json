@@ -173,7 +173,19 @@
       "completed": "Tamamlandı",
       "failed": "Başarısız",
       "cancelled": "İptal Edildi"
-    }
+    },
+    "modalTitle": "İndirme Seçenekleri",
+    "tabLibrary": "Kütüphaneye Ekle",
+    "tabCustom": "Özel Klasör",
+    "selectSeries": "Dizi / Film Seç:",
+    "noSeriesFound": "Kütüphanede dizi bulunamadı. Lütfen önce Ana Ekrandan bir dizi ekleyin.",
+    "seasonFolder": "Sezon Klasörü:",
+    "typeNewSeason": "veya yeni yazın (örn. Season 2)",
+    "episodeName": "Bölüm Adı:",
+    "episodePlaceholder": "örn. S01E01 veya Bölüm 1",
+    "customFolderInfo": "Bu dosyayı kaydetmek için bilgisayarınızda belirli bir klasör seçmeniz istenecektir. Dosya otomatik olarak Zenith Stream kütüphanenize eklenmeyecektir.",
+    "defaultFileName": "Varsayılan Dosya Adı:",
+    "quickSave": "⚡ Hızlı Kaydet"
   },
   "control_panel": {
     "server_status": "Sunucu Durumu",

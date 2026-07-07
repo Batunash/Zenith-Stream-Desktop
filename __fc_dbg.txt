@@ -1,0 +1,103 @@
+
+ RUN  v4.1.9 C:/Zenith/Zenith-Stream-Desktop
+
+stdout | main/ipc/fileControl.test.js
+Veritabanı Yolu: C:\Zenith\video-hub-test.sqlite
+
+stdout | main/ipc/fileControl.test.js > fileControl > media API > analyze
+{
+  "videoStreams": []
+}
+
+stderr | main/ipc/fileControl.test.js > fileControl > file:createSerie — branches > returns success:false + error when mkdirSync throws (outer catch)
+Kritik Hata: Error: denied
+    at Object.<anonymous> (C:/Zenith/Zenith-Stream-Desktop/main/ipc/fileControl.test.js:298:57)
+    at Object.Mock [as mkdirSync] (file:///C:/Zenith/Zenith-Stream-Desktop/node_modules/@vitest/spy/dist/index.js:332:34)
+    at C:\Zenith\Zenith-Stream-Desktop\main\ipc\fileControl.js:41:16
+    at C:/Zenith/Zenith-Stream-Desktop/main/ipc/fileControl.test.js:300:41
+    at file:///C:/Zenith/Zenith-Stream-Desktop/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///C:/Zenith/Zenith-Stream-Desktop/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///C:/Zenith/Zenith-Stream-Desktop/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///C:/Zenith/Zenith-Stream-Desktop/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///C:/Zenith/Zenith-Stream-Desktop/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+
+stderr | main/ipc/fileControl.test.js > fileControl > final branch closures (5 branches + line 127) > file:createSerie: skips mkdir for a season folder that already exists (line 73 else-false)
+SEASONSKIP result: {"success":false,"message":"Bu dizi zaten var!","path":"C:\\Media\\Seasons"} mkdirCalls: []
+
+ ✓ main/ipc/fileControl.test.js > fileControl > registers all file IPC handlers 3ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSerie > creates a directory and database entry on success 3ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSerie > returns error if MEDIA_DIR not set 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:deleteSerie > deletes folder on success 1ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSeason > creates a season directory 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getSeries & details > getSeries reads directory 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getSeries & details > getSeriesDetail reads metadata and seasons 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:deleteSeason & deleteEpisode > deletes season 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:deleteSeason & deleteEpisode > deletes episode 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:syncDatabase > syncs DB 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:fetchMetadata > fetches from TMDB 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:fetchMetadata > returns error if no API key 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > media API > analyze 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > media API > decide 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > media API > process 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSerie — branches > rejects a serieName that escapes MEDIA_DIR via ".." (isSafePath false) 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSerie — branches > returns "Bu dizi zaten var!" when the series folder already exists 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSerie — branches > downloads an http poster and sets localPoster when imageDest exists 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSerie — branches > uses the .jpg fallback when the http image has no extension 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSerie — branches > copies a local image when metadata.image is an existing local path 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSerie — branches > creates N season folders when numberOfSeasons > 0 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSerie — branches > still returns success:true when db.syncFilesystemToDatabase throws (inner try/catch) 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSerie — branches > returns success:false + error when mkdirSync throws (outer catch) 5ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSerie — branches > logs and continues when the image download rejects (image catch) 1ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSeason — branches > rejects an unsafe serieName/seasonId that escapes MEDIA_DIR 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSeason — branches > returns isExist:false with error when mkdirSync throws 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:createSeason — branches > returns the "no archive folder" message when MEDIA_DIR is empty 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:addEpisode > returns ok:false when MEDIA_DIR is not configured 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:addEpisode > returns ok:false for an unsafe serieName that escapes MEDIA_DIR 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:addEpisode > creates the folder when it does not exist and enqueues the videos 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:addEpisode > skips mkdir when the season folder already exists 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getSeries — branches > returns [] when MEDIA_DIR is not configured 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getSeries — branches > sets fullPosterPath when a series metadata has localPoster 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getSeries — branches > skips items that are not directories 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getSeries — branches > returns [] when readdirSync throws 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getSeriesDetail — branches > returns error when MEDIA_DIR is not configured 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getSeriesDetail — branches > returns error for an unsafe folderName 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getSeriesDetail — branches > returns error when the series folder does not exist 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getSeriesDetail — branches > returns seasons with empty metadata when metadata.json is missing 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getSeriesDetail — branches > sets fullPosterPath when metadata has localPoster 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getSeriesDetail — branches > returns error when reading metadata throws 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getEpisodes > returns [] when MEDIA_DIR is not configured 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getEpisodes > returns [] for an unsafe folderName 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getEpisodes > returns [] when the season folder does not exist 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getEpisodes > filters by VIDEO_EXTS and maps name/path/size 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:getEpisodes > returns [] when readdirSync throws 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:deleteSerie — branches > returns success:false for an unsafe folderName 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:deleteSerie — branches > returns success:false when the folder does not exist 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:deleteSerie — branches > returns success:false with error when rmSync throws 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:deleteSeason — branches > returns success:false for an unsafe folderName 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:deleteSeason — branches > returns success:false with error when rmSync throws 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:deleteEpisode — branches > returns "yetkiniz yok" when MEDIA_DIR is not set (isSafePath falsy root) 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:deleteEpisode — branches > skips unlink and still succeeds when the file does not exist 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:deleteEpisode — branches > returns success:false with error when unlinkSync throws 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:syncDatabase — branches > returns success:false when MEDIA_DIR is not configured 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:syncDatabase — branches > returns success:false with error when db.syncFilesystemToDatabase throws 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:fetchMetadata — branches > uses movie_results and returns mediaType "movie" 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:fetchMetadata — branches > returns the not-found message when neither tv nor movie results exist 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:fetchMetadata — branches > returns "TMDB bağlantı hatası." when axios rejects 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > file:fetchMetadata — branches > uses VITE_TMDB_API_KEY as a fallback when TMDB_API_KEY is empty 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > media:analyze/decide/process — error & progress branches > media:analyze returns success:false when analyzeFile rejects 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > media:analyze/decide/process — error & progress branches > media:decide returns success:false when analyzeFile rejects 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > media:analyze/decide/process — error & progress branches > media:process forwards percent via event.sender.send and returns the new path 1ms
+ ✓ main/ipc/fileControl.test.js > fileControl > media:analyze/decide/process — error & progress branches > media:process returns success:false when processVideo rejects 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > final branch closures (5 branches + line 127) > file:createSerie: non-http image that does not exist leaves localPoster null (line 51 else-false) 1ms
+ ✓ main/ipc/fileControl.test.js > fileControl > final branch closures (5 branches + line 127) > file:createSerie: skips mkdir for a season folder that already exists (line 73 else-false) 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > final branch closures (5 branches + line 127) > file:getSeries: directory item without metadata.json is included with empty metadata (line 143 else-false) 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > final branch closures (5 branches + line 127) > file:syncDatabase: happy path returns success message (line 273 fallthrough) 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > final branch closures (5 branches + line 127) > file:fetchMetadata: returns "API Key bulunamadı." when no key is configured (line 288 early return) 0ms
+ ✓ main/ipc/fileControl.test.js > fileControl > final branch closures (5 branches + line 127) > file:addEpisode: deferred db sync runs after the 3000ms setTimeout (line 127) 3ms
+
+ Test Files  1 passed (1)
+      Tests  70 passed (70)
+   Start at  20:10:05
+   Duration  1.87s (transform 92ms, setup 183ms, import 81ms, tests 35ms, environment 1.37s)
+

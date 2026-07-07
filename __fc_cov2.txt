@@ -1,0 +1,10 @@
+
+ RUN  v4.1.9 C:/Zenith/Zenith-Stream-Desktop
+      Coverage enabled with v8
+
+
+ Test Files  1 passed (1)
+      Tests  70 passed (70)
+   Start at  14:35:35
+   Duration  1.93s (transform 77ms, setup 191ms, import 69ms, tests 41ms, environment 1.31s)
+

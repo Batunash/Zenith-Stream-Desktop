@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FaSpinner, FaExclamationTriangle, FaCheck, FaTimes, FaFolderOpen, FaFileAlt } from 'react-icons/fa';
 
 const ConversionModal = ({ filePath, onClose, onStart }) => {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [analysis, setAnalysis] = useState(null);
     const [selectedIndices, setSelectedIndices] = useState([]);

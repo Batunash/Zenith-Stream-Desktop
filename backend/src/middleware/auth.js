@@ -1,4 +1,4 @@
-const { verifyToken } = require('../config/auth');
+const authConfig = require('../config/auth');
 const db = require('../config/database');
 
 function authenticateToken(req, res, next) {
@@ -8,7 +8,7 @@ function authenticateToken(req, res, next) {
     if (!token) return res.status(401).json({ error: 'Access token required' });
 
     try {
-        const decoded = verifyToken(token);
+        const decoded = authConfig.verifyToken(token);
         const user = db.getUserById(decoded.userId);
         
         if (!user) return res.status(401).json({ error: 'Invalid token' });
@@ -26,7 +26,7 @@ function optionalAuth(req, res, next) {
 
     if (token) {
         try {
-            const decoded = verifyToken(token);
+            const decoded = authConfig.verifyToken(token);
             const user = db.getUserById(decoded.userId);
             if (user) {
                 req.user = { id: user.ID, username: user.USERNAME };

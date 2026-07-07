@@ -107,9 +107,13 @@ const SettingsPage = ({ isSetupRequired, onConfigUpdate }) => {
             )}
             <h1 style={{margin:0}}>{t('settings.title')}</h1>
             
-            <div style={{marginLeft: 'auto', display: 'flex', gap: '10px'}}>
-                <button onClick={() => changeLanguage('tr')} style={{...styles.langBtn, opacity: i18n.language === 'tr' ? 1 : 0.5}}>TR</button>
-                <button onClick={() => changeLanguage('en')} style={{...styles.langBtn, opacity: i18n.language === 'en' ? 1 : 0.5}}>EN</button>
+            <div style={{marginLeft: 'auto', display: 'flex', gap: '5px'}}>
+                <button onClick={() => changeLanguage('tr')} style={{...styles.langBtn, opacity: i18n.language === 'tr' ? 1 : 0.5}} title="Türkçe">TR</button>
+                <button onClick={() => changeLanguage('en')} style={{...styles.langBtn, opacity: i18n.language === 'en' ? 1 : 0.5}} title="English">EN</button>
+                <button onClick={() => changeLanguage('es')} style={{...styles.langBtn, opacity: i18n.language === 'es' ? 1 : 0.5}} title="Español">ES</button>
+                <button onClick={() => changeLanguage('de')} style={{...styles.langBtn, opacity: i18n.language === 'de' ? 1 : 0.5}} title="Deutsch">DE</button>
+                <button onClick={() => changeLanguage('fr')} style={{...styles.langBtn, opacity: i18n.language === 'fr' ? 1 : 0.5}} title="Français">FR</button>
+                <button onClick={() => changeLanguage('ru')} style={{...styles.langBtn, opacity: i18n.language === 'ru' ? 1 : 0.5}} title="Русский">RU</button>
             </div>
         </div>
 

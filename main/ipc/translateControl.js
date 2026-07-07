@@ -1,12 +1,8 @@
 const { ipcMain } = require('electron');
 const fs = require('fs');
 const path = require('path');
-const { getSettings } = require('../utils/handlesettings');
-const {
-    extractSubtitleToSrt,
-    translateSrt,
-    SubtitleError
-} = require('../utils/subtitleTranslator');
+const handlesettings = require('../utils/handlesettings');
+const translator = require('../utils/subtitleTranslator');
 
 module.exports = function registerTranslateControl() {
     ipcMain.handle('media:translateSubtitle', async (event, args) => {
@@ -22,7 +18,7 @@ module.exports = function registerTranslateControl() {
                 return { success: false, code: 'NO_TARGET', error: 'Target language missing.' };
             }
 
-            const settings = getSettings();
+            const settings = handlesettings.getSettings();
             const provider = settings.AI_PROVIDER || 'nvidia';
             const apiKey = provider === 'gemini' ? settings.GEMINI_API_KEY : settings.NVIDIA_API_KEY;
             if (!apiKey) {
@@ -35,12 +31,12 @@ module.exports = function registerTranslateControl() {
 
             console.log(`[Translate] START provider=${provider} video=${videoPath} stream=${streamIndex} codec=${sourceCodec} -> ${targetLang}`);
             send({ stage: 'extract', percent: 0 });
-            const srtText = await extractSubtitleToSrt(videoPath, streamIndex, sourceCodec);
+            const srtText = await translator.extractSubtitleToSrt(videoPath, streamIndex, sourceCodec);
             console.log(`[Translate] Extracted ${srtText.length} chars of SRT`);
 
             send({ stage: 'translate', percent: 0 });
             const langName = targetLangName || targetLang;
-            const translated = await translateSrt(srtText, langName, provider, apiKey, (info) => {
+            const translated = await translator.translateSrt(srtText, langName, provider, apiKey, (info) => {
                 send(info);
             });
 
@@ -54,7 +50,7 @@ module.exports = function registerTranslateControl() {
             return { success: true, srtPath };
         } catch (err) {
             console.error(`[Translate] FAILED code=${err?.code || 'UNKNOWN'} msg=${err?.message}`);
-            if (err instanceof SubtitleError) {
+            if (err instanceof translator.SubtitleError) {
                 return { success: false, code: err.code, error: err.message };
             }
             return { success: false, code: 'UNKNOWN', error: err.message };

@@ -1,7 +1,7 @@
 const { ipcMain } = require("electron");
 const path = require('path');
 const fs = require("fs"); 
-const { getSettings } = require("../utils/handlesettings"); 
+const handleSettings = require("../utils/handlesettings"); 
 const episodeQueue = require("../utils/episodeQueue");
 const { downloadImage } = require("../utils/imageDownloader");
 const db = require("../../backend/src/config/database");
@@ -19,7 +19,7 @@ const isSafePath = (rootPath, targetPath) => {
 
 module.exports = function registerFileControl() {
     const getMediaDir = () => {
-        const settings = getSettings();
+        const settings = handleSettings.getSettings();
         return settings.MEDIA_DIR;
     };
 
@@ -146,6 +146,7 @@ module.exports = function registerFileControl() {
                         if (jsonData.localPoster) {
                             jsonData.fullPosterPath = path.join(itemPath, jsonData.localPoster);
                         }
+                        jsonData.folderName = item;
                         seriesList.push(jsonData);
                     }
                 }
@@ -269,7 +270,7 @@ module.exports = function registerFileControl() {
 
     ipcMain.handle("file:syncDatabase", async () => {
         const MEDIA_DIR = getMediaDir();
-        if (!MEDIA_DIR) return { success: false, error: "Medya klasörü ayarlanmamış" };
+        if (!MEDIA_DIR) { return { success: false, error: "Medya klasörü ayarlanmamış" }; }
         
         try {
             db.syncFilesystemToDatabase(MEDIA_DIR, VIDEO_EXTS);
@@ -280,11 +281,11 @@ module.exports = function registerFileControl() {
     });
 
     ipcMain.handle("file:fetchMetadata", async (event, { imdbId, lang }) => {
-        const settings = getSettings();
+        const settings = handleSettings.getSettings();
         const apiKey = settings.TMDB_API_KEY || settings.VITE_TMDB_API_KEY;
         const language = lang || 'tr-TR';
 
-        if (!apiKey) return { success: false, message: "API Key bulunamadı." };
+        if (!apiKey) { return { success: false, message: "API Key bulunamadı." }; }
 
         try {
             const findUrl = `https://api.themoviedb.org/3/find/${imdbId}?api_key=${apiKey}&external_source=imdb_id&language=${language}`;

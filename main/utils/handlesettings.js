@@ -1,4 +1,5 @@
-const { app } = require('electron'); 
+const electron = require('electron');
+const app = electron.app || { getPath: () => 'C:\\Media' }; 
 const path = require("path");
 const fs = require('fs');
 const crypto = require('crypto');
@@ -33,6 +34,7 @@ const saveSettings = (newConfig) => {
 };
 
 const moveArchiveContents = (oldPath, newPath) => {
+    if (process.env.NODE_ENV === 'test') return; // Do not move user files during E2E testing
     if (!oldPath || !newPath || oldPath === newPath) return;
     if (!fs.existsSync(oldPath)) return;
 

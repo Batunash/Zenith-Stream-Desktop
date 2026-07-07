@@ -1,6 +1,7 @@
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
-const { app } = require('electron');
+const electron = require('electron');
+const app = electron.app || { isPackaged: false };
 const os = require('os');
 let ffmpegPath;
 let ffprobePath;

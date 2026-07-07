@@ -7,12 +7,12 @@ const { db } = require('./mediaService');
 function watch (req){
     const {episodeId}=req.params;
     const episode = db.getEpisodeById(episodeId);
-    const filePath = episode.FILE_PATH;
     if (!episode) {
-    throw new Error('Episode not found in database');
+        throw new Error('Episode not found in database');
     }
+    const filePath = episode.FILE_PATH;
     if (!fs.existsSync(filePath)) {
-    throw new Error('File not found on disk');
+        throw new Error('File not found on disk');
     }
     const stat = fs.statSync(filePath);
     const fileSize = stat.size;

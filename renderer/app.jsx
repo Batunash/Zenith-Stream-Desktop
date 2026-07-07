@@ -6,6 +6,13 @@ import SeriesDetail from './pages/SeriesDetail';
 import AuthPage from './pages/AuthPage'; 
 import SettingsPage from './pages/SettingsPage';
 import DownloadManager from './pages/DownloadManager';
+
+window.onerror = function(message, source, lineno, colno, error) {
+  window.api.invoke('browser:navigate', 'data:text/html,<html><body><h1>React Crash</h1><p>' + message + '</p><p>' + (error ? error.stack : '') + '</p></body></html>');
+};
+window.onunhandledrejection = function(event) {
+  window.api.invoke('browser:navigate', 'data:text/html,<html><body><h1>Promise Crash</h1><p>' + event.reason + '</p></body></html>');
+};
 function App() {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
@@ -27,10 +34,12 @@ function App() {
   }, [user]);
 
   const handleLogin = (userData) => {
+    setLoadingConfig(true); // Prevent Navigate race condition
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
   };
   const isSetupComplete = config && config.MEDIA_DIR && config.MEDIA_DIR.trim() !== "";
+  console.log("APP CONFIG:", config, "isSetupComplete:", isSetupComplete);
   const ProtectedRoute = ({ children }) => {
     if (!user) return <AuthPage onLoginSuccess={handleLogin} />;
     if (loadingConfig) return <div style={{color:'white', padding:50}}>Yükleniyor...</div>;

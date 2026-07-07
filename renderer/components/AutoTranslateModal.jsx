@@ -80,10 +80,7 @@ const AutoTranslateModal = ({ seriesName, episodes, onClose }) => {
     };
 
     const handleStart = async () => {
-        if (selectedEpisodes.size === 0) {
-            setErrorBanner(t('auto_translate.no_episodes'));
-            return;
-        }
+
         setErrorBanner(null);
         setResults([]);
         setBusy(true);

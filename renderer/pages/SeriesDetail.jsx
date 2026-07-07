@@ -170,14 +170,14 @@ const SeriesDetail = () => {
   if (loading && !metadata) return <div style={{color:'white', padding: 40}}>{t('common.loading')}</div>;
 
   return (
-    <div style={{ height: '100%', overflowY: 'auto', backgroundColor: '#121212', color: 'white' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', backgroundColor: '#121212', color: 'white' }}>
       <SeriesBanner
         metadata={metadata}
         seasonCount={seasons.length}
         onBack={() => navigate('/')}
         onAutoTranslate={handleAutoTranslate}
       />
-      <div style={{ padding: '0 40px 50px 40px' ,marginTop:'30px'}}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 40px 50px 40px', marginTop: '30px' }}>
         <SeasonList 
             seasons={seasons} 
             activeSeason={activeSeason} 

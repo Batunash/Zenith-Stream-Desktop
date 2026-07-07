@@ -12,10 +12,11 @@ export default function Dashboard() {
 
   const loadSeries = async () => {
     try {
-      const data = await window.api.invoke('file:getSeries');
-      setSeries(data);
-    } catch (error) {
-      console.error("Diziler yüklenemedi:", error);
+      const seriesList = await window.api.invoke('file:getSeries');
+      console.log('DASHBOARD SERIES LIST:', seriesList);
+      setSeries(seriesList || []);
+    } catch (err) {
+      console.error('Error loading series:', err);
     }
   };
 
@@ -46,9 +47,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleAddSerie = () => {
-      navigate('/add-series');
-  };
+
 
   const navigateToSettings = () => {
       navigate('/settings');

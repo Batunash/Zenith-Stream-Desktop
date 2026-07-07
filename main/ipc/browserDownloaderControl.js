@@ -1,5 +1,7 @@
 const { ipcMain, dialog, app } = require('electron');
 const path = require('path');
+const fs = require('fs');
+const handlesettings = require('../utils/handlesettings');
 const browserDownloader = require('../utils/browserDownloader');
 
 function registerBrowserDownloaderControl() {
@@ -51,24 +53,45 @@ function registerBrowserDownloaderControl() {
     return { success: true };
   });
 
-  ipcMain.handle('browser:downloadStream', async (event, { stream, filename }) => {
+  ipcMain.handle('browser:downloadStream', async (event, { stream, filename, libraryContext }) => {
     try {
       const isSub = stream.type === 'SUBTITLE';
       const defaultExt = isSub ? '.vtt' : '.mkv';
-      const defaultPath = path.join(app.getPath('downloads'), 'ZenithStream', filename + defaultExt);
-      
-      const filters = isSub 
-        ? [{ name: 'Subtitles', extensions: ['vtt', 'srt'] }]
-        : [{ name: 'Videos', extensions: ['mkv', 'mp4', 'ts'] }];
+      let filePath;
 
-      const { filePath } = await dialog.showSaveDialog({
-        title: isSub ? 'Save Subtitle' : 'Save Video',
-        defaultPath: defaultPath,
-        filters: filters
-      });
+      // Sanitize filename strictly for Windows ffmpeg
+      // Replace en-dash/em-dash with regular dash, replace other weird characters
+      filename = filename.replace(/[\u2013\u2014]/g, '-').replace(/[^\w\s.\-çğıöşüÇĞİÖŞÜ]/g, '_').trim();
 
-      if (!filePath) {
-        return { success: false, error: 'Cancelled by user' };
+      if (libraryContext && libraryContext.enabled) {
+        const MEDIA_DIR = handlesettings.getSettings().MEDIA_DIR;
+        if (!MEDIA_DIR) {
+          return { success: false, error: 'Media directory not configured in settings' };
+        }
+        
+        const dirPath = path.join(MEDIA_DIR, libraryContext.serieName, libraryContext.seasonId);
+        if (!fs.existsSync(dirPath)) {
+          fs.mkdirSync(dirPath, { recursive: true });
+        }
+        
+        filePath = path.join(dirPath, filename + defaultExt);
+      } else {
+        const defaultPath = path.join(app.getPath('downloads'), 'ZenithStream', filename + defaultExt);
+        
+        const filters = isSub 
+          ? [{ name: 'Subtitles', extensions: ['vtt', 'srt'] }]
+          : [{ name: 'Videos', extensions: ['mkv', 'mp4', 'ts'] }];
+
+        const dialogResult = await dialog.showSaveDialog({
+          title: isSub ? 'Save Subtitle' : 'Save Video',
+          defaultPath: defaultPath,
+          filters: filters
+        });
+
+        if (!dialogResult.filePath) {
+          return { success: false, error: 'Cancelled by user' };
+        }
+        filePath = dialogResult.filePath;
       }
 
       // We don't await this so it happens in the background

@@ -1,7 +1,7 @@
 const { ipcMain } = require('electron');
 const fs = require('fs');
 const path = require('path');
-const { burnExternalSrt } = require('../utils/burnExternalSubtitle');
+const burner = require('../utils/burnExternalSubtitle');
 
 module.exports = function registerBurnControl() {
     ipcMain.handle('media:burnExternalSubtitle', async (event, args) => {
@@ -19,7 +19,7 @@ module.exports = function registerBurnControl() {
             };
 
             send({ percent: 0 });
-            await burnExternalSrt(videoPath, srtPath, (percent) => {
+            await burner.burnExternalSrt(videoPath, srtPath, (percent) => {
                 send({ percent });
             });
             send({ percent: 100 });

@@ -32,11 +32,13 @@ function findFirstVideoFile(dir, exts) {
 }
 
 class DatabaseManager {
-  constructor() {
+    constructor() {
     this.db = null;
     this.SQL = null;
-    if (app.isPackaged) {
+    if (app && app.isPackaged) {
       this.dbPath = path.join(app.getPath('userData'), 'video-hub.sqlite');
+    } else if (process.env.NODE_ENV === 'test') {
+      this.dbPath = path.join(__dirname, '../../../../video-hub-test.sqlite');
     } else {
       this.dbPath = path.join(__dirname, '../../../../video-hub.sqlite');
     }
@@ -56,6 +58,7 @@ class DatabaseManager {
     }
 
     this.initializeTables();
+    this.exec("PRAGMA foreign_keys = ON;");
   }
 
   save() {
@@ -79,8 +82,9 @@ class DatabaseManager {
         stmt.bind(args);
         stmt.step();
         stmt.free();
+        const lastInsertRowid = self.db.exec("SELECT last_insert_rowid()")[0].values[0][0];
         self.save();
-        return { lastInsertRowid: self.db.exec("SELECT last_insert_rowid()")[0].values[0][0] };
+        return { lastInsertRowid };
       },
       get: function(...args) {
         stmt.bind(args);
@@ -199,8 +203,26 @@ class DatabaseManager {
       `).run(userId, episodeId, progress, watchTime);
   }
 
-  deleteSeriesByPath(p) { this.prepare('DELETE FROM SERIES WHERE FOLDER_PATH = ?').run(p); }
-  deleteSeasonByPath(p) { this.prepare('DELETE FROM SEASONS WHERE FOLDER_PATH = ?').run(p); }
+  deleteSeriesByPath(p) {
+    const serie = this.prepare('SELECT ID FROM SERIES WHERE FOLDER_PATH = ?').get(p);
+    if (serie) {
+      const seasons = this.prepare('SELECT ID FROM SEASONS WHERE SERIE_ID = ?').all(serie.ID);
+      for (const s of seasons) {
+        this.prepare('DELETE FROM EPISODES WHERE SEASON_ID = ?').run(s.ID);
+      }
+      this.prepare('DELETE FROM SEASONS WHERE SERIE_ID = ?').run(serie.ID);
+      this.prepare('DELETE FROM SERIES WHERE ID = ?').run(serie.ID);
+    }
+  }
+
+  deleteSeasonByPath(p) {
+    const season = this.prepare('SELECT ID FROM SEASONS WHERE FOLDER_PATH = ?').get(p);
+    if (season) {
+      this.prepare('DELETE FROM EPISODES WHERE SEASON_ID = ?').run(season.ID);
+      this.prepare('DELETE FROM SEASONS WHERE ID = ?').run(season.ID);
+    }
+  }
+
   deleteEpisodeByPath(p) { this.prepare('DELETE FROM EPISODES WHERE FILE_PATH = ?').run(p); }
 syncFilesystemToDatabase(mediaDir, videoExts) {
     if (!fs.existsSync(mediaDir)) return;

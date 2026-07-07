@@ -6,7 +6,7 @@ app.commandLine.appendSwitch("disable-software-rasterizer");
 app.commandLine.appendSwitch("disable-features", "VaapiVideoDecoder,UseOzonePlatform");
 app.commandLine.appendSwitch("ozone-platform", "x11");
 app.disableHardwareAcceleration();
-const isDev = !app.isPackaged;
+const isDev = !app.isPackaged && process.env.NODE_ENV !== 'test';
 const registerServerControlIPC = require("./ipc/serverControl");
 const registerFileControl = require("./ipc/fileControl");
 const registerDialogManager = require("./ipc/dialogManager");
@@ -35,6 +35,8 @@ function createWindow() {
       devTools: isDev,
     },
   });
+
+  mainWindow.webContents.on('console-message', (e, level, msg) => require('fs').appendFileSync('frontend.log', msg + '\n'));
 
   if (isDev) {
     mainWindow.loadURL("http://localhost:5173/renderer/index.html");
