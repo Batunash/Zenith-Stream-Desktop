@@ -254,8 +254,10 @@ describe('Electron Main Process', () => {
       fireReady();
       const handler = electronMock.protocol.registerFileProtocol.mock.calls[0][1];
       const cb = vi.fn();
-      handler({ url: 'media://C%3A%2Ftest%2Fvideo.mp4' }, cb);
-      expect(cb).toHaveBeenCalledWith(expect.objectContaining({ path: 'C:/test/video.mp4' }));
+      const absolutePath = process.platform === 'win32' ? 'C:/test/video.mp4' : '/test/video.mp4';
+      const encodedUrl = 'media://' + encodeURIComponent(absolutePath);
+      handler({ url: encodedUrl }, cb);
+      expect(cb).toHaveBeenCalledWith(expect.objectContaining({ path: absolutePath }));
     });
 
     it('handler joins userData for a relative path', () => {

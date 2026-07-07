@@ -95,16 +95,15 @@ const EpisodeList = ({
 
       {episodes.length > 0 ? (
         <div style={styles.episodeGrid}>
-          <AutoSizer>
+          <AutoSizer defaultHeight={800} defaultWidth={1000}>
             {({ height, width }) => (
-              <List
-                height={height}
-                itemCount={episodes.length}
-                itemSize={90} /* 80px card + 10px padding */
-                width={width}
-              >
-                {Row}
-              </List>
+                <List
+                  height={height}
+                  rowCount={episodes.length}
+                  rowHeight={90}
+                  width={width}
+                  rowComponent={Row}
+                />
             )}
           </AutoSizer>
         </div>

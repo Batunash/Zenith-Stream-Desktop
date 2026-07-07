@@ -9,10 +9,9 @@ vi.mock('react-virtualized-auto-sizer', () => ({
 }));
 
 vi.mock('react-window', () => ({
-  List: ({ children, itemCount }) => {
-    const Component = children;
+  List: ({ rowComponent: Component, rowCount }) => {
     const items = [];
-    for (let i = 0; i < itemCount; i++) {
+    for (let i = 0; i < rowCount; i++) {
       items.push(<Component key={i} index={i} style={{}} />);
     }
     return <div>{items}</div>;

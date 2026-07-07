@@ -83,8 +83,15 @@ test.describe('Add Series E2E', () => {
       .click();
 
     // Dashboard'a dönmesini ve dizinin görünmesini bekle
-    await expect(window.locator('span', { hasText: seriesName }).first()).toBeVisible({
-      timeout: 15000,
-    });
+    try {
+      await expect(window.locator('span', { hasText: seriesName }).first()).toBeVisible({
+        timeout: 15000,
+      });
+    } catch (error) {
+      console.log('--- DASHBOARD HTML DUMP ---');
+      const html = await window.locator('body').innerHTML();
+      console.log(html.substring(0, 5000));
+      throw error;
+    }
   });
 });

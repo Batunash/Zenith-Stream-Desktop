@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import SeriesCard from '../components/SeriesCard';
 import ControlPanel from '../components/ControlPanel';
 import { useTranslation } from 'react-i18next';
-import { FixedSizeGrid as Grid } from 'react-window';
-import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -72,43 +70,15 @@ export default function Dashboard() {
       <div style={styles.mainContent}>
         <h1 style={styles.header}>{t('dashboard.title')}</h1>
         {series.length > 0 ? (
-          <div style={{ flex: 1, minHeight: '400px' }}>
-            <AutoSizer>
-              {({ height, width }) => {
-                const CARD_WIDTH = 200;
-                const CARD_HEIGHT = 280;
-                const columnCount = Math.max(1, Math.floor(width / CARD_WIDTH));
-                const rowCount = Math.ceil(series.length / columnCount);
-
-                const Cell = ({ columnIndex, rowIndex, style }) => {
-                  const index = rowIndex * columnCount + columnIndex;
-                  if (index >= series.length) return null;
-                  const serie = series[index];
-                  return (
-                    <div style={{ ...style, padding: '10px', boxSizing: 'border-box' }}>
-                      <SeriesCard
-                        data={serie}
-                        onClick={() => navigate(`/details/${encodeURIComponent(serie.folderName)}`)}
-                        onDelete={handleDeleteSerie}
-                      />
-                    </div>
-                  );
-                };
-
-                return (
-                  <Grid
-                    columnCount={columnCount}
-                    columnWidth={CARD_WIDTH}
-                    height={height}
-                    rowCount={rowCount}
-                    rowHeight={CARD_HEIGHT}
-                    width={width}
-                  >
-                    {Cell}
-                  </Grid>
-                );
-              }}
-            </AutoSizer>
+          <div style={styles.grid}>
+            {series.map((serie) => (
+              <SeriesCard
+                key={serie.folderName || serie.id}
+                data={serie}
+                onClick={() => navigate(`/details/${encodeURIComponent(serie.folderName)}`)}
+                onDelete={handleDeleteSerie}
+              />
+            ))}
           </div>
         ) : (
           <div style={{ color: '#666', textAlign: 'center', marginTop: '50px' }}>
@@ -139,6 +109,8 @@ const styles = {
     padding: '40px',
     overflowY: 'auto',
     height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
   },
   header: {
     color: 'white',

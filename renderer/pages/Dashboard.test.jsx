@@ -13,8 +13,7 @@ vi.mock('react-virtualized-auto-sizer', () => ({
 }));
 
 vi.mock('react-window', () => ({
-  FixedSizeGrid: ({ children, columnCount, rowCount }) => {
-    const Component = children;
+  Grid: ({ cellComponent: Component, columnCount, rowCount }) => {
     const items = [];
     for (let r = 0; r < rowCount; r++) {
       for (let c = 0; c < columnCount; c++) {
