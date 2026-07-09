@@ -77,6 +77,8 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+      
       - name: Publish Draft Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
